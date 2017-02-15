@@ -2,21 +2,21 @@
 * mit klemen
 * kurze vorstellung meinerseits, spezialisierungsbereiche, ideen
 * mögliche themenbereiche
-** secure software development lifecycle (secure SDLC)
-** trusted code
-** mitarbeit bei einer security matrix (x-achse programmiersprache, y-achse typischer themenbereich)
-** blockchain, e-voting
+ * secure software development lifecycle (secure SDLC)
+ * trusted code
+ * mitarbeit bei einer security matrix (x-achse programmiersprache, y-achse typischer themenbereich)
+ * blockchain, e-voting
 * forschungsantrag TRUC
 * folgetreffen mit weipl
 
 # 18.01.17
 * mit weipl
 * themenbereiche bei blockchain
-** namecoin
-** merged mining
+ * namecoin
+ * merged mining
 * dissertanten bei SBA
-** Nicholas Stifter
-** Aljosha Judmayer
+ * Nicholas Stifter
+ * Aljosha Judmayer
 * machstrukturen im bitcoin netzwerk
 * was passiert wenn mining reward = 0
 * migrationen von blockchains
@@ -28,15 +28,15 @@
 * erstellen von accounts (gitlab, mattermost, ...)
 * freischalten von repo mit wichtigen papers
 * next steps
-** grundlegende papers lesen
-** thema überlegen
+ * grundlegende papers lesen
+ * thema überlegen
 
 # 09.02.17
 * mit aljosha, nicholas, andreas
 * zfs thema besteht immer noch, erster task von simon
 * ideen für DA
-** selfish mining (wird priorisiert)
-** eclipse attacks
+ * selfish mining (wird priorisiert)
+ * eclipse attacks
 * kleine recherche und einlesen in netzwerk simulations software (ns2, ns3)
 * slicetime, als input wie man netzwerk simulation auch umsetzen kann
 * simulation soll ohne großen aufwand auf ähnlichem oder stärkerm system reproduzierbar und deterministisch wiederholbar sein
@@ -46,15 +46,15 @@
 * mit andreas
 * einführung und Q&A für simon
 * andreas refactored den code weiter
-** DockerCommands
-** NetworkCommands
-** LogProcessing
-** lesbarkeit, naming
-** string concatenation besser lesbar machen
+ * DockerCommands
+ * NetworkCommands
+ * LogProcessing
+ * lesbarkeit, naming
+ * string concatenation besser lesbar machen
 * btn = bitcoin testnetwork
 * simon lest sich weiter ein
-** im bitcoin wiki werden viele befehle erklärt, client mal mit den commands ansprechen und system weiter verstehen
-** zfs reproduzieren und schauen ob problem besteht
+ * im bitcoin wiki werden viele befehle erklärt, client mal mit den commands ansprechen und system weiter verstehen
+ * zfs reproduzieren und schauen ob problem besteht
 * auch commands in den ELK stack füttern für eventuelles troubleshooting
 * selfish minig könnte man mit einem proxy umsetzten der zwischen 2 nodes sitzt networkt <-> normal node <-> proxy, and only connections to <-> normal node with known IP
 im proxy wird das selfish mining implementiert somit müsste man die referenz implementierungen nicht angreifen
