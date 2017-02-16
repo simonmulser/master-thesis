@@ -70,4 +70,7 @@ $ zfs list
 NAME           USED  AVAIL  REFER  MOUNTPOINT
 zpool-docker   185M  28.2G   185M  /Volumes/zpool-docker
 ```
+___
+
+[explanation of data-files](https://github.com/bitcoin/bitcoin/blob/master/doc/files.md) in bitcoin client
 
