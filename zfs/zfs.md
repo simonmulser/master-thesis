@@ -55,7 +55,7 @@ dedup = 34.60, compress = 1.00, copies = 1.00, dedup * compress / copies = 34.60
 
 dedup (34.50) shows the deduplication-ratio
 
-check actual deduplication:
+print size and deduplication of pool in a more compact format:
 ```
 $ zpool list
 NAME           SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT
@@ -74,7 +74,7 @@ $ sudo zfs set dedup=on zpool-docker
 ```
 ___
 
-check size of pool
+check size of dataset:
 ```
 $ zfs list
 NAME           USED  AVAIL  REFER  MOUNTPOINT
