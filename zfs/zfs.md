@@ -1,5 +1,6 @@
-# zfs on mac
-install OpenZFS for OS X Yosemite and run ZFS on usb-device:
+# zfs documentation and commands
+* can be installed on OS X (OpenZFS) and on linux
+* can also be mounted from a usb-stick or a large file
 
 ```
 $ mount
