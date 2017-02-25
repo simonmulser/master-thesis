@@ -30,25 +30,30 @@ $ truncate -s 14M /blockchain/simon/local_test_zfs.dat
 ```
 ___
 
-create simulated DDT histogramm:
+print DDT (deduplication table) of pool:
 ```
-$ sudo zdb -S zpool-docker
+$ sudo zdb -DD zpool-docker
+DDT-sha256-zap-duplicate: 183 entries, size 318 on disk, 201 in core
+DDT-sha256-zap-unique: 10182 entries, size 276 on disk, 156 in core
 
-Simulated DDT histogram:
+DDT histogram (aggregated over all DDTs):
 
 bucket              allocated                       referenced
 ______   ______________________________   ______________________________
 refcnt   blocks   LSIZE   PSIZE   DSIZE   blocks   LSIZE   PSIZE   DSIZE
 ------   ------   -----   -----   -----   ------   -----   -----   -----
-     1       55   1.74M   1.74M   1.74M       55   1.74M   1.74M   1.74M
-     2        2   64.5K   64.5K   64.5K        4    129K    129K    129K
-   128        8    769K    769K    769K    1.11K    107M    107M    107M
- Total       65   2.56M   2.56M   2.56M    1.17K    109M    109M    109M
+     1    9.94K   4.97M   4.97M   4.97M    9.94K   4.97M   4.97M   4.97M
+     2        7   3.50K   3.50K   3.50K       20     10K     10K     10K
+     4       27   13.5K   13.5K   13.5K      124     62K     62K     62K
+     8      146     73K     73K     73K    1.42K    730K    730K    730K
+    16        2      1K      1K      1K       40     20K     20K     20K
+  256K        1     512     512     512     339K    169M    169M    169M
+ Total    10.1K   5.06M   5.06M   5.06M     350K    175M    175M    175M
 
-dedup = 42.41, compress = 1.00, copies = 1.00, dedup * compress / copies = 42.41
+dedup = 34.60, compress = 1.00, copies = 1.00, dedup * compress / copies = 34.60
 ```
 
-dedup (42.41) shows the deduplication-ratio
+dedup (34.50) shows the deduplication-ratio
 
 check actual deduplication:
 ```
