@@ -24,6 +24,10 @@ NAME           USED  AVAIL  REFER  MOUNTPOINT
 zpool-docker  1012K  95.0M   957K  /Volumes/zpool-docker
 
 ```
+create a large file to mount:
+```
+$ truncate -s 14M /blockchain/simon/local_test_zfs.dat
+```
 ___
 
 create simulated DDT histogramm:
