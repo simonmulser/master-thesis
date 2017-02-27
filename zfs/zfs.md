@@ -196,6 +196,6 @@ we can see:
 * recordsize=512bytes worked (350K*512=127M)
 * 9.94K blocks with a total size of 4.97M are not deduplicated
 * 1 block is 339K time referenced what makes a 175M (which is weird)
-____
+___
 
 check zfs again when simulation code is refactored. consider to increase blocksize to 1K or 2K.
