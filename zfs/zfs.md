@@ -157,7 +157,7 @@ patch client in validation.cpp
 ___
 
 simulation on VM of sba-research
-* run current simcoin implementation with 10 nodes and ~300blocks
+* run current simcoin implementation with 10 nodes and ~200blocks
 * check DDT if everything makes sense
 
 ```
@@ -194,9 +194,13 @@ dedup = 34.60, compress = 1.00, copies = 1.00, dedup * compress / copies = 34.60
 ```
 we can see:
 * recordsize=512bytes worked (350K*512=127M)
+
 * 9.94K blocks with a total size of 4.97M are not deduplicated
-* 1 block is 339K time referenced what makes a 175M (which is weird)
+
+* 146 blocks are referenced more than 8 times - these blocks should be bitcoin blocks
+
+* 1 block is 339K time referenced what makes a 175M. This sould be a totally empty block (everything 0) which is caused by the blk***.dat file because in this file the rest of the space is filled up with zeros and the file has a size of 16M.
 
 ___
 
-check zfs again when simulation code is refactored. consider to increase blocksize to 1K or 2K.
+consider to increase blocksize to 1K or 2K because in a normal simulation blocks are not empty and therefore bigger.
