@@ -156,6 +156,46 @@ patch client in validation.cpp
 ```
 ___
 
-next steps:
-* create image with patched client
-* test it locally with zfs running on a usb stick
+simulation on VM of sba-research
+* run current simcoin implementation with 10 nodes and ~300blocks
+* check DDT if everything makes sense
+
+```
+$ du -h btn-0/
+176K    btn-0/regtest/database
+20K btn-0/regtest/chainstate
+64K btn-0/regtest/blocks/index
+18M btn-0/regtest/blocks
+20M btn-0/regtest
+20M btn-0/
+```
+
+```
+$ sudo zdb -DD zpool-docker
+DDT-sha256-zap-duplicate: 183 entries, size 318 on disk, 201 in core
+DDT-sha256-zap-unique: 10182 entries, size 276 on disk, 156 in core
+
+DDT histogram (aggregated over all DDTs):
+
+bucket              allocated                       referenced
+______   ______________________________   ______________________________
+refcnt   blocks   LSIZE   PSIZE   DSIZE   blocks   LSIZE   PSIZE   DSIZE
+------   ------   -----   -----   -----   ------   -----   -----   -----
+     1    9.94K   4.97M   4.97M   4.97M    9.94K   4.97M   4.97M   4.97M
+     2        7   3.50K   3.50K   3.50K       20     10K     10K     10K
+     4       27   13.5K   13.5K   13.5K      124     62K     62K     62K
+     8      146     73K     73K     73K    1.42K    730K    730K    730K
+    16        2      1K      1K      1K       40     20K     20K     20K
+  256K        1     512     512     512     339K    169M    169M    169M
+ Total    10.1K   5.06M   5.06M   5.06M     350K    175M    175M    175M
+
+dedup = 34.60, compress = 1.00, copies = 1.00, dedup * compress / copies = 34.60
+
+```
+we can see:
+* recordsize=512bytes worked (350K*512=127M)
+* 9.94K blocks with a total size of 4.97M are not deduplicated
+* 1 block is 339K time referenced what makes a 175M (which is weird)
+____
+
+check zfs again when simulation code is refactored. consider to increase blocksize to 1K or 2K.
