@@ -196,8 +196,70 @@ we can see:
 * recordsize=512bytes worked (350K*512=127M)
 * 9.94K blocks with a total size of 4.97M are not deduplicated
 * 146 blocks are referenced more than 8 times - these blocks should be bitcoin blocks
-
 * 1 block is 339K time referenced what makes a 175M. This sould be a totally empty block (everything 0) which is caused by the blk***.dat file because in this file the rest of the space is filled up with zeros and the file has a size of 16M.
+
+___
+
+second simulation
+* run current simcoin implementation with 10 nodes and 210blocks
+* create filesystem for blocks folder of nodes
+* activate only on this folders dedup and recordsize of 512bytes
+
+for i 0..10 execute:
+```
+$ sudo zfs create zpool-docker/btn-i
+$ sudo zfs create zpool-docker/btn-i/regtest
+$ sudo zfs create zpool-docker/btn-i/regtest/blocks
+$ sudo zfs set recordsize=512 zpool-docker/btn-i/regtest/blocks
+$ sudo zfs set dedup=on zpool-docker/btn-i/regtest/blocks
+```
+to verify settings:
+```
+sudo zfs get dedup,recordsize
+NAME                        PROPERTY    VALUE          SOURCE
+data2                       dedup       off            local
+data2                       recordsize  128K           local
+data2/btn-0                 dedup       off            inherited from data2
+data2/btn-0                 recordsize  128K           inherited from data2
+data2/btn-0/regtest         dedup       off            inherited from data2
+data2/btn-0/regtest         recordsize  128K           inherited from data2
+data2/btn-0/regtest/blocks  dedup       on             local
+data2/btn-0/regtest/blocks  recordsize  512            local
+data2/btn-1                 dedup       off            inherited from data2
+data2/btn-1                 recordsize  128K           inherited from data2
+data2/btn-1/regtest         dedup       off            inherited from data2
+data2/btn-1/regtest         recordsize  128K           inherited from data2
+data2/btn-1/regtest/blocks  dedup       on             local
+data2/btn-1/regtest/blocks  recordsize  512            local
+...
+```
+
+it seems that zfs does the [deduplication always over the whole pool](http://superuser.com/questions/521646/view-zfs-deduplication-ratio-on-a-dataset). therefore it is only possible to get pool-wide statistics.
+
+```
+$ sudo zdb -DD data2
+DDT-sha256-zap-duplicate: 260 entries, size 283 on disk, 157 in core
+DDT-sha256-zap-unique: 28 entries, size 274 on disk, 292 in core
+
+DDT histogram (aggregated over all DDTs):
+
+bucket              allocated                       referenced
+______   ______________________________   ______________________________
+refcnt   blocks   LSIZE   PSIZE   DSIZE   blocks   LSIZE   PSIZE   DSIZE
+------   ------   -----   -----   -----   ------   -----   -----   -----
+     1       28     14K     14K     14K       28     14K     14K     14K
+     2        6      3K      3K      3K       18      9K      9K      9K
+     4       36     18K     18K     18K      162     81K     81K     81K
+     8      217    108K    108K    108K    2.12K   1.06M   1.06M   1.06M
+  256K        1     512     512     512     338K    169M    169M    169M
+ Total      288    144K    144K    144K     340K    170M    170M    170M
+
+dedup = 1209.03, compress = 1.00, copies = 1.00, dedup * compress / copies = 1209.03
+```
+
+we can see:
+* in the line `refcnt 8` we have 217/2.12K=10x deduplication. this blocks should be our bitcoin blocks. furthermore the amount of 217 blocks make sense since we have generated 210 bitcoin blocks.
+* the one block which is referenced 338K times should be again an empty block.
 
 ___
 
