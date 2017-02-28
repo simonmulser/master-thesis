@@ -157,7 +157,7 @@ patch client in validation.cpp
 ___
 
 simulation on VM of sba-research
-* run current simcoin implementation with 10 nodes and ~200blocks
+* run current simcoin implementation with 10 nodes and 210blocks
 * check DDT if everything makes sense
 
 ```
