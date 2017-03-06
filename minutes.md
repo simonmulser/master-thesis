@@ -59,4 +59,16 @@
 * selfish minig könnte man mit einem proxy umsetzten der zwischen 2 nodes sitzt networkt <-> normal node <-> proxy, and only connections to <-> normal node with known IP
 im proxy wird das selfish mining implementiert somit müsste man die referenz implementierungen nicht angreifen
 
-
+# 06.03.17
+* mit aljosha, nicholas, andreas
+* erklärung und besprechung zfs
+ * zfs funktioniert
+ * zfs am host system hat dedup und recordsize 512bytes bereits aktiviert
+* virtual machine (vm) mit simulation ausreizen und ertesten wo das bottle neck ist
+* vm kann noch skaliert werden und notfalls können simulationen auch in der cloud ausgeführt werden
+* simon implementiert proxy node
+ * lesen der selfish mining papers mit den verschiedenen strategien
+ * implementierung in python
+ * so generisch wie möglich dh. verschieden selfish mining strategien und der proxy soll auch als eclipse attack node verwendet werden können
+ * aljosha schickt relevante selfish mining papers als ausgangslage
+* andreas refactored und implementiert simcoin für seine arbeit weiter
