@@ -1,4 +1,5 @@
 from bitcoin import network
+import logging
 
 def on_inv_received(connection, inv):
     for item in inv.hashes:
@@ -12,4 +13,5 @@ def start():
     client.run_forever()
     
 if __name__=="__main__":
+    logging.basicConfig(level=logging.DEBUG)
     start()
