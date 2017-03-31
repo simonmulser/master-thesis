@@ -13,5 +13,3 @@ RUN git clone https://github.com/cdecker/pycoin.git &&\
 	git reset --hard 51f8ea84f029c6ddefc485d383ec61b18c1c8de8 &&\
 	git gc &&\
 	python setup.py install
-
-EXPOSE 8333
