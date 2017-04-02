@@ -12,9 +12,12 @@ class Proxy(object):
     def start(self):
         client = network.GeventNetworkClient()
 
-        #for t in network.messages.parsers:
-        client.register_handler('inv', self.relay_message)
-        client.register_handler('getheaders', self.test)
+        for message in ['notfound', 'addr', 'tx', 'inv',
+                        'reject', 'alert', 'headers', 'getaddr',
+                        'getheaders', 'getdata', 'mempool',
+                        'block', 'getblocks']:
+            client.register_handler(message, self.relay_message)
+
         client.register_handler('ping', self.ping_message)
 
         network.ClientBehavior(client)
@@ -27,26 +30,18 @@ class Proxy(object):
 
         client.run_forever()
 
-    def test(self, connection, message):
-
-        logging.debug(message.locator)
-        logging.debug(message.hashstop)
-
     def relay_message(self, connection, message):
-        logging.debug('relaying %s message from %s:%d', message.type, *connection.host)
+        logging.debug('relaying %s message from %s:%d', message.command, *connection.host)
 
         while self.relay[connection] is None:
             logging.debug('wait for second client to connect')
             sleep(1)
         relay_connection = self.relay[connection]
+
         relay_connection.send(message.command, message)
 
-    def getheaders_message(self, connection, message):
-        logging.debug('%s message from %s:%d', message.command, *connection.host)
 
     def ping_message(self, connection, message):
-        logging.debug('%s message from %s:%d', message.command, *connection.host)
-        logging.debug(message.command)
         connection.send('pong', message)
 
 
