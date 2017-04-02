@@ -1,4 +1,5 @@
 pycoin
+python-bitcoinlib
 
 .idea
 *.iml
