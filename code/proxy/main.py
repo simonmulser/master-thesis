@@ -1,5 +1,7 @@
 from bitcoinnetwork import network
 import logging
+from selfishlogic import SelfishLogic
+
 
 class Proxy(object):
     def __init__(self):
@@ -7,6 +9,7 @@ class Proxy(object):
 
     def start(self):
         client = network.GeventNetworkClient()
+        selfish_logic = SelfishLogic()
 
         for message in ['notfound', 'addr', 'tx', 'inv',
                         'reject', 'alert', 'headers', 'getaddr',
@@ -15,6 +18,9 @@ class Proxy(object):
             client.register_handler(message, self.relay_message)
 
         client.register_handler('ping', self.ping_message)
+
+        client.register_handler('inv', selfish_logic.process_inv_msg)
+        client.register_handler('block', selfish_logic.process_block)
 
         network.ClientBehavior(client)
 
