@@ -6,6 +6,7 @@ from bitcoin import messages
 class SelfishLogic:
 
     def __init__(self):
+        self.known_blocks = []
         logging.debug("new selfish proxy")
 
     def process_inv_msg(self, connection, message):
@@ -26,5 +27,7 @@ class SelfishLogic:
                 logging.warn("unknown inv type")
 
     def process_block(self, connection, message):
-        print "block"
-        print message
+
+        block_hash = message.block.GetHash()
+        if block_hash not in self.known_blocks:
+            self.known_blocks.append(block_hash)
