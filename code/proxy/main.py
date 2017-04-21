@@ -1,7 +1,3 @@
-import sys
-sys.path.append('pycoin')
-sys.path.append('python-bitcoinlib')
-
 from bitcoinnetwork import network
 import logging
 
