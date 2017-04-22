@@ -3,7 +3,7 @@ import logging
 from selfishlogic import SelfishLogic
 
 
-class Proxy(object):
+class Networking(object):
     def __init__(self):
         self.relay = {}
 
@@ -40,13 +40,13 @@ class Proxy(object):
             sleep(1)
         relay_connection = self.relay[connection]
 
-        relay_connection.send(message.command, message)
-
+        #relay_connection.send(message.command, message)
 
     def ping_message(self, connection, message):
+        print connection
         connection.send('pong', message)
 
 
 if __name__=="__main__":
     logging.basicConfig(level=logging.DEBUG)
-    Proxy().start()
+    Networking().start()
