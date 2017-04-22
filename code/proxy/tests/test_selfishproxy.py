@@ -19,8 +19,9 @@ class SelfishProxyTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
         logic.process_inv_msg(connection, msg)
-        assert connection.send.called
-        assert connection.send.call_args[0][0] == 'getdata'
+
+        self.assertTrue(connection.send.called)
+        self.assertEqual(connection.send.call_args[0][0], 'getdata')
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_inv_msg_filtered_block(self, connection):
@@ -30,7 +31,8 @@ class SelfishProxyTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
         logic.process_inv_msg(connection, msg)
-        assert connection.send.called is False
+
+        self.assertFalse(connection.send.called)
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_inv_msg_error(self, connection):
@@ -40,7 +42,8 @@ class SelfishProxyTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
         logic.process_inv_msg(connection, msg)
-        assert connection.send.called is False
+
+        self.assertFalse(connection.send.called)
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_inv_msg_tx(self, connection):
@@ -50,7 +53,8 @@ class SelfishProxyTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
         logic.process_inv_msg(connection, msg)
-        assert connection.send.called is False
+
+        self.assertFalse(connection.send.called)
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_inv_msg_error(self, connection):
@@ -60,7 +64,8 @@ class SelfishProxyTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
         logic.process_inv_msg(connection, msg)
-        assert connection.send.called is False
+
+        self.assertFalse(connection.send.called)
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_block(self, connection):
@@ -70,8 +75,8 @@ class SelfishProxyTest(unittest.TestCase):
         msg.block = block
         logic.process_block(connection, msg)
 
-        assert block.GetHash() in logic.known_blocks
-        assert len(logic.known_blocks) is 1
+        self.assertTrue(block.GetHash() in logic.blocks)
+        self.assertEqual(len(logic.blocks), 2)
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_block_two_times(self, connection):
@@ -82,8 +87,8 @@ class SelfishProxyTest(unittest.TestCase):
         logic.process_block(connection, msg)
         logic.process_block(connection, msg)
 
-        assert block.GetHash() in logic.known_blocks
-        assert len(logic.known_blocks) is 1
+        self.assertTrue(block.GetHash() in logic.blocks)
+        self.assertEqual(len(logic.blocks), 2)
 
 
 def get_type_key(msg_type):
