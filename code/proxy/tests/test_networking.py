@@ -14,7 +14,7 @@ class NetworkingTest(unittest.TestCase):
         inv.type = get_type_key("Block")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv_msg(connection, msg)
+        networking.process_inv(connection, msg)
 
         self.assertTrue(connection.send.called)
         self.assertEqual(connection.send.call_args[0][0], 'getdata')
@@ -26,7 +26,7 @@ class NetworkingTest(unittest.TestCase):
         inv.type = get_type_key("FilteredBlock")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv_msg(connection, msg)
+        networking.process_inv(connection, msg)
 
         self.assertFalse(connection.send.called)
 
@@ -37,7 +37,7 @@ class NetworkingTest(unittest.TestCase):
         inv.type = get_type_key("Error")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv_msg(connection, msg)
+        networking.process_inv(connection, msg)
 
         self.assertFalse(connection.send.called)
 
@@ -48,7 +48,7 @@ class NetworkingTest(unittest.TestCase):
         inv.type = get_type_key("TX")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv_msg(connection, msg)
+        networking.process_inv(connection, msg)
 
         self.assertFalse(connection.send.called)
 
@@ -59,7 +59,7 @@ class NetworkingTest(unittest.TestCase):
         inv.type = "Unknown"
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv_msg(connection, msg)
+        networking.process_inv(connection, msg)
 
         self.assertFalse(connection.send.called)
 

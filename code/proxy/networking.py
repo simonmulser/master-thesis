@@ -20,8 +20,8 @@ class Networking(object):
 
         client.register_handler('ping', self.ping_message)
 
-        client.register_handler('inv', self.process_inv_msg)
         client.register_handler('block', chain.process_block)
+        client.register_handler('inv', self.process_inv)
 
         network.ClientBehavior(client)
 
@@ -47,7 +47,7 @@ class Networking(object):
         print connection
         connection.send('pong', message)
 
-    def process_inv_msg(self, connection, message):
+    def process_inv(self, connection, message):
         relay_inv = []
         for inv in message.inv:
             try:
