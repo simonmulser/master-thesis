@@ -11,10 +11,9 @@ class Networking(object):
         client = network.GeventNetworkClient()
         selfish_logic = SelfishLogic()
 
-        for message in ['notfound', 'addr', 'tx', 'inv',
+        for message in ['notfound', 'addr', 'tx', 'getblocks'
                         'reject', 'alert', 'headers', 'getaddr',
-                        'getheaders', 'getdata', 'mempool',
-                        'block', 'getblocks']:
+                        'getheaders', 'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
         client.register_handler('ping', self.ping_message)
