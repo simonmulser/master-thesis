@@ -90,8 +90,54 @@ class SelfishProxyTest(unittest.TestCase):
         self.assertTrue(block.GetHash() in logic.blocks)
         self.assertEqual(len(logic.blocks), 2)
 
+    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
+    def test_process_block(self, connection):
+        logic = SelfishLogic()
+        block = core.CBlock(hashPrevBlock=genesis_hash())
+        msg = messages.msg_block
+        msg.block = block
+        logic.process_block(connection, msg)
+
+        self.assertEqual( len(logic.tips), 1)
+        self.assertEqual( logic.tips[0].height, 1)
+
+    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
+    def test_process_two_block(self, connection):
+        logic = SelfishLogic()
+        first_block = core.CBlock(hashPrevBlock=genesis_hash())
+        msg = messages.msg_block
+        msg.block = first_block
+        logic.process_block(connection, msg)
+
+        second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
+        msg.block = second_block
+        logic.process_block(connection, msg)
+
+        self.assertEqual( len(logic.tips), 1)
+        self.assertEqual( logic.tips[0].height, 2)
+
+    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
+    def test_process_fork(self, connection):
+        logic = SelfishLogic()
+        first_block = core.CBlock(hashPrevBlock=genesis_hash())
+        msg = messages.msg_block
+        msg.block = first_block
+        logic.process_block(connection, msg)
+
+        second_block = core.CBlock(hashPrevBlock=genesis_hash())
+        msg.block = second_block
+        logic.process_block(connection, msg)
+
+        self.assertEqual(len(logic.tips), 2)
+        self.assertEqual(logic.tips[0].height, 1)
+        self.assertEqual(logic.tips[1].height, 1)
+
 
 def get_type_key(msg_type):
     for key in net.CInv.typemap.keys():
         if net.CInv.typemap[key] == msg_type:
             return key
+
+
+def genesis_hash():
+    return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
