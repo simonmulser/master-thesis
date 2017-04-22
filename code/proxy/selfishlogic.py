@@ -87,6 +87,13 @@ class SelfishLogic:
             block.height = prevBlock.height + 1
             block.prevBlock = prevBlock
 
+    def chain_length(self):
+        max_length = 0
+        for tip in self.tips:
+            if tip.height > max_length:
+                max_length = tip.height
+        return max_length
+
 
 class Block:
 

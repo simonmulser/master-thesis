@@ -168,6 +168,37 @@ class SelfishProxyTest(unittest.TestCase):
         self.assertEqual(logic.tips[0].height, 3)
         self.assertEqual(logic.tips[0].prevBlock.height, 2)
 
+    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
+    def test_process_chain_length(self, connection):
+        logic = SelfishLogic()
+        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
+        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
+        third_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash())
+
+        msg = messages.msg_block
+        msg.block = second_block_chain_b
+        logic.process_block(connection, msg)
+
+        msg.block = first_block_chain_b
+        logic.process_block(connection, msg)
+
+        self.assertEqual(len(logic.tips), 1)
+        self.assertEqual(logic.chain_length(), 2)
+
+        msg.block = first_block_chain_a
+        logic.process_block(connection, msg)
+
+        msg.block = second_block_chain_a
+        logic.process_block(connection, msg)
+
+        msg.block = third_block_chain_a
+        logic.process_block(connection, msg)
+
+        self.assertEqual(len(logic.tips), 2)
+        self.assertEqual(logic.chain_length(), 3)
+
 
 def get_type_key(msg_type):
     for key in net.CInv.typemap.keys():
