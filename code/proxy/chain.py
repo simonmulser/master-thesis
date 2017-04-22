@@ -2,7 +2,7 @@ import logging
 from bitcoin import core
 
 
-class SelfishLogic:
+class Chain:
 
     def __init__(self):
 

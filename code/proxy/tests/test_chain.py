@@ -1,16 +1,16 @@
 import unittest
 import mock
-from selfishlogic import SelfishLogic
+from chain import Chain
 from bitcoin import messages
 from bitcoin import core
 import logging
 
 
-class SelfishProxyTest(unittest.TestCase):
+class ChainTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_block(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
@@ -21,7 +21,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_block_two_times(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
@@ -32,7 +32,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_block(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = block
@@ -43,7 +43,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_two_block(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = first_block
@@ -58,7 +58,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_fork(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         msg = messages.msg_block
         msg.block = first_block
@@ -74,7 +74,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_orphan_blocks(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg = messages.msg_block
@@ -90,7 +90,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_two_orphan_blocks(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
@@ -111,7 +111,7 @@ class SelfishProxyTest(unittest.TestCase):
 
     @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
     def test_process_chain_length(self, connection):
-        logic = SelfishLogic()
+        logic = Chain()
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
         second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())

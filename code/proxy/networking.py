@@ -1,6 +1,6 @@
 from bitcoinnetwork import network
 import logging
-from selfishlogic import SelfishLogic
+from chain import Chain
 from bitcoin import net
 from bitcoin import messages
 
@@ -11,7 +11,7 @@ class Networking(object):
 
     def start(self):
         client = network.GeventNetworkClient()
-        selfish_logic = SelfishLogic()
+        chain = Chain()
 
         for message in ['notfound', 'addr', 'tx', 'getblocks'
                         'reject', 'alert', 'headers', 'getaddr',
@@ -21,7 +21,7 @@ class Networking(object):
         client.register_handler('ping', self.ping_message)
 
         client.register_handler('inv', self.process_inv_msg)
-        client.register_handler('block', selfish_logic.process_block)
+        client.register_handler('block', chain.process_block)
 
         network.ClientBehavior(client)
 
