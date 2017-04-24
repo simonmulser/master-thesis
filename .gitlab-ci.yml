@@ -1,0 +1,7 @@
+before_script:
+  - apt-get update -qq
+
+unittest:
+  script:
+    - cd code/proxy && python -m unittest discover
+
