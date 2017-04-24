@@ -1,5 +1,7 @@
 before_script:
   - apt-get update -qq
+  - python --version
+  - pip install mock
 
 unittest:
   script:
