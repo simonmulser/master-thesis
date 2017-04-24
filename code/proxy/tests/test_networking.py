@@ -12,14 +12,11 @@ class NetworkingTest(unittest.TestCase):
         self.networking = Networking()
         self.connectionAlice = MagicMock()
         self.connectionBob = MagicMock()
-        self.chainAlice = MagicMock()
-        self.chainBob = MagicMock()
+        self.chain = MagicMock()
 
         self.networking.network_partitions[self.connectionAlice] = NetworkPartition(self.connectionAlice, self.connectionBob)
         self.networking.network_partitions[self.connectionBob] = NetworkPartition(self.connectionBob, self.connectionAlice)
-        self.networking.network_partitions[self.connectionAlice].chain = self.chainAlice
-        self.networking.network_partitions[self.connectionBob].chain = self.chainBob
-
+        self.networking.chain = self.chain
 
     def test_process_inv_msg_block(self):
         inv = net.CInv()
@@ -92,8 +89,7 @@ class NetworkingTest(unittest.TestCase):
         msg = messages.msg_version
         self.networking.process_block(self.connectionAlice, msg)
 
-        self.assertTrue(self.chainAlice.process_block.called)
-        self.assertFalse(self.chainBob.process_block.called)
+        self.assertTrue(self.chain.process_block.called)
 
 
 def get_type_key(msg_type):

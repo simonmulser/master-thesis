@@ -1,5 +1,6 @@
 import logging
 from bitcoin import core
+from enum import Enum
 
 
 class Chain:
@@ -8,7 +9,7 @@ class Chain:
 
         genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 
-        self.genesis = Block(genesis_hash, None)
+        self.genesis = Block(genesis_hash, None, Visibility.public)
         self.tips = [self.genesis]
         self.blocks = [self.genesis]
         self.orphan_blocks = []
@@ -16,7 +17,7 @@ class Chain:
 
         logging.debug("new selfish proxy")
 
-    def process_block(self, message):
+    def process_block(self, message, visibility):
         received_block = message.block
 
         if received_block.GetHash() in self.known_block_hashes:
@@ -35,7 +36,7 @@ class Chain:
                     prevBlock = block
                     break
 
-        block = Block(received_block.GetHash(), received_block.hashPrevBlock)
+        block = Block(received_block.GetHash(), received_block.hashPrevBlock, visibility)
         self.blocks.append(block)
 
         if prevBlock is None:
@@ -75,12 +76,15 @@ class Chain:
                 max_length = tip.height
         return max_length
 
+Visibility = Enum('Visibility', 'alice, public')
+
 
 class Block:
 
-    def __init__(self, hash, hashPrevBlock):
+    def __init__(self, hash, hashPrevBlock, visibility):
         self.child_blocks = []
         self.hash = hash
         self.hashPrevBlock = hashPrevBlock
         self.prevBlock = None
         self.height = 0
+        self.visibility = visibility

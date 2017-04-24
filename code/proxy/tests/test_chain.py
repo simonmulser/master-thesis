@@ -2,6 +2,7 @@ import unittest
 from chain import Chain
 from bitcoin import messages
 from bitcoin import core
+from chain import Visibility
 import logging
 
 
@@ -12,7 +13,7 @@ class ChainTest(unittest.TestCase):
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertTrue(block.GetHash() in logic.blocks)
         self.assertEqual(len(logic.blocks), 2)
@@ -22,8 +23,8 @@ class ChainTest(unittest.TestCase):
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg)
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.blocks), 2)
 
@@ -32,7 +33,7 @@ class ChainTest(unittest.TestCase):
         block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual( len(logic.tips), 1)
         self.assertEqual( logic.tips[0].height, 1)
@@ -42,11 +43,11 @@ class ChainTest(unittest.TestCase):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = first_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg.block = second_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.tips), 1)
         self.assertEqual(logic.tips[0].height, 2)
@@ -56,11 +57,11 @@ class ChainTest(unittest.TestCase):
         first_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         msg = messages.msg_block
         msg.block = first_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         second_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
         msg.block = second_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.tips), 2)
         self.assertEqual(logic.tips[0].height, 1)
@@ -72,10 +73,10 @@ class ChainTest(unittest.TestCase):
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg = messages.msg_block
         msg.block = second_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         msg.block = first_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.tips), 1)
         self.assertEqual(logic.tips[0].height, 2)
@@ -89,13 +90,13 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = third_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         msg.block = second_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         msg.block = first_block
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.tips), 1)
         self.assertEqual(logic.tips[0].height, 3)
@@ -111,16 +112,16 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_b
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         msg.block = first_block_chain_b
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         self.assertEqual(len(logic.tips), 1)
         self.assertEqual(logic.chain_length(), 2)
 
         msg.block = first_block_chain_a
-        logic.process_block(msg)
+        logic.process_block(msg, Visibility.public)
 
         msg.block = second_block_chain_a
         logic.process_block(msg)

@@ -3,11 +3,15 @@ import logging
 from chain import Chain
 from bitcoin import net
 from bitcoin import messages
+from chain import Visibility
 
 
 class Networking(object):
     def __init__(self):
         self.network_partitions = {}
+        self.alice = None
+        self.bob = None
+        self.chain = Chain()
 
     def start(self):
         client = network.GeventNetworkClient()
@@ -24,14 +28,14 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        alice = client.connect(('240.0.0.2', 18444))
-        bob = client.connect(('240.0.0.3', 18444))
+        self.alice = client.connect(('240.0.0.2', 18444))
+        self.bob = client.connect(('240.0.0.3', 18444))
 
-        partition_alice = NetworkPartition(alice, bob)
-        partition_bob = NetworkPartition(bob, alice)
+        partition_alice = NetworkPartition(self.alice, self.bob)
+        partition_bob = NetworkPartition(self.bob, self.alice)
 
-        self.network_partitions[alice] = partition_alice
-        self.network_partitions[bob] = partition_bob
+        self.network_partitions[self.alice] = partition_alice
+        self.network_partitions[self.bob] = partition_bob
 
         client.run_forever()
 
@@ -65,13 +69,15 @@ class Networking(object):
             self.network_partitions[connection].outbound.send('inv', relay_inv)
 
     def process_block(self, connection, message):
-        self.network_partitions[connection].chain.process_block(message)
+        if connection == self.alice:
+            self.chain.process_block(message, Visibility.alice)
+        else:
+            self.chain.process_block(message, Visibility.public)
 
 
 class NetworkPartition:
 
     def __init__(self, inbound, outbound):
-        self.chain = Chain()
         self.inbound = inbound
         self.outbound = outbound
 
