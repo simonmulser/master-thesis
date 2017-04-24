@@ -45,7 +45,6 @@ class Networking(object):
         self.network_partitions[connection].outbound.send(message.command, message)
 
     def ping_message(self, connection, message):
-        print connection
         connection.send('pong', message)
 
     def process_inv(self, connection, message):
