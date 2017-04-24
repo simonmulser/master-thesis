@@ -9,8 +9,8 @@ from chain import Visibility
 class Networking(object):
     def __init__(self):
         self.relay = {}
-        self.alice = None
-        self.bob = None
+        self.private = None
+        self.public = None
         self.chain = Chain()
 
     def start(self):
@@ -28,11 +28,11 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        self.alice = client.connect(('240.0.0.2', 18444))
-        self.bob = client.connect(('240.0.0.3', 18444))
+        self.private = client.connect(('240.0.0.2', 18444))
+        self.public = client.connect(('240.0.0.3', 18444))
 
-        self.relay[self.alice] = self.bob
-        self.relay[self.bob] = self.alice
+        self.relay[self.private] = self.public
+        self.relay[self.public] = self.private
 
         client.run_forever()
 
@@ -65,7 +65,7 @@ class Networking(object):
             self.relay[connection].send('inv', relay_inv)
 
     def process_block(self, connection, message):
-        if connection == self.alice:
+        if connection == self.private:
             self.chain.process_block(message, Visibility.alice)
         else:
             self.chain.process_block(message, Visibility.public)

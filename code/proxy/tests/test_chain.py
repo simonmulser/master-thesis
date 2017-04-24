@@ -134,7 +134,7 @@ class ChainTest(unittest.TestCase):
         chain.process_block(msg, Visibility.public)
 
         msg.block = first_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         length_alice, length_public = chain.length_of_fork()
         self.assertEqual(length_alice, 1)
@@ -148,10 +148,10 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = first_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = first_block_chain_b
         chain.process_block(msg, Visibility.public)
@@ -170,16 +170,16 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = first_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = third_a_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = third_b_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         msg.block = first_block_chain_b
         chain.process_block(msg, Visibility.public)
@@ -212,7 +212,7 @@ class ChainTest(unittest.TestCase):
         chain.process_block(msg, Visibility.public)
 
         msg.block = first_block_chain_a
-        chain.process_block(msg, Visibility.alice)
+        chain.process_block(msg, Visibility.private)
 
         self.assertEqual(len(chain.tips), 3)
 
