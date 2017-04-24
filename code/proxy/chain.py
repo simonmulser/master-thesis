@@ -69,12 +69,32 @@ class Chain:
             block.height = prevBlock.height + 1
             block.prevBlock = prevBlock
 
-    def chain_length(self):
-        max_length = 0
+    def length_of_fork(self):
+        highest_alice_tip = None
+        highest_public_tip = None
         for tip in self.tips:
-            if tip.height > max_length:
-                max_length = tip.height
-        return max_length
+            if tip.visibility == Visibility.alice:
+                if highest_alice_tip is None:
+                    highest_alice_tip = tip
+                elif highest_alice_tip.height < tip.height:
+                    highest_alice_tip = tip
+            else:
+                if highest_public_tip is None:
+                    highest_public_tip = tip
+                elif highest_public_tip.height < tip.height:
+                    highest_public_tip = tip
+
+        if highest_alice_tip is None:
+            return 0, 0
+
+        fork_point = highest_alice_tip
+        while fork_point.visibility is Visibility.alice:
+            fork_point = fork_point.prevBlock
+
+        if highest_public_tip is None:
+            highest_public_tip = fork_point
+
+        return highest_alice_tip.height - fork_point.height, highest_public_tip.height - fork_point.height
 
 Visibility = Enum('Visibility', 'alice, public')
 
