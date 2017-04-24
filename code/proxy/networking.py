@@ -7,12 +7,10 @@ from bitcoin import messages
 
 class Networking(object):
     def __init__(self):
-        self.relay = {}
+        self.network_partitions = {}
 
     def start(self):
         client = network.GeventNetworkClient()
-        chainAlice = Chain()
-        chainBob = Chain()
 
         for message in ['notfound', 'addr', 'tx', 'getblocks'
                         'reject', 'alert', 'headers', 'getaddr',
@@ -29,20 +27,18 @@ class Networking(object):
         alice = client.connect(('240.0.0.2', 18444))
         bob = client.connect(('240.0.0.3', 18444))
 
-        self.relay[alice] = bob
-        self.relay[bob] = alice
+        partition_alice = NetworkPartition(alice, bob)
+        partition_bob = NetworkPartition(bob, alice)
+
+        self.network_partitions[alice] = partition_alice
+        self.network_partitions[bob] = partition_bob
 
         client.run_forever()
 
     def relay_message(self, connection, message):
         logging.debug('relaying %s message from %s:%d', message.command, *connection.host)
 
-        while self.relay[connection] is None:
-            logging.debug('wait for second client to connect')
-            sleep(1)
-
-        relay_connection = self.relay[connection]
-        relay_connection.send(message.command, message)
+        self.network_partitions[connection].outbound.send(message.command, message)
 
     def ping_message(self, connection, message):
         print connection
@@ -66,10 +62,18 @@ class Networking(object):
                 logging.warn("unknown inv type")
 
         if len(relay_inv) > 0:
-            self.relay[connection].send('inv', relay_inv)
+            self.network_partitions[connection].outbound.send('inv', relay_inv)
 
     def process_block(self, connection, message):
         return
+
+
+class NetworkPartition:
+
+    def __init__(self, inbound, outbound):
+        self.chain = Chain()
+        self.inbound = inbound
+        self.outbound = outbound
 
 
 if __name__ == "__main__":
