@@ -24,6 +24,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertTrue(self.connectionAlice.send.called)
         self.assertEqual(self.connectionAlice.send.call_args[0][0], 'getdata')
+        self.assertFalse(self.connectionBob.send.called)
 
     def test_process_inv_msg_filtered_block(self):
         inv = net.CInv()
@@ -33,6 +34,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_inv(self.connectionAlice, msg)
 
         self.assertFalse(self.connectionAlice.send.called)
+        self.assertFalse(self.connectionBob.send.called)
 
     def test_process_inv_msg_error(self):
         inv = net.CInv()
@@ -42,6 +44,11 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_inv(self.connectionAlice, msg)
 
         self.assertFalse(self.connectionAlice.send.called)
+        self.assertTrue(self.connectionBob.send.called)
+        self.assertEqual(self.connectionBob.send.call_args[0][0], 'inv')
+
+        amount_of_inv = len(self.connectionBob.send.call_args[0][1])
+        self.assertEqual(amount_of_inv, 1)
 
     def test_process_inv_msg_tx(self):
         inv = net.CInv()
@@ -51,8 +58,13 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_inv(self.connectionAlice, msg)
 
         self.assertFalse(self.connectionAlice.send.called)
+        self.assertTrue(self.connectionBob.send.called)
+        self.assertEqual(self.connectionBob.send.call_args[0][0], 'inv')
 
-    def test_process_inv_msg_error(self):
+        amount_of_inv = len(self.connectionBob.send.call_args[0][1])
+        self.assertEqual(amount_of_inv, 1)
+
+    def test_process_inv_msg_unknown(self):
         inv = net.CInv()
         inv.type = "Unknown"
         msg = messages.msg_inv
@@ -60,6 +72,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_inv(self.connectionAlice, msg)
 
         self.assertFalse(self.connectionAlice.send.called)
+        self.assertFalse(self.connectionBob.send.called)
 
 
 def get_type_key(msg_type):

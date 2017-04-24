@@ -65,6 +65,9 @@ class Networking(object):
             except KeyError:
                 logging.warn("unknown inv type")
 
+        if len(relay_inv) > 0:
+            self.relay[connection].send('inv', relay_inv)
+
     def process_block(self, connection, message):
         return
 
