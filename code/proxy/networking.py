@@ -8,7 +8,7 @@ from chain import Visibility
 
 class Networking(object):
     def __init__(self):
-        self.network_partitions = {}
+        self.relay = {}
         self.alice = None
         self.bob = None
         self.chain = Chain()
@@ -31,18 +31,15 @@ class Networking(object):
         self.alice = client.connect(('240.0.0.2', 18444))
         self.bob = client.connect(('240.0.0.3', 18444))
 
-        partition_alice = NetworkPartition(self.alice, self.bob)
-        partition_bob = NetworkPartition(self.bob, self.alice)
-
-        self.network_partitions[self.alice] = partition_alice
-        self.network_partitions[self.bob] = partition_bob
+        self.relay[self.alice] = self.bob
+        self.relay[self.bob] = self.alice
 
         client.run_forever()
 
     def relay_message(self, connection, message):
         logging.debug('relaying %s message from %s:%d', message.command, *connection.host)
 
-        self.network_partitions[connection].outbound.send(message.command, message)
+        self.relay[connection].send(message.command, message)
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
@@ -65,20 +62,13 @@ class Networking(object):
                 logging.warn("unknown inv type")
 
         if len(relay_inv) > 0:
-            self.network_partitions[connection].outbound.send('inv', relay_inv)
+            self.relay[connection].send('inv', relay_inv)
 
     def process_block(self, connection, message):
         if connection == self.alice:
             self.chain.process_block(message, Visibility.alice)
         else:
             self.chain.process_block(message, Visibility.public)
-
-
-class NetworkPartition:
-
-    def __init__(self, inbound, outbound):
-        self.inbound = inbound
-        self.outbound = outbound
 
 
 if __name__ == "__main__":

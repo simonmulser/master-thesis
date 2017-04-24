@@ -1,7 +1,6 @@
 import unittest
 from mock import MagicMock
 from networking import Networking
-from networking import NetworkPartition
 from bitcoin import net
 from bitcoin import messages
 
@@ -14,8 +13,8 @@ class NetworkingTest(unittest.TestCase):
         self.connectionBob = MagicMock()
         self.chain = MagicMock()
 
-        self.networking.network_partitions[self.connectionAlice] = NetworkPartition(self.connectionAlice, self.connectionBob)
-        self.networking.network_partitions[self.connectionBob] = NetworkPartition(self.connectionBob, self.connectionAlice)
+        self.networking.relay[self.connectionAlice] = self.connectionBob
+        self.networking.relay[self.connectionBob] = self.connectionAlice
         self.networking.chain = self.chain
 
     def test_process_inv_msg_block(self):
