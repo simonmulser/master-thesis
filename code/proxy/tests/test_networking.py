@@ -74,6 +74,14 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connectionAlice.send.called)
         self.assertFalse(self.connectionBob.send.called)
 
+    def test_relay_message(self):
+        msg = messages.msg_version
+        self.networking.relay_message(self.connectionAlice, msg)
+
+        self.assertFalse(self.connectionAlice.send.called)
+        self.assertTrue(self.connectionBob.send.called)
+        self.assertEqual(self.connectionBob.send.call_args[0][0], msg.command)
+
 
 def get_type_key(msg_type):
     for key in net.CInv.typemap.keys():

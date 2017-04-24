@@ -40,9 +40,9 @@ class Networking(object):
         while self.relay[connection] is None:
             logging.debug('wait for second client to connect')
             sleep(1)
-        relay_connection = self.relay[connection]
 
-        #relay_connection.send(message.command, message)
+        relay_connection = self.relay[connection]
+        relay_connection.send(message.command, message)
 
     def ping_message(self, connection, message):
         print connection
