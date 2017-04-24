@@ -58,7 +58,7 @@ class Networking(object):
                     data_packet.inv.append(message.inv[0])
                     connection.send('getdata', data_packet)
                 elif net.CInv.typemap[inv.type] == "FilteredBlock":
-                    logging.debug("we dont care about filtered blocks")
+                    logging.debug("we don't care about filtered blocks")
                 else:
                     logging.debug("unknown inv type")
             except KeyError:
