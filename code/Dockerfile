@@ -1,7 +1,7 @@
 FROM python:2-wheezy
 
-RUN pip install six==1.8.0
-RUN pip install enum34
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 RUN git clone https://github.com/simonmulser/pycoin.git
 RUN cd pycoin && \
