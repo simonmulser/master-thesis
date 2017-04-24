@@ -11,7 +11,8 @@ class Networking(object):
 
     def start(self):
         client = network.GeventNetworkClient()
-        chain = Chain()
+        chainAlice = Chain()
+        chainBob = Chain()
 
         for message in ['notfound', 'addr', 'tx', 'getblocks'
                         'reject', 'alert', 'headers', 'getaddr',
