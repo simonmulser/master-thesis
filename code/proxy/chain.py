@@ -94,8 +94,6 @@ class Chain:
 
         return highest_private_tip.height - fork_point.height, highest_public_tip.height - fork_point.height
 
-Visibility = Enum('Visibility', 'private, public')
-
 
 class Block:
 
@@ -106,3 +104,5 @@ class Block:
         self.prevBlock = None
         self.height = 0
         self.visibility = visibility
+
+Visibility = Enum('Visibility', 'private, public')
