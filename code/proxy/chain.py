@@ -16,7 +16,7 @@ class Chain:
 
         logging.debug("new selfish proxy")
 
-    def process_block(self, connection, message):
+    def process_block(self, message):
         received_block = message.block
 
         if received_block.GetHash() in self.known_block_hashes:
