@@ -65,7 +65,7 @@ class Networking(object):
             self.network_partitions[connection].outbound.send('inv', relay_inv)
 
     def process_block(self, connection, message):
-        return
+        self.network_partitions[connection].chain.process_block(message)
 
 
 class NetworkPartition:
