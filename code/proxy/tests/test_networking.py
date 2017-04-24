@@ -1,5 +1,5 @@
 import unittest
-import mock
+from mock import MagicMock
 from networking import Networking
 from bitcoin import net
 from bitcoin import messages
@@ -7,61 +7,59 @@ from bitcoin import messages
 
 class NetworkingTest(unittest.TestCase):
 
-    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
-    def test_process_inv_msg_block(self, connection):
-        networking = Networking()
+    def setUp(self):
+        self.networking = Networking()
+        self.connectionAlice = MagicMock()
+        self.connectionBob = MagicMock()
+
+        self.networking.relay[self.connectionAlice] = self.connectionBob
+        self.networking.relay[self.connectionBob] = self.connectionAlice
+
+    def test_process_inv_msg_block(self):
         inv = net.CInv()
         inv.type = get_type_key("Block")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv(connection, msg)
+        self.networking.process_inv(self.connectionAlice, msg)
 
-        self.assertTrue(connection.send.called)
-        self.assertEqual(connection.send.call_args[0][0], 'getdata')
+        self.assertTrue(self.connectionAlice.send.called)
+        self.assertEqual(self.connectionAlice.send.call_args[0][0], 'getdata')
 
-    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
-    def test_process_inv_msg_filtered_block(self, connection):
-        networking = Networking()
+    def test_process_inv_msg_filtered_block(self):
         inv = net.CInv()
         inv.type = get_type_key("FilteredBlock")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv(connection, msg)
+        self.networking.process_inv(self.connectionAlice, msg)
 
-        self.assertFalse(connection.send.called)
+        self.assertFalse(self.connectionAlice.send.called)
 
-    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
-    def test_process_inv_msg_error(self, connection):
-        networking = Networking()
+    def test_process_inv_msg_error(self):
         inv = net.CInv()
         inv.type = get_type_key("Error")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv(connection, msg)
+        self.networking.process_inv(self.connectionAlice, msg)
 
-        self.assertFalse(connection.send.called)
+        self.assertFalse(self.connectionAlice.send.called)
 
-    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
-    def test_process_inv_msg_tx(self, connection):
-        networking = Networking()
+    def test_process_inv_msg_tx(self):
         inv = net.CInv()
         inv.type = get_type_key("TX")
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv(connection, msg)
+        self.networking.process_inv(self.connectionAlice, msg)
 
-        self.assertFalse(connection.send.called)
+        self.assertFalse(self.connectionAlice.send.called)
 
-    @mock.patch('bitcoinnetwork.network.GeventConnection', autospec=True)
-    def test_process_inv_msg_error(self, connection):
-        networking = Networking()
+    def test_process_inv_msg_error(self):
         inv = net.CInv()
         inv.type = "Unknown"
         msg = messages.msg_inv
         msg.inv = [inv]
-        networking.process_inv(connection, msg)
+        self.networking.process_inv(self.connectionAlice, msg)
 
-        self.assertFalse(connection.send.called)
+        self.assertFalse(self.connectionAlice.send.called)
 
 
 def get_type_key(msg_type):
