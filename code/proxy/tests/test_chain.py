@@ -8,114 +8,114 @@ from chain import Visibility
 class ChainTest(unittest.TestCase):
 
     def test_process_block(self):
-        logic = Chain()
+        chain = Chain()
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertTrue(block.GetHash() in logic.blocks)
-        self.assertEqual(len(logic.blocks), 2)
+        self.assertTrue(block.GetHash() in chain.blocks)
+        self.assertEqual(len(chain.blocks), 2)
 
     def test_process_block_two_times(self):
-        logic = Chain()
+        chain = Chain()
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg, Visibility.public)
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.blocks), 2)
+        self.assertEqual(len(chain.blocks), 2)
 
     def test_process_block(self):
-        logic = Chain()
+        chain = Chain()
         block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual( len(logic.tips), 1)
-        self.assertEqual( logic.tips[0].height, 1)
+        self.assertEqual( len(chain.tips), 1)
+        self.assertEqual( chain.tips[0].height, 1)
 
     def test_process_two_block(self):
-        logic = Chain()
+        chain = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = first_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg.block = second_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.tips), 1)
-        self.assertEqual(logic.tips[0].height, 2)
+        self.assertEqual(len(chain.tips), 1)
+        self.assertEqual(chain.tips[0].height, 2)
 
     def test_process_fork(self):
-        logic = Chain()
+        chain = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         msg = messages.msg_block
         msg.block = first_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         second_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
         msg.block = second_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.tips), 2)
-        self.assertEqual(logic.tips[0].height, 1)
-        self.assertEqual(logic.tips[1].height, 1)
+        self.assertEqual(len(chain.tips), 2)
+        self.assertEqual(chain.tips[0].height, 1)
+        self.assertEqual(chain.tips[1].height, 1)
 
     def test_process_orphan_blocks(self):
-        logic = Chain()
+        chain = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg = messages.msg_block
         msg.block = second_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         msg.block = first_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.tips), 1)
-        self.assertEqual(logic.tips[0].height, 2)
-        self.assertEqual(logic.tips[0].prevBlock.height, 1)
+        self.assertEqual(len(chain.tips), 1)
+        self.assertEqual(chain.tips[0].height, 2)
+        self.assertEqual(chain.tips[0].prevBlock.height, 1)
 
     def test_process_two_orphan_blocks(self):
-        logic = Chain()
+        chain = Chain()
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 
         msg = messages.msg_block
         msg.block = third_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         msg.block = second_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         msg.block = first_block
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.tips), 1)
-        self.assertEqual(logic.tips[0].height, 3)
-        self.assertEqual(logic.tips[0].prevBlock.height, 2)
+        self.assertEqual(len(chain.tips), 1)
+        self.assertEqual(chain.tips[0].height, 3)
+        self.assertEqual(chain.tips[0].prevBlock.height, 2)
 
     def test_length_of_fork_alice_no_chain(self):
-        logic = Chain()
+        chain = Chain()
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash())
         second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
 
         msg = messages.msg_block
         msg.block = second_block_chain_b
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
         msg.block = first_block_chain_b
-        logic.process_block(msg, Visibility.public)
+        chain.process_block(msg, Visibility.public)
 
-        self.assertEqual(len(logic.tips), 1)
+        self.assertEqual(len(chain.tips), 1)
 
-        length_alice, length_public = logic.length_of_fork()
+        length_alice, length_public = chain.length_of_fork()
         self.assertEqual(length_alice, 0)
         self.assertEqual(length_public, 0)
 
