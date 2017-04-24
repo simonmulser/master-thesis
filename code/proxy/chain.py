@@ -15,8 +15,6 @@ class Chain:
         self.orphan_blocks = []
         self.known_block_hashes = [genesis_hash]
 
-        logging.debug("new selfish proxy")
-
     def process_block(self, message, visibility):
         received_block = message.block
 
