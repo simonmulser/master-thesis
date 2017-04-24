@@ -20,8 +20,8 @@ class Networking(object):
 
         client.register_handler('ping', self.ping_message)
 
-        client.register_handler('block', chain.process_block)
         client.register_handler('inv', self.process_inv)
+        client.register_handler('block', self.process_block)
 
         network.ClientBehavior(client)
 
@@ -63,6 +63,9 @@ class Networking(object):
                     logging.debug("unknown inv type")
             except KeyError:
                 logging.warn("unknown inv type")
+
+    def process_block(self, connection, message):
+        return
 
 
 if __name__=="__main__":
