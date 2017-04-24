@@ -3,7 +3,6 @@ from chain import Chain
 from bitcoin import messages
 from bitcoin import core
 from chain import Visibility
-import logging
 
 
 class ChainTest(unittest.TestCase):
