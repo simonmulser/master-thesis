@@ -60,12 +60,12 @@ class Chain:
                         self.orphan_blocks.remove(inserted_orphan_block)
 
     def insert_block(self, prevBlock, block):
-            if prevBlock in self.tips:
-                self.tips.remove(prevBlock)
-            self.tips.append(block)
-            prevBlock.child_blocks.append(block)
-            block.height = prevBlock.height + 1
-            block.prevBlock = prevBlock
+        if prevBlock in self.tips:
+            self.tips.remove(prevBlock)
+        self.tips.append(block)
+        prevBlock.child_blocks.append(block)
+        block.height = prevBlock.height + 1
+        block.prevBlock = prevBlock
 
     def length_of_fork(self):
         highest_private_tip = None
