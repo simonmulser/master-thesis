@@ -3,5 +3,6 @@ before_script:
 
 unittest:
   script:
-    - cd code/proxy && python -m unittest discover
+    - cd code/proxy
+    - python -m unittest discover
 
