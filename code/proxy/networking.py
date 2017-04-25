@@ -3,7 +3,7 @@ import logging
 from chain import Chain
 from bitcoin import net
 from bitcoin import messages
-from chain import Visibility
+from actionservice import BlockOrigin
 
 
 class Networking(object):
@@ -66,9 +66,9 @@ class Networking(object):
 
     def process_block(self, connection, message):
         if connection == self.private:
-            self.chain.process_block(message, Visibility.alice)
+            self.chain.process_block(message, BlockOrigin.alice)
         else:
-            self.chain.process_block(message, Visibility.public)
+            self.chain.process_block(message, BlockOrigin.public)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
-import logging
 from bitcoin import core
-from enum import Enum
+from actionservice import ActionService
+from actionservice import BlockOrigin
+from strategy import selfish_mining_strategy
 
 
 class Chain:
@@ -9,11 +10,12 @@ class Chain:
 
         genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 
-        self.genesis = Block(genesis_hash, None, Visibility.public)
+        self.genesis = Block(genesis_hash, None, BlockOrigin.public)
         self.tips = [self.genesis]
         self.blocks = [self.genesis]
         self.orphan_blocks = []
         self.known_block_hashes = [genesis_hash]
+        self.action_service = ActionService(selfish_mining_strategy)
 
     def process_block(self, message, visibility):
         received_block = message.block
@@ -59,6 +61,9 @@ class Chain:
                     if inserted_orphan_block in self.orphan_blocks:
                         self.orphan_blocks.remove(inserted_orphan_block)
 
+            height_private, height_public = self.length_of_fork()
+            self.action_service.take_action(height_private, height_public, visibility)
+
     def insert_block(self, prevBlock, block):
         if prevBlock in self.tips:
             self.tips.remove(prevBlock)
@@ -71,7 +76,7 @@ class Chain:
         highest_private_tip = None
         highest_public_tip = None
         for tip in self.tips:
-            if tip.visibility == Visibility.private:
+            if tip.visibility == BlockOrigin.private:
                 if highest_private_tip is None:
                     highest_private_tip = tip
                 elif highest_private_tip.height < tip.height:
@@ -86,7 +91,7 @@ class Chain:
             return 0, 0
 
         fork_point = highest_private_tip
-        while fork_point.visibility is Visibility.private:
+        while fork_point.visibility is BlockOrigin.private:
             fork_point = fork_point.prevBlock
 
         if highest_public_tip is None:
@@ -104,5 +109,3 @@ class Block:
         self.prevBlock = None
         self.height = 0
         self.visibility = visibility
-
-Visibility = Enum('Visibility', 'private, public')
