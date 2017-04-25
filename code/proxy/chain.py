@@ -31,7 +31,7 @@ class Chain:
     def execute_action(self, action):
         pass
 
-    def try_to_insert_block(self, received_block, visibility):
+    def try_to_insert_block(self, received_block, block_origin):
         if received_block.GetHash() in self.known_block_hashes:
             return
         else:
@@ -48,7 +48,7 @@ class Chain:
                     prevBlock = block
                     break
 
-        block = Block(received_block.GetHash(), received_block.hashPrevBlock, visibility)
+        block = Block(received_block.GetHash(), received_block.hashPrevBlock, block_origin)
         self.blocks.append(block)
 
         if prevBlock is None:
