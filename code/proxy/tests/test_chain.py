@@ -212,6 +212,31 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(length_alice, 1)
         self.assertEqual(length_public, 3)
 
+    def test_process_block(self):
+        self.chain.try_to_insert_block = MagicMock(return_value=False)
+        self.chain.length_of_fork = MagicMock()
+
+        msg = messages.msg_block
+        msg.block = None
+        self.chain.process_block(msg, BlockOrigin.public)
+
+        self.assertTrue(self.chain.try_to_insert_block.called)
+        self.assertFalse(self.chain.length_of_fork.called)
+        self.assertFalse(self.chain.action_service.take_action.called)
+
+    def test_process_block(self):
+        self.chain.try_to_insert_block = MagicMock(return_value=True)
+        self.chain.length_of_fork = MagicMock(return_value=(0, 0))
+
+        msg = messages.msg_block
+        msg.block = None
+        self.chain.process_block(msg, BlockOrigin.public)
+
+        self.assertTrue(self.chain.try_to_insert_block.called)
+        self.assertTrue(self.chain.length_of_fork.called)
+        self.assertTrue(self.chain.action_service.take_action.called)
+
+
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
