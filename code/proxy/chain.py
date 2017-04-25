@@ -24,11 +24,11 @@ class Chain:
 
             height_private, height_public = self.length_of_fork()
 
-            action = self.action_service.take_action(height_private, height_public, visibility)
+            action = self.action_service.find_action(height_private, height_public, visibility)
 
-            self.execute(action)
+            self.execute_action(action)
 
-    def execute(self, action):
+    def execute_action(self, action):
         pass
 
     def try_to_insert_block(self, received_block, visibility):

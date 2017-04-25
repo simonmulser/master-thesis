@@ -7,7 +7,7 @@ class ActionService:
         self.fork_state = ForkState.irrelevant
         self.strategy = strategy
 
-    def take_action(self, length_private, length_public, last_block_origin):
+    def find_action(self, length_private, length_public, last_block_origin):
         if length_private is 0 and length_public is 0:
             raise ActionServiceException('both lengths can\'t be zero')
 

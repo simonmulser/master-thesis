@@ -222,7 +222,7 @@ class ChainTest(unittest.TestCase):
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertFalse(self.chain.length_of_fork.called)
-        self.assertFalse(self.chain.action_service.take_action.called)
+        self.assertFalse(self.chain.action_service.find_action.called)
 
     def test_process_block(self):
         self.chain.try_to_insert_block = MagicMock(return_value=True)
@@ -234,7 +234,7 @@ class ChainTest(unittest.TestCase):
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(self.chain.length_of_fork.called)
-        self.assertTrue(self.chain.action_service.take_action.called)
+        self.assertTrue(self.chain.action_service.find_action.called)
 
 
 
