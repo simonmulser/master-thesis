@@ -12,88 +12,88 @@ class ChainTest(unittest.TestCase):
         self.chain = Chain()
         self.chain.action_service = MagicMock()
 
-    def test_process_block(self):
+    def test_try_to_insert_block(self):
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertTrue(block.GetHash() in self.chain.blocks)
         self.assertEqual(len(self.chain.blocks), 2)
 
-    def test_process_block_two_times(self):
+    def test_try_to_insert_block_two_times(self):
         block = core.CBlock()
         msg = messages.msg_block
         msg.block = block
-        self.chain.process_block(msg, BlockOrigin.public)
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.blocks), 2)
 
-    def test_process_block(self):
+    def test_try_to_insert_block(self):
         block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 1)
 
-    def test_process_two_block(self):
+    def test_try_to_insert_two_blocks(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         msg = messages.msg_block
         msg.block = first_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg.block = second_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 2)
 
-    def test_process_fork(self):
+    def test_try_to_insert_fork(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         msg = messages.msg_block
         msg.block = first_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         second_block = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
         msg.block = second_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 2)
         self.assertEqual(self.chain.tips[0].height, 1)
         self.assertEqual(self.chain.tips[1].height, 1)
 
-    def test_process_orphan_blocks(self):
+    def test_try_to_insert_orphan_blocks(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         msg = messages.msg_block
         msg.block = second_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 2)
         self.assertEqual(self.chain.tips[0].prevBlock.height, 1)
 
-    def test_process_two_orphan_blocks(self):
+    def test_try_to_insert_two_orphan_blocks(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 
         msg = messages.msg_block
         msg.block = third_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = second_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 3)
@@ -105,10 +105,10 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
 
@@ -123,13 +123,13 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         length_alice, length_public = self.chain.length_of_fork()
         self.assertEqual(length_alice, 1)
@@ -142,13 +142,13 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = first_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = first_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         length_alice, length_public = self.chain.length_of_fork()
         self.assertEqual(length_alice, 2)
@@ -163,19 +163,19 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = first_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = third_a_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = third_b_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         msg.block = first_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 3)
 
@@ -192,19 +192,19 @@ class ChainTest(unittest.TestCase):
 
         msg = messages.msg_block
         msg.block = second_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = third_a_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = third_b_block_chain_b
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.try_to_insert_block(msg, BlockOrigin.public)
 
         msg.block = first_block_chain_a
-        self.chain.process_block(msg, BlockOrigin.private)
+        self.chain.try_to_insert_block(msg, BlockOrigin.private)
 
         self.assertEqual(len(self.chain.tips), 3)
 

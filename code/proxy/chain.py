@@ -20,6 +20,13 @@ class Chain:
     def process_block(self, message, visibility):
         received_block = message.block
 
+        if self.try_to_insert_block(received_block, visibility):
+
+            height_private, height_public = self.length_of_fork()
+
+            self.action_service.take_action(height_private, height_public, visibility)
+
+    def try_to_insert_block(self, received_block, visibility):
         if received_block.GetHash() in self.known_block_hashes:
             return
         else:
@@ -41,6 +48,7 @@ class Chain:
 
         if prevBlock is None:
             self.orphan_blocks.append(block)
+            return False
         else:
             self.insert_block(prevBlock, block)
 
@@ -60,9 +68,7 @@ class Chain:
                 for inserted_orphan_block in inserted_orphan_blocks:
                     if inserted_orphan_block in self.orphan_blocks:
                         self.orphan_blocks.remove(inserted_orphan_block)
-
-            height_private, height_public = self.length_of_fork()
-            self.action_service.take_action(height_private, height_public, visibility)
+            return True
 
     def insert_block(self, prevBlock, block):
         if prevBlock in self.tips:
