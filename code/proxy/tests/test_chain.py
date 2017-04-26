@@ -1,5 +1,7 @@
 import unittest
 from chain import Chain
+from chain import Block
+from chain import Fork
 from mock import MagicMock
 from bitcoin import messages
 from bitcoin import core
@@ -70,104 +72,109 @@ class ChainTest(unittest.TestCase):
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 
         self.chain.try_to_insert_block(third_block, BlockOrigin.public)
-
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 3)
         self.assertEqual(self.chain.tips[0].prevBlock.height, 2)
 
-    def test_length_of_fork_alice_no_chain(self):
+    def test_get_private_public_fork_no_private_tip(self):
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash())
         second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
 
         self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
 
-        length_alice, length_public = self.chain.length_of_fork()
-        self.assertEqual(length_alice, 0)
-        self.assertEqual(length_public, 0)
+        fork = self.chain.get_private_public_fork()
+        self.assertEqual(fork.private_height, 0)
+        self.assertEqual(fork.private_tip.hash, second_block_chain_b.GetHash())
 
-    def test_length_of_fork_lead_public(self):
+        self.assertEqual(fork.public_height, 0)
+        self.assertEqual(fork.public_tip.hash, second_block_chain_b.GetHash())
+
+    def test_get_private_public_fork_lead_public(self):
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
 
         self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
 
-        length_alice, length_public = self.chain.length_of_fork()
-        self.assertEqual(length_alice, 1)
-        self.assertEqual(length_public, 2)
+        fork = self.chain.get_private_public_fork()
+        self.assertEqual(fork.private_height, 1)
+        self.assertEqual(fork.private_tip.hash, first_block_chain_a.GetHash())
 
-    def test_length_of_fork_lead_alice(self):
+        self.assertEqual(fork.public_height, 2)
+        self.assertEqual(fork.public_tip.hash, second_block_chain_b.GetHash())
+
+    def test_get_private_public_fork_lead_alice(self):
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
 
         self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-
         self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-
         self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
 
-        length_alice, length_public = self.chain.length_of_fork()
-        self.assertEqual(length_alice, 2)
-        self.assertEqual(length_public, 1)
+        fork = self.chain.get_private_public_fork()
 
-    def test_length_of_fork_private_fork_point(self):
+        self.assertEqual(fork.private_height, 2)
+        self.assertEqual(fork.private_tip.hash, second_block_chain_a.GetHash())
+
+        self.assertEqual(fork.public_height, 1)
+        self.assertEqual(fork.public_tip.hash, first_block_chain_b.GetHash())
+
+    def test_get_private_public_fork_private_fork_point(self):
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
         third_a_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash(), nNonce=1)
+        fourth_block_chain_a = core.CBlock(hashPrevBlock=third_a_block_chain_a.GetHash())
         third_b_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash(), nNonce=2)
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
 
         self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-
         self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-
         self.chain.try_to_insert_block(third_a_block_chain_a, BlockOrigin.private)
-
         self.chain.try_to_insert_block(third_b_block_chain_a, BlockOrigin.private)
-
+        self.chain.try_to_insert_block(fourth_block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 3)
 
-        length_alice, length_public = self.chain.length_of_fork()
-        self.assertEqual(length_alice, 3)
-        self.assertEqual(length_public, 1)
+        fork = self.chain.get_private_public_fork()
+        self.assertEqual(fork.private_height, 4)
+        self.assertEqual(fork.private_tip.hash, fourth_block_chain_a.GetHash())
 
-    def test_length_of_fork_public_fork_point(self):
+        self.assertEqual(fork.public_height, 1)
+        self.assertEqual(fork.public_tip.hash, first_block_chain_b.GetHash())
+
+    def test_get_private_public_fork_public_fork_point(self):
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
         third_a_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash(), nNonce=1)
         third_b_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash(), nNonce=2)
+        fourth_block_chain_b = core.CBlock(hashPrevBlock=third_a_block_chain_b.GetHash())
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
 
         self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(third_a_block_chain_b, BlockOrigin.public)
-
+        self.chain.try_to_insert_block(fourth_block_chain_b, BlockOrigin.public)
         self.chain.try_to_insert_block(third_b_block_chain_b, BlockOrigin.public)
-
         self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
 
         self.assertEqual(len(self.chain.tips), 3)
 
-        length_alice, length_public = self.chain.length_of_fork()
-        self.assertEqual(length_alice, 1)
-        self.assertEqual(length_public, 3)
+        fork = self.chain.get_private_public_fork()
+        self.assertEqual(fork.private_height, 1)
+        self.assertEqual(fork.private_tip.hash, first_block_chain_a.GetHash() )
+
+        self.assertEqual(fork.public_height, 4)
+        self.assertEqual(fork.public_tip.hash, fourth_block_chain_b.GetHash())
 
     def test_process_block(self):
         self.chain.try_to_insert_block = MagicMock(return_value=False)

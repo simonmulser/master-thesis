@@ -22,9 +22,9 @@ class Chain:
 
         if self.try_to_insert_block(received_block, visibility):
 
-            height_private, height_public = self.length_of_fork()
+            fork = self.get_private_public_fork()
 
-            action = self.action_service.find_action(height_private, height_public, visibility)
+            action = self.action_service.find_action(fork.private_height, fork.public_height, visibility)
 
             self.execute_action(action)
 
@@ -83,7 +83,7 @@ class Chain:
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
 
-    def length_of_fork(self):
+    def get_private_public_fork(self):
         highest_private_tip = None
         highest_public_tip = None
         for tip in self.tips:
@@ -98,17 +98,24 @@ class Chain:
                 elif highest_public_tip.height < tip.height:
                     highest_public_tip = tip
 
-        if highest_private_tip is None:
-            return 0, 0
+        fork = Fork(highest_private_tip, highest_public_tip)
+
+        if fork.private_tip is None:
+            fork.private_tip = fork.public_tip
+            fork.private_height = fork.public_height = 0
+            return fork
 
         fork_point = highest_private_tip
         while fork_point.visibility is BlockOrigin.private:
             fork_point = fork_point.prevBlock
 
         if highest_public_tip is None:
-            highest_public_tip = fork_point
+            fork.public_tip = fork_point
 
-        return highest_private_tip.height - fork_point.height, highest_public_tip.height - fork_point.height
+        fork.private_height = fork.private_tip.height - fork_point.height
+        fork.public_height = fork.public_tip.height - fork_point.height
+
+        return fork
 
 
 class Block:
@@ -120,3 +127,12 @@ class Block:
         self.prevBlock = None
         self.height = 0
         self.visibility = visibility
+
+
+class Fork:
+
+    def __init__(self, private_tip, public_tip):
+        self.private_tip = private_tip
+        self.private_height = -1
+        self.public_tip = public_tip
+        self.public_height = -1
