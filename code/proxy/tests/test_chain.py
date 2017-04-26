@@ -250,7 +250,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "public tip.*is higher then private tip.*"):
+        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must >= then public tip.*"):
             self.chain.execute_action(Action.match, private_tip, public_tip)
 
 

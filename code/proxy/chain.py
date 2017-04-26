@@ -37,7 +37,7 @@ class Chain:
         if action is Action.match:
 
             if public_tip.height > private_tip.height:
-                raise ActionServiceException("public tip_height={} is higher then private tip_height={} -"
+                raise ActionServiceException("private tip_height={} must >= then public tip_height={} -"
                                              " match not possible".format(public_tip.height, private_tip.height))
 
             blocks_to_publish = []
