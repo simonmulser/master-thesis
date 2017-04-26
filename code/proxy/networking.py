@@ -11,7 +11,7 @@ class Networking(object):
         self.relay = {}
         self.private = None
         self.public = None
-        self.chain = Chain()
+        self.chain = Chain(self)
 
     def start(self):
         client = network.GeventNetworkClient()
@@ -69,6 +69,9 @@ class Networking(object):
             self.chain.process_block(message, BlockOrigin.alice)
         else:
             self.chain.process_block(message, BlockOrigin.public)
+
+    def publish_blocks(self, blocks):
+        pass
 
 
 if __name__ == "__main__":

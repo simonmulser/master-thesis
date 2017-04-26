@@ -1,17 +1,19 @@
 import unittest
 from chain import Chain
 from chain import Block
-from chain import Fork
 from mock import MagicMock
 from bitcoin import messages
 from bitcoin import core
 from actionservice import BlockOrigin
+from actionservice import Action
+from actionservice import ActionServiceException
 
 
 class ChainTest(unittest.TestCase):
 
     def setUp(self):
-        self.chain = Chain()
+        self.networking = MagicMock()
+        self.chain = Chain(self.networking)
         self.chain.action_service = MagicMock()
 
     def test_try_to_insert_block_without_prevHash(self):
@@ -200,6 +202,55 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.length_of_fork.called)
         self.assertTrue(self.chain.action_service.find_action.called)
 
+    def test_match_same_height(self):
+        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 2)
+        self.assertTrue(block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+
+    def test_match_lead_private(self):
+        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
+        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 2)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+
+    def test_match_lead_public(self):
+        private_tip = Block(None, None, None)
+        private_tip.height = 1
+
+        public_tip = Block(None, None, None)
+        public_tip.height = 2
+
+        with self.assertRaisesRegexp(ActionServiceException, "public tip.*is higher then private tip.*"):
+            self.chain.execute_action(Action.match, private_tip, public_tip)
 
 
 def genesis_hash():

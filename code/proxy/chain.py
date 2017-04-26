@@ -1,16 +1,21 @@
 from bitcoin import core
 from actionservice import ActionService
 from actionservice import BlockOrigin
+from actionservice import Action
+from actionservice import ActionServiceException
 from strategy import selfish_mining_strategy
 
 
 class Chain:
 
-    def __init__(self):
+    def __init__(self, networking):
+
+        self.networking = networking
 
         genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 
         self.genesis = Block(genesis_hash, None, BlockOrigin.public)
+        self.genesis.transferred = True
         self.tips = [self.genesis]
         self.blocks = [self.genesis]
         self.orphan_blocks = []
@@ -26,10 +31,30 @@ class Chain:
 
             action = self.action_service.find_action(fork.private_height, fork.public_height, visibility)
 
-            self.execute_action(action)
+            self.execute_action(action, fork.private_tip, fork.public_tip)
 
-    def execute_action(self, action):
-        pass
+    def execute_action(self, action, private_tip, public_tip):
+        if action is Action.match:
+
+            if public_tip.height > private_tip.height:
+                raise ActionServiceException("public tip_height={} is higher then private tip_height={} -"
+                                             " match not possible".format(public_tip.height, private_tip.height))
+
+            blocks_to_publish = []
+
+            private_block = private_tip
+            while private_block.height > public_tip.height:
+                private_block = private_block.prevBlock
+
+            blocks_to_publish.extend(get_unpublished_blocks(private_block))
+            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
+
+            self.networking.publish_blocks(blocks_to_publish)
+
+        elif action is Action.override:
+            pass
+        elif action is Action.adopt:
+            pass
 
     def try_to_insert_block(self, received_block, block_origin):
         if received_block.GetHash() in self.known_block_hashes:
@@ -118,6 +143,14 @@ class Chain:
         return fork
 
 
+def get_unpublished_blocks(block):
+    blocks = []
+    while block.transferred is False:
+        blocks.append(block)
+        block = block.prevBlock
+    return blocks
+
+
 class Block:
 
     def __init__(self, hash, hashPrevBlock, visibility):
@@ -127,6 +160,7 @@ class Block:
         self.prevBlock = None
         self.height = 0
         self.visibility = visibility
+        self.transferred = False
 
 
 class Fork:
