@@ -147,6 +147,8 @@ def get_unpublished_blocks(block):
     blocks = []
     while block.transferred is False:
         blocks.append(block)
+        block.transferred = True
+
         block = block.prevBlock
     return blocks
 
