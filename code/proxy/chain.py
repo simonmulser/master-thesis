@@ -17,9 +17,8 @@ class Chain:
         self.genesis = Block(genesis_hash, None, BlockOrigin.public)
         self.genesis.transferred = True
         self.tips = [self.genesis]
-        self.blocks = [self.genesis]
+        self.blocks = {genesis_hash: self.genesis}
         self.orphan_blocks = []
-        self.known_block_hashes = [genesis_hash]
         self.action_service = ActionService(selfish_mining_strategy)
 
     def process_block(self, message, visibility):
@@ -72,10 +71,8 @@ class Chain:
             self.networking.transfer_blocks(blocks_to_transfer)
 
     def try_to_insert_block(self, received_block, block_origin):
-        if received_block.GetHash() in self.known_block_hashes:
+        if received_block.GetHash() in self.blocks.keys():
             return
-        else:
-            self.known_block_hashes.append(received_block.GetHash())
 
         prevBlock = None
         for tip in self.tips:
@@ -83,13 +80,13 @@ class Chain:
                 prevBlock = tip
                 break
         if prevBlock is None:
-            for block in self.blocks:
+            for block in self.blocks.values():
                 if block.hash == received_block.hashPrevBlock:
                     prevBlock = block
                     break
 
         block = Block(received_block.GetHash(), received_block.hashPrevBlock, block_origin)
-        self.blocks.append(block)
+        self.blocks[block.hash] = block
 
         if prevBlock is None:
             self.orphan_blocks.append(block)
