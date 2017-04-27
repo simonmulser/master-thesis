@@ -200,6 +200,28 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.action_service.find_action.called)
         self.assertTrue(self.chain.execute_action.called)
 
+    def test_process_block_exception_find_action(self):
+        self.chain.try_to_insert_block = MagicMock(return_value=True)
+        self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
+        self.chain.action_service.find_action = MagicMock(side_effect=ActionException('mock_exception'))
+        self.chain.execute_action = MagicMock()
+
+        self.chain.process_block(None, BlockOrigin.public)
+
+        self.assertTrue(self.chain.action_service.find_action.called)
+        self.assertFalse(self.chain.execute_action.called)
+
+    def test_process_block_exception_execute_action(self):
+        self.chain.try_to_insert_block = MagicMock(return_value=True)
+        self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
+        self.chain.action_service.find_action = MagicMock()
+        self.chain.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
+
+        self.chain.process_block(None, BlockOrigin.public)
+
+        self.assertTrue(self.chain.action_service.find_action.called)
+        self.assertTrue(self.chain.execute_action.called)
+
     def test_match_same_height(self):
         block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)

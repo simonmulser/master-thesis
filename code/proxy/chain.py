@@ -4,6 +4,7 @@ from strategy import BlockOrigin
 from strategy import Action
 from strategy import ActionException
 from strategies import selfish_mining_strategy
+import logging
 
 
 class Chain:
@@ -27,9 +28,12 @@ class Chain:
 
             fork = self.get_private_public_fork()
 
-            action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
+            try:
+                action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
 
-            self.execute_action(action, fork.private_tip, fork.public_tip)
+                self.execute_action(action, fork.private_tip, fork.public_tip)
+            except ActionException as exce:
+                logging.warn(exce.message)
 
     def execute_action(self, action, private_tip, public_tip):
         blocks_to_transfer = []
