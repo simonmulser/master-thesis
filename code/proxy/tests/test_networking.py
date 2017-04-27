@@ -9,8 +9,8 @@ class NetworkingTest(unittest.TestCase):
 
     def setUp(self):
         self.networking = Networking()
-        self.connection_private = MagicMock()
-        self.connection_public = MagicMock()
+        self.connection_private = self.networking.connection_private = MagicMock()
+        self.connection_public = self.networking.connection_public = MagicMock()
         self.chain = MagicMock()
 
         self.networking.relay[self.connection_private] = self.connection_public

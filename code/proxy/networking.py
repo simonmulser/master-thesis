@@ -9,8 +9,8 @@ from actionservice import BlockOrigin
 class Networking(object):
     def __init__(self):
         self.relay = {}
-        self.private = None
-        self.public = None
+        self.connection_private = None
+        self.connection_public = None
         self.chain = Chain(self)
 
     def start(self):
@@ -28,11 +28,11 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        self.private = client.connect(('240.0.0.2', 18444))
-        self.public = client.connect(('240.0.0.3', 18444))
+        self.connection_private = client.connect(('240.0.0.2', 18444))
+        self.connection_public = client.connect(('240.0.0.3', 18444))
 
-        self.relay[self.private] = self.public
-        self.relay[self.public] = self.private
+        self.relay[self.connection_private] = self.connection_public
+        self.relay[self.connection_public] = self.connection_private
 
         client.run_forever()
 
@@ -65,7 +65,7 @@ class Networking(object):
             self.relay[connection].send('inv', relay_inv)
 
     def process_block(self, connection, message):
-        if connection == self.private:
+        if connection == self.connection_private:
             self.chain.process_block(message, BlockOrigin.private)
         else:
             self.chain.process_block(message, BlockOrigin.public)
