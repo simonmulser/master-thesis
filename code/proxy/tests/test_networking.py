@@ -74,7 +74,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connection_public.send.called)
         self.assertTrue(self.networking.connection_private.send.called)
         self.assertEqual(self.networking.connection_private.send.call_args[0][0], 'inv')
-        self.assertEqual(self.networking.connection_private.send.call_args[0][1][0], inv)
+        self.assertEqual(self.networking.connection_private.send.call_args[0][1].inv[0], inv)
 
     def test_process_inv_msg_private_block_known_transfer_allowed(self):
         inv = net.CInv()
@@ -93,7 +93,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connection_private.send.called)
         self.assertTrue(self.networking.connection_public.send.called)
         self.assertEqual(self.networking.connection_public.send.call_args[0][0], 'inv')
-        self.assertEqual(self.networking.connection_public.send.call_args[0][1][0], inv)
+        self.assertEqual(self.networking.connection_public.send.call_args[0][1].inv[0], inv)
 
     def test_process_inv_msg_filtered_block(self):
         inv = net.CInv()
@@ -116,8 +116,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_public.send.called)
         self.assertEqual(self.connection_public.send.call_args[0][0], 'inv')
 
-        amount_of_inv = len(self.connection_public.send.call_args[0][1])
-        self.assertEqual(amount_of_inv, 1)
+        self.assertEqual(len(self.connection_public.send.call_args[0][1].inv), 1)
 
     def test_process_inv_msg_tx(self):
         inv = net.CInv()
@@ -130,8 +129,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_public.send.called)
         self.assertEqual(self.connection_public.send.call_args[0][0], 'inv')
 
-        amount_of_inv = len(self.connection_public.send.call_args[0][1])
-        self.assertEqual(amount_of_inv, 1)
+        self.assertEqual(len(self.connection_public.send.call_args[0][1].inv), 1)
 
     def test_process_inv_msg_allowed_block_and_tx(self):
         block = net.CInv()
@@ -150,7 +148,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.connection_public.send.called)
         self.assertTrue(self.networking.connection_private.send.called)
-        self.assertEqual(len(self.networking.connection_private.send.call_args[0][1]), 2)
+        self.assertEqual(len(self.networking.connection_private.send.call_args[0][1].inv), 2)
 
     def test_process_inv_msg_unknown(self):
         inv = net.CInv()

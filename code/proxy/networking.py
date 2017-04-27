@@ -67,7 +67,8 @@ class Networking(object):
                 logging.warn("unknown inv type")
 
         if len(relay_inv) > 0:
-            self.relay[connection].send('inv', relay_inv)
+            message.inv = relay_inv
+            self.relay_message(connection, message)
 
     def process_block(self, connection, message):
         if connection == self.connection_private:
