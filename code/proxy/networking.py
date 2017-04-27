@@ -53,8 +53,7 @@ class Networking(object):
                     relay_inv.append(inv)
                 elif net.CInv.typemap[inv.type] == "Block":
                     if inv.hash in self.chain.blocks:
-                        block = self.chain.blocks[inv.hash]
-                        if block.transfer_allowed is True:
+                        if self.chain.blocks[inv.hash].transfer_allowed:
                             relay_inv.append(inv)
                     else:
                         data_packet = messages.msg_getdata()
