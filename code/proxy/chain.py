@@ -15,7 +15,7 @@ class Chain:
         genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 
         self.genesis = Block(genesis_hash, None, BlockOrigin.public)
-        self.genesis.transferred = True
+        self.genesis.transfer_allowed = True
         self.tips = [self.genesis]
         self.blocks = {genesis_hash: self.genesis}
         self.orphan_blocks = []
@@ -44,8 +44,8 @@ class Chain:
             while private_block.height > public_tip.height:
                 private_block = private_block.prevBlock
 
-            blocks_to_transfer.extend(get_untransferred_blocks(private_block))
-            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
+            blocks_to_transfer.extend(get_blocks_transfer_unallowed(private_block))
+            blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
         elif action is Action.override:
             if public_tip.height >= private_tip.height:
@@ -56,18 +56,18 @@ class Chain:
             while private_block.height > public_tip.height + 1:
                 private_block = private_block.prevBlock
 
-            blocks_to_transfer.extend(get_untransferred_blocks(private_block))
-            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
+            blocks_to_transfer.extend(get_blocks_transfer_unallowed(private_block))
+            blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
         elif action is Action.adopt:
             if private_tip.height >= public_tip.height:
                 raise ActionServiceException("public tip_height={} must > then private tip_height={} -"
                                              " adopt not possible".format(public_tip.height, private_tip.height))
-            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
+            blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
         if len(blocks_to_transfer) > 0:
             for block in blocks_to_transfer:
-                block.transferred = True
+                block.transfer_allowed = True
 
             self.networking.send_inv(blocks_to_transfer)
 
@@ -156,9 +156,9 @@ class Chain:
         return fork
 
 
-def get_untransferred_blocks(block):
+def get_blocks_transfer_unallowed(block):
     blocks = []
-    while block.transferred is False:
+    while block.transfer_allowed is False:
         blocks.append(block)
 
         block = block.prevBlock
@@ -174,7 +174,7 @@ class Block:
         self.prevBlock = None
         self.height = 0
         self.block_origin = block_origin
-        self.transferred = False
+        self.transfer_allowed = False
 
 
 class Fork:
