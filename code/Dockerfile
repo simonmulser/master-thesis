@@ -6,5 +6,3 @@ RUN pip install -r requirements.txt
 RUN git clone https://github.com/simonmulser/pycoin.git
 RUN cd pycoin && \
     python setup.py install
-
-RUN pip install python-bitcoinlib
