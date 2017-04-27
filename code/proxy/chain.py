@@ -47,8 +47,6 @@ class Chain:
             blocks_to_transfer.extend(get_untransferred_blocks(private_block))
             blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
 
-            self.networking.transfer_blocks(blocks_to_transfer)
-
         elif action is Action.override:
             if public_tip.height >= private_tip.height:
                 raise ActionServiceException("private tip_height={} must > then public tip_height={} -"
