@@ -169,8 +169,8 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_public.send.called)
         self.assertEqual(self.connection_public.send.call_args[0][0], msg.command)
 
-    def test_process_block(self):
-        msg = messages.msg_version
+    def test_process_block_unknown(self):
+        msg = messages.msg_block
         self.networking.process_block(self.connection_private, msg)
 
         self.assertTrue(self.chain.process_block.called)
