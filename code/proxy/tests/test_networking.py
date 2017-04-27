@@ -1,6 +1,7 @@
 import unittest
 from mock import MagicMock
 from networking import Networking
+from networking import inv_typemap
 from bitcoin import net
 from bitcoin import messages
 from bitcoin import core
@@ -242,5 +243,3 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_public.send.called)
         inv_msg = self.networking.connection_public.send.call_args[0][1]
         self.assertEqual(len(inv_msg), 2)
-
-inv_typemap = {v: k for k, v in net.CInv.typemap.items()}

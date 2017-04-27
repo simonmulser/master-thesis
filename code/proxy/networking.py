@@ -5,7 +5,6 @@ from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
 
-inv_type_block = 2
 
 class Networking(object):
     def __init__(self):
@@ -87,7 +86,7 @@ class Networking(object):
 
         for block in blocks:
             inv = net.CInv()
-            inv.type = inv_type_block
+            inv.type = inv_typemap['Block']
             inv.hash = block.hash
 
             if block.block_origin is BlockOrigin.private:
@@ -107,3 +106,5 @@ class Networking(object):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     Networking().start()
+
+inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
