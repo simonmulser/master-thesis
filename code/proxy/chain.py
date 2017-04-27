@@ -21,10 +21,9 @@ class Chain:
         self.orphan_blocks = []
         self.action_service = ActionService(selfish_mining_strategy)
 
-    def process_block(self, message, block_origin):
-        received_block = message.block
+    def process_block(self, block, block_origin):
 
-        if self.try_to_insert_block(received_block, block_origin):
+        if self.try_to_insert_block(block, block_origin):
 
             fork = self.get_private_public_fork()
 

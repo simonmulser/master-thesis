@@ -77,9 +77,9 @@ class Networking(object):
                 self.relay_message(connection, message)
         else:
             if connection == self.connection_private:
-                self.chain.process_block(message, BlockOrigin.private)
+                self.chain.process_block(block, BlockOrigin.private)
             else:
-                self.chain.process_block(message, BlockOrigin.public)
+                self.chain.process_block(block, BlockOrigin.public)
 
     def send_inv(self, blocks):
         private_block_invs = []

@@ -183,9 +183,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block = MagicMock(return_value=False)
         self.chain.length_of_fork = MagicMock()
 
-        msg = messages.msg_block
-        msg.block = None
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertFalse(self.chain.length_of_fork.called)
@@ -195,9 +193,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block = MagicMock(return_value=True)
         self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
 
-        msg = messages.msg_block
-        msg.block = None
-        self.chain.process_block(msg, BlockOrigin.public)
+        self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(self.chain.get_private_public_fork.called)
