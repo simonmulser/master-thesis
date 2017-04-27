@@ -112,8 +112,5 @@ class Networking(object):
         connection.send('pong', message)
         logging.debug('send pong to %s:%d', message.command, *connection.host)
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-    Networking().start()
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
