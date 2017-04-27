@@ -158,7 +158,6 @@ class Chain:
 
         fork.private_height = fork.private_tip.height - fork_point.height
         fork.public_height = fork.public_tip.height - fork_point.height
-
         return fork
 
 
