@@ -101,9 +101,12 @@ class Networking(object):
         if len(private_block_invs) > 0:
             msg.inv = private_block_invs
             self.connection_private.send('inv', private_block_invs)
+            logging.info('{} block invs send to {}:{}'.format(len(private_block_invs), *self.connection_private.host))
+
         if len(public_block_invs) > 0:
             msg.inv = public_block_invs
             self.connection_public.send('inv', public_block_invs)
+            logging.info('{} block invs send to {}:{}'.format(len(public_block_invs), *self.connection_public.host))
 
     def ping_message(connection, message):
         connection.send('pong', message)

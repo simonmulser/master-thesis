@@ -15,6 +15,9 @@ class NetworkingTest(unittest.TestCase):
         self.networking = Networking()
         self.connection_private = self.networking.connection_private = MagicMock()
         self.connection_public = self.networking.connection_public = MagicMock()
+        self.connection_private.host = ('127.0.0.1', '4444')
+        self.connection_public.host = ('127.0.0.1', '4444')
+
         self.chain = MagicMock()
 
         self.networking.relay[self.connection_private] = self.connection_public
