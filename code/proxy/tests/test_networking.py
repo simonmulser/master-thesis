@@ -92,7 +92,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertTrue(self.chain.process_block.called)
 
-    def test_transfer_private_blocks(self):
+    def test_send_inv_private_blocks(self):
         block1 = Block("hash1", None, BlockOrigin.private)
         block2 = Block("hash2", None, BlockOrigin.private)
         self.networking.send_inv([block1, block2])
@@ -103,7 +103,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.networking.connection_private.send.called)
 
-    def test_transfer_public_blocks(self):
+    def test_send_inv_public_blocks(self):
         block1 = Block("hash1", None, BlockOrigin.public)
         block2 = Block("hash2", None, BlockOrigin.public)
         self.networking.send_inv([block1, block2])
@@ -114,7 +114,7 @@ class NetworkingTest(unittest.TestCase):
         inv_msg = self.networking.connection_private.send.call_args[0][1]
         self.assertEqual(len(inv_msg), 2)
 
-    def test_transfer_blocks(self):
+    def test_send_inv_blocks(self):
         block1 = Block("hash1", None, BlockOrigin.public)
         block2 = Block("hash2", None, BlockOrigin.public)
         block3 = Block("hash3", None, BlockOrigin.public)
