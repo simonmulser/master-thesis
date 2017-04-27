@@ -3,6 +3,7 @@ from mock import MagicMock
 from networking import Networking
 from bitcoin import net
 from bitcoin import messages
+from bitcoin import core
 from chain import Block
 from chain import BlockOrigin
 
@@ -173,6 +174,36 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_block(self.connection_private, msg)
 
         self.assertTrue(self.chain.process_block.called)
+
+    def test_process_block_known_transfer_unallowed(self):
+        cBlock = core.CBlock()
+        msg = messages.msg_block
+        msg.block = cBlock
+
+        block = Block(cBlock.GetHash(), None, None)
+        block.transfer_allowed = False
+        self.chain.blocks = {block.hash: block}
+
+        self.networking.process_block(self.connection_private, msg)
+
+        self.assertFalse(self.chain.process_block.called)
+        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.connection_public.send.called)
+
+    def test_process_block_known_transfer_allowed(self):
+        cBlock = core.CBlock()
+        msg = messages.msg_block
+        msg.block = cBlock
+
+        block = Block(cBlock.GetHash(), None, None)
+        block.transfer_allowed = True
+        self.chain.blocks = {block.hash: block}
+
+        self.networking.process_block(self.connection_private, msg)
+
+        self.assertFalse(self.chain.process_block.called)
+        self.assertFalse(self.connection_private.send.called)
+        self.assertTrue(self.connection_public.send.called)
 
     def test_send_inv_private_blocks(self):
         block1 = Block("hash1", None, BlockOrigin.private)

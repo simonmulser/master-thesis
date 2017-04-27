@@ -71,10 +71,15 @@ class Networking(object):
             self.relay_message(connection, message)
 
     def process_block(self, connection, message):
-        if connection == self.connection_private:
-            self.chain.process_block(message, BlockOrigin.private)
+        block = message.block
+        if block.GetHash() in self.chain.blocks:
+            if self.chain.blocks[block.GetHash()].transfer_allowed:
+                self.relay_message(connection, message)
         else:
-            self.chain.process_block(message, BlockOrigin.public)
+            if connection == self.connection_private:
+                self.chain.process_block(message, BlockOrigin.private)
+            else:
+                self.chain.process_block(message, BlockOrigin.public)
 
     def send_inv(self, blocks):
         private_block_invs = []
