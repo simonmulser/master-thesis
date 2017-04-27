@@ -70,7 +70,7 @@ class Networking(object):
         else:
             self.chain.process_block(message, BlockOrigin.public)
 
-    def publish_blocks(self, blocks):
+    def transfer_blocks(self, blocks):
         pass
 
 

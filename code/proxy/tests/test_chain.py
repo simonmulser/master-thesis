@@ -214,13 +214,13 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 2)
-        self.assertTrue(block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 2)
+        self.assertTrue(block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
     def test_match_lead_private(self):
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
@@ -235,13 +235,13 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 2)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 2)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
     def test_match_lead_public(self):
         private_tip = Block(None, None, None)
@@ -286,14 +286,14 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 3)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 3)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
     def test_override_two_blocks_lead_private(self):
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
@@ -310,14 +310,14 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 3)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 3)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
     def test_adopt_private_lead(self):
         private_tip = Block(None, None, None)
@@ -352,13 +352,13 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 2)
-        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 2)
+        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
     def test_adopt_two_blocks_lead_public(self):
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
@@ -375,14 +375,14 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.publish_blocks.called)
+        self.assertTrue(self.chain.networking.transfer_blocks.called)
 
-        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
 
-        self.assertEqual(len(hashes_of_published_blocks), 3)
-        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_published_blocks)
-        self.assertTrue(third_block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertEqual(len(hashes_of_transferred_blocks), 3)
+        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_transferred_blocks)
+        self.assertTrue(third_block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()

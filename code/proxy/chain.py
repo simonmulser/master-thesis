@@ -34,7 +34,7 @@ class Chain:
             self.execute_action(action, fork.private_tip, fork.public_tip)
 
     def execute_action(self, action, private_tip, public_tip):
-        blocks_to_publish = []
+        blocks_to_transfer = []
 
         if action is Action.match:
             if public_tip.height > private_tip.height:
@@ -45,10 +45,10 @@ class Chain:
             while private_block.height > public_tip.height:
                 private_block = private_block.prevBlock
 
-            blocks_to_publish.extend(get_unpublished_blocks(private_block))
-            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
+            blocks_to_transfer.extend(get_untransferred_blocks(private_block))
+            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
 
-            self.networking.publish_blocks(blocks_to_publish)
+            self.networking.transfer_blocks(blocks_to_transfer)
 
         elif action is Action.override:
             if public_tip.height >= private_tip.height:
@@ -59,17 +59,17 @@ class Chain:
             while private_block.height > public_tip.height + 1:
                 private_block = private_block.prevBlock
 
-            blocks_to_publish.extend(get_unpublished_blocks(private_block))
-            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
+            blocks_to_transfer.extend(get_untransferred_blocks(private_block))
+            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
 
         elif action is Action.adopt:
             if private_tip.height >= public_tip.height:
                 raise ActionServiceException("public tip_height={} must > then private tip_height={} -"
                                              " adopt not possible".format(public_tip.height, private_tip.height))
-            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
+            blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
 
-        if len(blocks_to_publish) > 0:
-            self.networking.publish_blocks(blocks_to_publish)
+        if len(blocks_to_transfer) > 0:
+            self.networking.transfer_blocks(blocks_to_transfer)
 
     def try_to_insert_block(self, received_block, block_origin):
         if received_block.GetHash() in self.known_block_hashes:
@@ -158,11 +158,10 @@ class Chain:
         return fork
 
 
-def get_unpublished_blocks(block):
+def get_untransferred_blocks(block):
     blocks = []
     while block.transferred is False:
         blocks.append(block)
-        block.transferred = True
 
         block = block.prevBlock
     return blocks
