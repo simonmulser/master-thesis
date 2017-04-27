@@ -51,7 +51,17 @@ class Chain:
             self.networking.publish_blocks(blocks_to_publish)
 
         elif action is Action.override:
-            pass
+            if public_tip.height >= private_tip.height:
+                raise ActionServiceException("private tip_height={} must > then public tip_height={} -"
+                                             " override not possible".format(public_tip.height, private_tip.height))
+
+            private_block = private_tip
+            while private_block.height > public_tip.height + 1:
+                private_block = private_block.prevBlock
+
+            blocks_to_publish.extend(get_unpublished_blocks(private_block))
+            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
+
         elif action is Action.adopt:
             pass
 

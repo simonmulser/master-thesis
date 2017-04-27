@@ -253,6 +253,72 @@ class ChainTest(unittest.TestCase):
         with self.assertRaisesRegexp(ActionServiceException, "private tip.*must >= then public tip.*"):
             self.chain.execute_action(Action.match, private_tip, public_tip)
 
+    def test_override_lead_public(self):
+        private_tip = Block(None, None, None)
+        private_tip.height = 1
+
+        public_tip = Block(None, None, None)
+        public_tip.height = 2
+
+        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must > then public tip.*"):
+            self.chain.execute_action(Action.override, private_tip, public_tip)
+
+    def test_override_same_height(self):
+        private_tip = Block(None, None, None)
+        private_tip.height = 2
+
+        public_tip = Block(None, None, None)
+        public_tip.height = 2
+
+        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must > then public tip.*"):
+            self.chain.execute_action(Action.override, private_tip, public_tip)
+
+    def test_override_lead_private(self):
+        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
+        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 3)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+
+    def test_override_two_blocks_lead_private(self):
+        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
+        third_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash())
+        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(third_block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 3)
+        self.assertTrue(first_block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(second_block_chain_a.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
+
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
