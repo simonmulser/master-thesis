@@ -8,7 +8,6 @@ import logging
 
 
 class Chain:
-
     def __init__(self, networking):
 
         self.networking = networking
@@ -27,13 +26,12 @@ class Chain:
         if self.try_to_insert_block(block, block_origin):
 
             fork = self.get_private_public_fork()
-
             try:
                 action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
 
                 self.execute_action(action, fork.private_tip, fork.public_tip)
-            except ActionException as exce:
-                logging.warn(exce.message)
+            except ActionException as exception:
+                logging.warn(exception.message)
 
     def execute_action(self, action, private_tip, public_tip):
         blocks_to_transfer = []
@@ -41,7 +39,7 @@ class Chain:
         if action is Action.match:
             if public_tip.height > private_tip.height:
                 raise ActionException("private tip_height={} must >= then public tip_height={} -"
-                                             " match not possible".format(public_tip.height, private_tip.height))
+                                      " match not possible".format(public_tip.height, private_tip.height))
 
             private_block = private_tip
             while private_block.height > public_tip.height:
@@ -53,7 +51,7 @@ class Chain:
         elif action is Action.override:
             if public_tip.height >= private_tip.height:
                 raise ActionException("private tip_height={} must > then public tip_height={} -"
-                                             " override not possible".format(public_tip.height, private_tip.height))
+                                      " override not possible".format(public_tip.height, private_tip.height))
 
             private_block = private_tip
             while private_block.height > public_tip.height + 1:
@@ -65,7 +63,7 @@ class Chain:
         elif action is Action.adopt:
             if private_tip.height >= public_tip.height:
                 raise ActionException("public tip_height={} must > then private tip_height={} -"
-                                             " adopt not possible".format(public_tip.height, private_tip.height))
+                                      " adopt not possible".format(public_tip.height, private_tip.height))
             blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
         if len(blocks_to_transfer) > 0:
@@ -166,7 +164,6 @@ def get_blocks_transfer_unallowed(block):
 
 
 class Block:
-
     def __init__(self, hash, hashPrevBlock, block_origin):
         self.child_blocks = []
         self.hash = hash
@@ -178,7 +175,6 @@ class Block:
 
 
 class Fork:
-
     def __init__(self, private_tip, public_tip):
         self.private_tip = private_tip
         self.private_height = -1
