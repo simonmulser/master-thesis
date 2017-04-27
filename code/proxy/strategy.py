@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 
 class Strategy:
@@ -21,14 +22,18 @@ class Strategy:
                 raise ActionException('fork_state=active, block_origin=public and '
                                              'length_private < length_public')
 
+        logging.debug('find action old fork_state={}'.format(self.fork_state))
         if last_block_origin is BlockOrigin.public and length_public <= length_private:
             self.fork_state = ForkState.relevant
         elif last_block_origin is BlockOrigin.private and self.fork_state is ForkState.active:
             self.fork_state = ForkState.active
         else:
             self.fork_state = ForkState.irrelevant
+        logging.debug('find action new fork_state={}'.format(self.fork_state))
 
         action = Action(self.strategy[self.fork_state.value][length_private][length_public])
+        logging.info('found action={} with length_private={} length_public={} last_block_origin={} fork_state={} '
+                      .format(action, length_private, length_public, last_block_origin, self.fork_state))
 
         if action is Action.match:
             self.fork_state = ForkState.active
