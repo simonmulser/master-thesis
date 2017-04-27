@@ -41,9 +41,6 @@ class Networking(object):
 
         self.relay[connection].send(message.command, message)
 
-    def ping_message(self, connection, message):
-        connection.send('pong', message)
-
     def process_inv(self, connection, message):
         relay_inv = []
         for inv in message.inv:
@@ -102,6 +99,9 @@ class Networking(object):
             msg.inv = public_block_invs
             self.connection_public.send('inv', public_block_invs)
 
+    def ping_message(connection, message):
+        connection.send('pong', message)
+        logging.debug('send pong to %s:%d', message.command, *connection.host)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
