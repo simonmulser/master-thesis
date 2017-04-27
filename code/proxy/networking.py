@@ -3,7 +3,7 @@ import logging
 from chain import Chain
 from bitcoin import net
 from bitcoin import messages
-from actionservice import BlockOrigin
+from strategy import BlockOrigin
 
 inv_type_block = 2
 

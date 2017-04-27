@@ -3,11 +3,10 @@ from chain import Chain
 from chain import Block
 from chain import Fork
 from mock import MagicMock
-from bitcoin import messages
 from bitcoin import core
-from actionservice import BlockOrigin
-from actionservice import Action
-from actionservice import ActionServiceException
+from strategy import BlockOrigin
+from strategy import Action
+from strategy import ActionException
 
 
 class ChainTest(unittest.TestCase):
@@ -246,7 +245,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must >= then public tip.*match.*"):
+        with self.assertRaisesRegexp(ActionException, "private tip.*must >= then public tip.*match.*"):
             self.chain.execute_action(Action.match, private_tip, public_tip)
 
     def test_override_lead_public(self):
@@ -256,7 +255,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must > then public tip.*override.*"):
+        with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
             self.chain.execute_action(Action.override, private_tip, public_tip)
 
     def test_override_same_height(self):
@@ -266,7 +265,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "private tip.*must > then public tip.*override.*"):
+        with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
             self.chain.execute_action(Action.override, private_tip, public_tip)
 
     def test_override_lead_private(self):
@@ -322,7 +321,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "public tip.*must > then private tip.*adopt.*"):
+        with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
             self.chain.execute_action(Action.adopt, private_tip, public_tip)
 
     def test_adopt_same_height(self):
@@ -332,7 +331,7 @@ class ChainTest(unittest.TestCase):
         public_tip = Block(None, None, None)
         public_tip.height = 2
 
-        with self.assertRaisesRegexp(ActionServiceException, "public tip.*must > then private tip.*adopt.*"):
+        with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
             self.chain.execute_action(Action.adopt, private_tip, public_tip)
 
     def test_adopt_lead_public(self):

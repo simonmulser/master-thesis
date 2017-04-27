@@ -1,9 +1,9 @@
 from bitcoin import core
-from actionservice import ActionService
-from actionservice import BlockOrigin
-from actionservice import Action
-from actionservice import ActionServiceException
-from strategy import selfish_mining_strategy
+from strategy import Strategy
+from strategy import BlockOrigin
+from strategy import Action
+from strategy import ActionException
+from strategies import selfish_mining_strategy
 
 
 class Chain:
@@ -19,7 +19,7 @@ class Chain:
         self.tips = [self.genesis]
         self.blocks = {genesis_hash: self.genesis}
         self.orphan_blocks = []
-        self.action_service = ActionService(selfish_mining_strategy)
+        self.action_service = Strategy(selfish_mining_strategy)
 
     def process_block(self, block, block_origin):
 
@@ -36,7 +36,7 @@ class Chain:
 
         if action is Action.match:
             if public_tip.height > private_tip.height:
-                raise ActionServiceException("private tip_height={} must >= then public tip_height={} -"
+                raise ActionException("private tip_height={} must >= then public tip_height={} -"
                                              " match not possible".format(public_tip.height, private_tip.height))
 
             private_block = private_tip
@@ -48,7 +48,7 @@ class Chain:
 
         elif action is Action.override:
             if public_tip.height >= private_tip.height:
-                raise ActionServiceException("private tip_height={} must > then public tip_height={} -"
+                raise ActionException("private tip_height={} must > then public tip_height={} -"
                                              " override not possible".format(public_tip.height, private_tip.height))
 
             private_block = private_tip
@@ -60,7 +60,7 @@ class Chain:
 
         elif action is Action.adopt:
             if private_tip.height >= public_tip.height:
-                raise ActionServiceException("public tip_height={} must > then private tip_height={} -"
+                raise ActionException("public tip_height={} must > then private tip_height={} -"
                                              " adopt not possible".format(public_tip.height, private_tip.height))
             blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
