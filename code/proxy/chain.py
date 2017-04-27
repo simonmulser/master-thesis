@@ -26,6 +26,7 @@ class Chain:
         if self.try_to_insert_block(block, block_origin):
 
             fork = self.get_private_public_fork()
+            logging.debug('current {}'.format(fork))
             try:
                 action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
 
@@ -66,11 +67,14 @@ class Chain:
                                       " adopt not possible".format(public_tip.height, private_tip.height))
             blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
+        logging.info('there are {} block invs to be send'.format(len(blocks_to_transfer)))
         if len(blocks_to_transfer) > 0:
             for block in blocks_to_transfer:
                 block.transfer_allowed = True
 
             self.networking.send_inv(blocks_to_transfer)
+
+        logging.info('executed action {}'.format(action))
 
     def try_to_insert_block(self, received_block, block_origin):
         prevBlock = None
@@ -89,6 +93,8 @@ class Chain:
 
         if prevBlock is None:
             self.orphan_blocks.append(block)
+            logging.info('{} added to orphan blocks'.format(block))
+
             return False
         else:
             self.insert_block(prevBlock, block)
@@ -118,6 +124,8 @@ class Chain:
         prevBlock.child_blocks.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
+
+        logging.info('{} inserted into chain'.format(block))
 
     def get_private_public_fork(self):
         highest_private_tip = None
@@ -173,6 +181,9 @@ class Block:
         self.block_origin = block_origin
         self.transfer_allowed = False
 
+    def __repr__(self):
+        return 'block(height={} block_origin={})'.format(self.height, self.block_origin)
+
 
 class Fork:
     def __init__(self, private_tip, public_tip):
@@ -180,3 +191,6 @@ class Fork:
         self.private_height = -1
         self.public_tip = public_tip
         self.public_height = -1
+
+    def __repr__(self):
+        return 'fork(private_height={} public_height={})'.format(self.private_height, self.public_height)
