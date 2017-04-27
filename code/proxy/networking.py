@@ -39,10 +39,10 @@ class Networking(object):
 
     def relay_message(self, connection, message):
         self.relay[connection].send(message.command, message)
-        logging.debug('relayed %s message from %s:%d', message.command, *connection.host)
+        logging.debug('relayed {} message from {}'.format(message.command, connection.host[0]))
 
     def process_inv(self, connection, message):
-        logging.debug('received inv from %s:%d', *connection.host)
+        logging.debug('received inv from {}'.format(connection.host[0]))
 
         relay_inv = []
         for inv in message.inv:
@@ -58,7 +58,7 @@ class Networking(object):
                         data_packet.inv.append(message.inv[0])
                         connection.send('getdata', data_packet)
 
-                        logging.info('requested new block from %s:%d', *connection.host)
+                        logging.info('requested new block from {}'.format(connection.host[0]))
                 elif net.CInv.typemap[inv.type] == "FilteredBlock":
                     logging.debug("we don't care about filtered blocks")
                 else:
@@ -71,7 +71,7 @@ class Networking(object):
             self.relay_message(connection, message)
 
     def process_block(self, connection, message):
-        logging.info('received block from %s:%d', *connection.host)
+        logging.info('received block from {}'.format(connection.host[0]))
 
         block = message.block
         if block.GetHash() in self.chain.blocks:
@@ -101,16 +101,15 @@ class Networking(object):
         if len(private_block_invs) > 0:
             msg.inv = private_block_invs
             self.connection_private.send('inv', private_block_invs)
-            logging.info('{} block invs send to {}:{}'.format(len(private_block_invs), *self.connection_private.host))
+            logging.info('{} block invs send to {}'.format(len(private_block_invs), self.connection_private.host[0]))
 
         if len(public_block_invs) > 0:
             msg.inv = public_block_invs
             self.connection_public.send('inv', public_block_invs)
-            logging.info('{} block invs send to {}:{}'.format(len(public_block_invs), *self.connection_public.host))
+            logging.info('{} block invs send to {}'.format(len(public_block_invs), self.connection_public.host[0]))
 
     def ping_message(connection, message):
         connection.send('pong', message)
-        logging.debug('send pong to %s:%d', message.command, *connection.host)
-
+        logging.debug('send pong to {}'.format(connection.host[0]))
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
