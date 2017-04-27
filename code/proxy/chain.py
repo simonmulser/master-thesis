@@ -21,14 +21,14 @@ class Chain:
         self.orphan_blocks = []
         self.action_service = ActionService(selfish_mining_strategy)
 
-    def process_block(self, message, visibility):
+    def process_block(self, message, block_origin):
         received_block = message.block
 
-        if self.try_to_insert_block(received_block, visibility):
+        if self.try_to_insert_block(received_block, block_origin):
 
             fork = self.get_private_public_fork()
 
-            action = self.action_service.find_action(fork.private_height, fork.public_height, visibility)
+            action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
 
             self.execute_action(action, fork.private_tip, fork.public_tip)
 
@@ -124,7 +124,7 @@ class Chain:
         highest_private_tip = None
         highest_public_tip = None
         for tip in self.tips:
-            if tip.visibility == BlockOrigin.private:
+            if tip.block_origin == BlockOrigin.private:
                 if highest_private_tip is None:
                     highest_private_tip = tip
                 elif highest_private_tip.height < tip.height:
@@ -143,7 +143,7 @@ class Chain:
             return fork
 
         fork_point = highest_private_tip
-        while fork_point.visibility is BlockOrigin.private:
+        while fork_point.block_origin is BlockOrigin.private:
             fork_point = fork_point.prevBlock
 
         if highest_public_tip is None:
@@ -166,13 +166,13 @@ def get_untransferred_blocks(block):
 
 class Block:
 
-    def __init__(self, hash, hashPrevBlock, visibility):
+    def __init__(self, hash, hashPrevBlock, block_origin):
         self.child_blocks = []
         self.hash = hash
         self.hashPrevBlock = hashPrevBlock
         self.prevBlock = None
         self.height = 0
-        self.visibility = visibility
+        self.block_origin = block_origin
         self.transferred = False
 
 
