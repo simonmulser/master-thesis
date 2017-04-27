@@ -35,13 +35,15 @@ class Networking(object):
         self.relay[self.connection_public] = self.connection_private
 
         client.run_forever()
+        logging.debug('client started')
 
     def relay_message(self, connection, message):
-        logging.debug('relaying %s message from %s:%d', message.command, *connection.host)
-
         self.relay[connection].send(message.command, message)
+        logging.debug('relayed %s message from %s:%d', message.command, *connection.host)
 
     def process_inv(self, connection, message):
+        logging.debug('received inv from %s:%d', *connection.host)
+
         relay_inv = []
         for inv in message.inv:
             try:
@@ -55,6 +57,8 @@ class Networking(object):
                         data_packet = messages.msg_getdata()
                         data_packet.inv.append(message.inv[0])
                         connection.send('getdata', data_packet)
+
+                        logging.info('requested new block from %s:%d', *connection.host)
                 elif net.CInv.typemap[inv.type] == "FilteredBlock":
                     logging.debug("we don't care about filtered blocks")
                 else:
@@ -67,6 +71,8 @@ class Networking(object):
             self.relay_message(connection, message)
 
     def process_block(self, connection, message):
+        logging.info('received block from %s:%d', *connection.host)
+
         block = message.block
         if block.GetHash() in self.chain.blocks:
             if self.chain.blocks[block.GetHash()].transfer_allowed:
