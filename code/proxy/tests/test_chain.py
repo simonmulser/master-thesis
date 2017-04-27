@@ -214,9 +214,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 2)
         self.assertTrue(block_chain_a.GetHash() in hashes_of_transferred_blocks)
@@ -235,9 +235,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 2)
         self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
@@ -286,9 +286,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 3)
         self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
@@ -310,9 +310,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 3)
         self.assertTrue(first_block_chain_a.GetHash() in hashes_of_transferred_blocks)
@@ -352,9 +352,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 2)
         self.assertTrue(first_block_chain_b.GetHash() in hashes_of_transferred_blocks)
@@ -375,9 +375,9 @@ class ChainTest(unittest.TestCase):
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
-        self.assertTrue(self.chain.networking.transfer_blocks.called)
+        self.assertTrue(self.chain.networking.send_inv.called)
 
-        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.transfer_blocks.call_args[0][0]]
+        hashes_of_transferred_blocks = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(hashes_of_transferred_blocks), 3)
         self.assertTrue(first_block_chain_b.GetHash() in hashes_of_transferred_blocks)

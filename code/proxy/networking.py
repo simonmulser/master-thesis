@@ -71,7 +71,7 @@ class Networking(object):
         else:
             self.chain.process_block(message, BlockOrigin.public)
 
-    def transfer_blocks(self, blocks):
+    def send_inv(self, blocks):
         private_block_invs = []
         public_block_invs = []
 
