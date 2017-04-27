@@ -34,13 +34,12 @@ class Chain:
             self.execute_action(action, fork.private_tip, fork.public_tip)
 
     def execute_action(self, action, private_tip, public_tip):
-        if action is Action.match:
+        blocks_to_publish = []
 
+        if action is Action.match:
             if public_tip.height > private_tip.height:
                 raise ActionServiceException("private tip_height={} must >= then public tip_height={} -"
                                              " match not possible".format(public_tip.height, private_tip.height))
-
-            blocks_to_publish = []
 
             private_block = private_tip
             while private_block.height > public_tip.height:
@@ -55,6 +54,9 @@ class Chain:
             pass
         elif action is Action.adopt:
             pass
+
+        if len(blocks_to_publish) > 0:
+            self.networking.publish_blocks(blocks_to_publish)
 
     def try_to_insert_block(self, received_block, block_origin):
         if received_block.GetHash() in self.known_block_hashes:
