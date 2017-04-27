@@ -66,7 +66,7 @@ class Networking(object):
 
     def process_block(self, connection, message):
         if connection == self.private:
-            self.chain.process_block(message, BlockOrigin.alice)
+            self.chain.process_block(message, BlockOrigin.private)
         else:
             self.chain.process_block(message, BlockOrigin.public)
 
