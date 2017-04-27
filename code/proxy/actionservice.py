@@ -48,7 +48,10 @@ class ForkState(Enum):
     relevant = 1
     active = 2
 
-BlockOrigin = Enum('Visibility', 'private, public')
+
+class BlockOrigin(Enum):
+    private = 0
+    public = 1
 
 
 class ActionServiceException(Exception):
