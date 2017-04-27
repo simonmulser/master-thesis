@@ -384,5 +384,6 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(second_block_chain_b.GetHash() in hashes_of_transferred_blocks)
         self.assertTrue(third_block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
+
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
