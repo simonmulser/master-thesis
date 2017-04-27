@@ -19,16 +19,81 @@ class NetworkingTest(unittest.TestCase):
         self.networking.relay[self.connection_public] = self.connection_private
         self.networking.chain = self.chain
 
-    def test_process_inv_msg_block(self):
+    def test_process_inv_msg_block_private_unknown(self):
         inv = net.CInv()
-        inv.type = get_type_key("Block")
+        inv.hash = 'hash1'
+        inv.type = get_type_key('Block')
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
 
+        self.assertFalse(self.connection_public.send.called)
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
+
+    def test_process_inv_msg_block_public_unknown(self):
+        inv = net.CInv()
+        inv.hash = 'hash1'
+        inv.type = get_type_key('Block')
+        msg = messages.msg_inv
+        msg.inv = [inv]
+        self.networking.process_inv(self.connection_public, msg)
+
+        self.assertFalse(self.connection_private.send.called)
+        self.assertTrue(self.connection_public.send.called)
+        self.assertEqual(self.connection_public.send.call_args[0][0], 'getdata')
+
+    def test_process_inv_msg_block_known_transfer_unallowed(self):
+        inv = net.CInv()
+        inv.hash = 'hash1'
+        inv.type = get_type_key('Block')
+        msg = messages.msg_inv
+        msg.inv = [inv]
+
+        self.chain.blocks = {inv.hash: Block(inv.hash, None, None)}
+        self.networking.process_inv(self.connection_public, msg)
+
+        self.assertFalse(self.connection_private.send.called)
         self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.chain.process_inv.called)
+
+    def test_process_inv_msg_public_block_known_transfer_allowed(self):
+        inv = net.CInv()
+        inv.hash = 'hash1'
+        inv.type = get_type_key('Block')
+        msg = messages.msg_inv
+        msg.inv = [inv]
+
+        block = Block(inv.hash, None, None)
+        block.transfer_allowed = True
+
+        self.chain.blocks = {inv.hash: block}
+        self.networking.process_inv(self.connection_public, msg)
+
+        self.assertFalse(self.chain.process_inv.called)
+        self.assertFalse(self.connection_public.send.called)
+        self.assertTrue(self.networking.connection_private.send.called)
+        self.assertEqual(self.networking.connection_private.send.call_args[0][0], 'inv')
+        self.assertEqual(self.networking.connection_private.send.call_args[0][1][0], inv)
+
+    def test_process_inv_msg_private_block_known_transfer_allowed(self):
+        inv = net.CInv()
+        inv.hash = 'hash1'
+        inv.type = get_type_key('Block')
+        msg = messages.msg_inv
+        msg.inv = [inv]
+
+        block = Block(inv.hash, None, None)
+        block.transfer_allowed = True
+
+        self.chain.blocks = {inv.hash: block}
+        self.networking.process_inv(self.connection_private, msg)
+
+        self.assertFalse(self.chain.process_inv.called)
+        self.assertFalse(self.connection_private.send.called)
+        self.assertTrue(self.networking.connection_public.send.called)
+        self.assertEqual(self.networking.connection_public.send.call_args[0][0], 'inv')
+        self.assertEqual(self.networking.connection_public.send.call_args[0][1][0], inv)
 
     def test_process_inv_msg_filtered_block(self):
         inv = net.CInv()
@@ -67,6 +132,25 @@ class NetworkingTest(unittest.TestCase):
 
         amount_of_inv = len(self.connection_public.send.call_args[0][1])
         self.assertEqual(amount_of_inv, 1)
+
+    def test_process_inv_msg_allowed_block_and_tx(self):
+        block = net.CInv()
+        block.hash = 'hash1'
+        block.type = get_type_key('Block')
+        tx = net.CInv()
+        tx.type = get_type_key('TX')
+        msg = messages.msg_inv
+        msg.inv = [block, tx]
+
+        block = Block(block.hash, None, None)
+        block.transfer_allowed = True
+
+        self.chain.blocks = {block.hash: block}
+        self.networking.process_inv(self.connection_public, msg)
+
+        self.assertFalse(self.connection_public.send.called)
+        self.assertTrue(self.networking.connection_private.send.called)
+        self.assertEqual(len(self.networking.connection_private.send.call_args[0][1]), 2)
 
     def test_process_inv_msg_unknown(self):
         inv = net.CInv()

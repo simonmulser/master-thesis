@@ -52,9 +52,14 @@ class Networking(object):
                 if net.CInv.typemap[inv.type] == "Error" or net.CInv.typemap[inv.type] == "TX":
                     relay_inv.append(inv)
                 elif net.CInv.typemap[inv.type] == "Block":
-                    data_packet = messages.msg_getdata()
-                    data_packet.inv.append(message.inv[0])
-                    connection.send('getdata', data_packet)
+                    if inv.hash in self.chain.blocks:
+                        block = self.chain.blocks[inv.hash]
+                        if block.transfer_allowed is True:
+                            relay_inv.append(inv)
+                    else:
+                        data_packet = messages.msg_getdata()
+                        data_packet.inv.append(message.inv[0])
+                        connection.send('getdata', data_packet)
                 elif net.CInv.typemap[inv.type] == "FilteredBlock":
                     logging.debug("we don't care about filtered blocks")
                 else:
