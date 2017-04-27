@@ -75,9 +75,6 @@ class Chain:
             self.networking.send_inv(blocks_to_transfer)
 
     def try_to_insert_block(self, received_block, block_origin):
-        if received_block.GetHash() in self.blocks:
-            return
-
         prevBlock = None
         for tip in self.tips:
             if tip.hash == received_block.hashPrevBlock:
