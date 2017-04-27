@@ -3,7 +3,6 @@ import logging
 
 
 class Strategy:
-
     def __init__(self, strategy):
         self.fork_state = ForkState.irrelevant
         self.strategy = strategy
@@ -16,11 +15,11 @@ class Strategy:
             if last_block_origin is BlockOrigin.private and length_private <= length_public:
                 self.fork_state = ForkState.irrelevant
                 raise ActionException('fork_state=active, block_origin=private and '
-                                             'length_private <= length_public')
+                                      'length_private <= length_public')
             elif last_block_origin is BlockOrigin.public and length_private < length_public:
                 self.fork_state = ForkState.irrelevant
                 raise ActionException('fork_state=active, block_origin=public and '
-                                             'length_private < length_public')
+                                      'length_private < length_public')
 
         logging.debug('find action old fork_state={}'.format(self.fork_state))
         if last_block_origin is BlockOrigin.public and length_public <= length_private:
@@ -33,7 +32,7 @@ class Strategy:
 
         action = Action(self.strategy[self.fork_state.value][length_private][length_public])
         logging.info('found action={} with length_private={} length_public={} last_block_origin={} fork_state={} '
-                      .format(action, length_private, length_public, last_block_origin, self.fork_state))
+                     .format(action, length_private, length_public, last_block_origin, self.fork_state))
 
         if action is Action.match:
             self.fork_state = ForkState.active
