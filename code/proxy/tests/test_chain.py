@@ -178,7 +178,7 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_height, 4)
         self.assertEqual(fork.public_tip.hash, fourth_block_chain_b.GetHash())
 
-    def test_process_block(self):
+    def test_process_block_cannot_insert_block(self):
         self.chain.try_to_insert_block = MagicMock(return_value=False)
         self.chain.length_of_fork = MagicMock()
 
