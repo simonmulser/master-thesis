@@ -319,6 +319,70 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(second_block_chain_a.GetHash() in hashes_of_published_blocks)
         self.assertTrue(block_chain_b.GetHash() in hashes_of_published_blocks)
 
+    def test_adopt_private_lead(self):
+        private_tip = Block(None, None, None)
+        private_tip.height = 3
+
+        public_tip = Block(None, None, None)
+        public_tip.height = 2
+
+        with self.assertRaisesRegexp(ActionServiceException, "public tip.*must > then private tip.*adopt.*"):
+            self.chain.execute_action(Action.adopt, private_tip, public_tip)
+
+    def test_adopt_same_height(self):
+        private_tip = Block(None, None, None)
+        private_tip.height = 2
+
+        public_tip = Block(None, None, None)
+        public_tip.height = 2
+
+        with self.assertRaisesRegexp(ActionServiceException, "public tip.*must > then private tip.*adopt.*"):
+            self.chain.execute_action(Action.adopt, private_tip, public_tip)
+
+    def test_adopt_lead_public(self):
+        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
+        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
+        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
+        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 2)
+        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_published_blocks)
+
+    def test_adopt_two_blocks_lead_public(self):
+        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
+        third_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash())
+        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
+        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
+        self.chain.try_to_insert_block(third_block_chain_b, BlockOrigin.public)
+        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.publish_blocks.called)
+
+        hashes_of_published_blocks = [block.hash for block in self.chain.networking.publish_blocks.call_args[0][0]]
+
+        self.assertEqual(len(hashes_of_published_blocks), 3)
+        self.assertTrue(first_block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(second_block_chain_b.GetHash() in hashes_of_published_blocks)
+        self.assertTrue(third_block_chain_b.GetHash() in hashes_of_published_blocks)
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()

@@ -63,7 +63,10 @@ class Chain:
             blocks_to_publish.extend(get_unpublished_blocks(public_tip))
 
         elif action is Action.adopt:
-            pass
+            if private_tip.height >= public_tip.height:
+                raise ActionServiceException("public tip_height={} must > then private tip_height={} -"
+                                             " adopt not possible".format(public_tip.height, private_tip.height))
+            blocks_to_publish.extend(get_unpublished_blocks(public_tip))
 
         if len(blocks_to_publish) > 0:
             self.networking.publish_blocks(blocks_to_publish)
