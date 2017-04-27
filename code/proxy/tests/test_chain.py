@@ -114,7 +114,7 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash, second_block_chain_b.GetHash())
 
-    def test_get_private_public_fork_lead_alice(self):
+    def test_get_private_public_fork_lead_private(self):
         first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
         second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
         first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
