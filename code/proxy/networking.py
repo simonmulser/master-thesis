@@ -93,8 +93,6 @@ class Networking(object):
             msg.inv = public_block_invs
             self.connection_public.send('inv', public_block_invs)
 
-        for block in blocks:
-            block.transferred = True
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

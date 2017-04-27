@@ -384,6 +384,22 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(second_block_chain_b.GetHash() in hashes_of_transferred_blocks)
         self.assertTrue(third_block_chain_b.GetHash() in hashes_of_transferred_blocks)
 
+    def test_execute_action_transferred_set(self):
+        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
+        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+
+        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
+        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
+
+        fork = self.chain.get_private_public_fork()
+
+        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
+
+        self.assertTrue(self.chain.networking.send_inv.called)
+        self.assertEqual(len(self.chain.networking.send_inv.call_args[0][0]), 2)
+        for block in self.chain.networking.send_inv.call_args[0][0]:
+            self.assertTrue(block.transferred)
+
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()

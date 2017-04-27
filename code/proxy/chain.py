@@ -66,6 +66,9 @@ class Chain:
             blocks_to_transfer.extend(get_untransferred_blocks(public_tip))
 
         if len(blocks_to_transfer) > 0:
+            for block in blocks_to_transfer:
+                block.transferred = True
+
             self.networking.send_inv(blocks_to_transfer)
 
     def try_to_insert_block(self, received_block, block_origin):
