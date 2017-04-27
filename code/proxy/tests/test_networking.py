@@ -3,6 +3,8 @@ from mock import MagicMock
 from networking import Networking
 from bitcoin import net
 from bitcoin import messages
+from chain import Block
+from chain import BlockOrigin
 
 
 class NetworkingTest(unittest.TestCase):
@@ -89,6 +91,48 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_block(self.connection_private, msg)
 
         self.assertTrue(self.chain.process_block.called)
+
+    def test_transfer_private_blocks(self):
+        block1 = Block("hash1", None, BlockOrigin.private)
+        block2 = Block("hash2", None, BlockOrigin.private)
+        self.networking.transfer_blocks([block1, block2])
+
+        self.assertTrue(block1.transferred)
+        self.assertTrue(block2.transferred)
+        self.assertTrue(self.networking.connection_public.send.called)
+        inv_msg = self.networking.connection_public.send.call_args[0][1]
+        self.assertEqual(len(inv_msg), 2)
+
+        self.assertFalse(self.networking.connection_private.send.called)
+
+    def test_transfer_public_blocks(self):
+        block1 = Block("hash1", None, BlockOrigin.public)
+        block2 = Block("hash2", None, BlockOrigin.public)
+        self.networking.transfer_blocks([block1, block2])
+
+        self.assertTrue(block1.transferred)
+        self.assertTrue(block2.transferred)
+        self.assertFalse(self.connection_public.send.called)
+
+        self.assertTrue(self.connection_private.send.called)
+        inv_msg = self.networking.connection_private.send.call_args[0][1]
+        self.assertEqual(len(inv_msg), 2)
+
+    def test_transfer_blocks(self):
+        block1 = Block("hash1", None, BlockOrigin.public)
+        block2 = Block("hash2", None, BlockOrigin.public)
+        block3 = Block("hash3", None, BlockOrigin.public)
+        block4 = Block("hash4", None, BlockOrigin.private)
+        block5 = Block("hash5", None, BlockOrigin.private)
+        self.networking.transfer_blocks([block1, block2, block3, block4, block5])
+
+        self.assertTrue(self.connection_public.send.called)
+        inv_msg = self.networking.connection_private.send.call_args[0][1]
+        self.assertEqual(len(inv_msg), 3)
+
+        self.assertTrue(self.connection_public.send.called)
+        inv_msg = self.networking.connection_public.send.call_args[0][1]
+        self.assertEqual(len(inv_msg), 2)
 
 
 def get_type_key(msg_type):

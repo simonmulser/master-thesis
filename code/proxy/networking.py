@@ -5,6 +5,7 @@ from bitcoin import net
 from bitcoin import messages
 from actionservice import BlockOrigin
 
+inv_type_block = 2
 
 class Networking(object):
     def __init__(self):
@@ -71,8 +72,29 @@ class Networking(object):
             self.chain.process_block(message, BlockOrigin.public)
 
     def transfer_blocks(self, blocks):
-        pass
+        private_block_invs = []
+        public_block_invs = []
 
+        for block in blocks:
+            inv = net.CInv()
+            inv.type = inv_type_block
+            inv.hash = block.hash
+
+            if block.block_origin is BlockOrigin.private:
+                public_block_invs.append(inv)
+            else:
+                private_block_invs.append(inv)
+
+        msg = messages.msg_inv()
+        if len(private_block_invs) > 0:
+            msg.inv = private_block_invs
+            self.connection_private.send('inv', private_block_invs)
+        if len(public_block_invs) > 0:
+            msg.inv = public_block_invs
+            self.connection_public.send('inv', public_block_invs)
+
+        for block in blocks:
+            block.transferred = True
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
