@@ -118,7 +118,6 @@ class Networking(object):
         logging.debug('ignoring message alert={} from {}'.format(message.alert, connection.host[0]))
 
     def get_headers_message(self, connection, message):
-        print(self.relay[connection].first_headers_ignored)
         if self.relay[connection].first_headers_ignored:
             self.relay_message(connection, message)
             return
