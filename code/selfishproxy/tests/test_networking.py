@@ -2,6 +2,7 @@ import unittest
 from mock import MagicMock
 from networking import Networking
 from networking import inv_typemap
+from networking import Connection
 from bitcoin import net
 from bitcoin import messages
 from bitcoin import core
@@ -20,8 +21,8 @@ class NetworkingTest(unittest.TestCase):
 
         self.chain = MagicMock()
 
-        self.networking.relay[self.connection_private] = self.connection_public
-        self.networking.relay[self.connection_public] = self.connection_private
+        self.networking.relay[self.connection_private] = Connection(self.connection_public)
+        self.networking.relay[self.connection_public] = Connection(self.connection_private)
         self.networking.chain = self.chain
 
     def test_process_inv_msg_block_private_unknown(self):
@@ -252,3 +253,12 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.connection_public.send.called)
         self.assertFalse(self.connection_private.send.called)
+
+    def test_receive_get_headers(self):
+        self.networking.get_headers_message(self.connection_public, messages.msg_getheaders)
+        self.assertFalse(self.connection_private.send.called)
+
+        self.networking.get_headers_message(self.connection_public, messages.msg_getheaders)
+        self.assertTrue(self.connection_private.send.called)
+
+        self.assertFalse(self.connection_public.send.called)

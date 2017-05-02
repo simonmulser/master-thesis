@@ -17,12 +17,13 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'addr', 'tx', 'getblocks'
-                        'getheaders', 'getdata', 'mempool']:
                         'reject', 'headers', 'getaddr',
+                        'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
         client.register_handler('ping', self.ping_message)
         client.register_handler('alert', self.alert_message)
+        client.register_handler('getheaders', self.get_headers_message)
 
         client.register_handler('inv', self.process_inv)
         client.register_handler('block', self.process_block)
@@ -32,14 +33,14 @@ class Networking(object):
         self.connection_private = client.connect(('240.0.0.2', 18444))
         self.connection_public = client.connect(('240.0.0.3', 18444))
 
-        self.relay[self.connection_private] = self.connection_public
-        self.relay[self.connection_public] = self.connection_private
+        self.relay[self.connection_private] = Connection(self.connection_public)
+        self.relay[self.connection_public] = Connection(self.connection_private)
 
         client.run_forever()
         logging.debug('client started')
 
     def relay_message(self, connection, message):
-        self.relay[connection].send(message.command, message)
+        self.relay[connection].connection.send(message.command, message)
         logging.debug('relayed {} message from {}'.format(message.command, connection.host[0]))
 
     def process_inv(self, connection, message):
@@ -116,4 +117,20 @@ class Networking(object):
     def alert_message(self, connection, message):
         logging.debug('ignoring message alert={} from {}'.format(message.alert, connection.host[0]))
 
+    def get_headers_message(self, connection, message):
+        print(self.relay[connection].first_headers_ignored)
+        if self.relay[connection].first_headers_ignored:
+            self.relay_message(connection, message)
+            return
+
+        self.relay[connection].first_headers_ignored = True
+        logging.info('ignoring first getheaders from {}'.format(connection.host[0]))
+
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
+
+
+class Connection:
+
+    def __init__(self, connection):
+        self.connection = connection
+        self.first_headers_ignored = False
