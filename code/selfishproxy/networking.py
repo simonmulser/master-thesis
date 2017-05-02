@@ -17,11 +17,12 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'addr', 'tx', 'getblocks'
-                        'reject', 'alert', 'headers', 'getaddr',
                         'getheaders', 'getdata', 'mempool']:
+                        'reject', 'headers', 'getaddr',
             client.register_handler(message, self.relay_message)
 
         client.register_handler('ping', self.ping_message)
+        client.register_handler('alert', self.alert_message)
 
         client.register_handler('inv', self.process_inv)
         client.register_handler('block', self.process_block)
@@ -111,5 +112,8 @@ class Networking(object):
     def ping_message(connection, message):
         connection.send('pong', message)
         logging.debug('send pong to {}'.format(connection.host[0]))
+
+    def alert_message(self, connection, message):
+        logging.debug('ignoring message alert={} from {}'.format(message.alert, connection.host[0]))
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}

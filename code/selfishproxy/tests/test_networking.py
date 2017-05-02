@@ -246,3 +246,9 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_public.send.called)
         inv_msg = self.networking.connection_public.send.call_args[0][1]
         self.assertEqual(len(inv_msg), 2)
+
+    def test_receive_alert(self):
+        self.networking.alert_message(None, None)
+
+        self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.connection_private.send.called)
