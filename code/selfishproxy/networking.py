@@ -110,7 +110,7 @@ class Networking(object):
             self.connection_public.send('inv', public_block_invs)
             logging.info('{} block invs send to {}'.format(len(public_block_invs), self.connection_public.host[0]))
 
-    def ping_message(connection, message):
+    def ping_message(self, connection, message):
         connection.send('pong', message)
         logging.debug('send pong to {}'.format(connection.host[0]))
 
