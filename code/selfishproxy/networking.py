@@ -116,7 +116,7 @@ class Networking(object):
         logging.debug('send pong to {}'.format(connection.host[0]))
 
     def ignore_message(self, connection, message):
-        logging.debug('ignoring message alert={} from {}'.format(message.alert, connection.host[0]))
+        logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
     def get_headers_message(self, connection, message):
         if self.relay[connection].first_headers_ignored:
