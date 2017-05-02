@@ -30,7 +30,15 @@ class Strategy:
             self.fork_state = ForkState.irrelevant
         logging.debug('find action new fork_state={}'.format(self.fork_state))
 
-        action = Action(self.strategy[self.fork_state.value][length_private][length_public])
+        try:
+            action = Action(self.strategy[self.fork_state.value][length_private][length_public])
+        except ValueError:
+            logging.warn('found no action with length_private={} length_public={} last_block_origin={} fork_state={} '
+                         .format(length_private, length_public, last_block_origin, self.fork_state))
+
+            self.fork_state = ForkState.irrelevant
+            return Action.adopt
+
         logging.info('found action={} with length_private={} length_public={} last_block_origin={} fork_state={} '
                      .format(action, length_private, length_public, last_block_origin, self.fork_state))
 

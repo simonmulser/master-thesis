@@ -11,19 +11,19 @@ class StrategyTest(unittest.TestCase):
     def setUp(self):
         self.strategy = [
             [  # irrelevant
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a']
+                ['*', '*', '*'],
+                ['*', '*', '*'],
+                ['*', '*', '*']
             ],
             [  # relevant
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a']
+                ['*', '*', '*'],
+                ['*', '*', '*'],
+                ['*', '*', '*']
             ],
             [  # match
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a'],
-                ['a', 'a', 'a']
+                ['*', '*', '*'],
+                ['*', '*', '*'],
+                ['*', '*', '*']
             ]
         ]
 
@@ -34,6 +34,14 @@ class StrategyTest(unittest.TestCase):
             action_service.find_action(0, 0, None)
 
         self.assertNotEqual(action_service.fork_state, ForkState.active)
+
+    def test_find_action_state_unreachable(self):
+        action_service = Strategy(self.strategy)
+        action_service.fork_state = ForkState.irrelevant
+
+        action = action_service.find_action(1, 1, BlockOrigin.public)
+        self.assertEqual(action, Action.adopt)
+        self.assertEqual(action_service.fork_state, ForkState.irrelevant)
 
     def test_find_action_block_origin_public_same_height(self):
         self.strategy[ForkState.relevant.value][2][2] = 'w'
