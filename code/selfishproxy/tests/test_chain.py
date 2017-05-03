@@ -178,8 +178,8 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_height, 4)
         self.assertEqual(fork.public_tip.hash, fourth_block_chain_b.GetHash())
 
-    def test_process_block_cannot_insert_block(self):
-        self.chain.try_to_insert_block = MagicMock(return_value=False)
+    def test_process_block_no_change_in_fork(self):
+        self.chain.try_to_insert_block = MagicMock()
         self.chain.length_of_fork = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
@@ -189,8 +189,10 @@ class ChainTest(unittest.TestCase):
         self.assertFalse(self.chain.action_service.find_action.called)
 
     def test_process_block(self):
-        self.chain.try_to_insert_block = MagicMock(return_value=True)
-        self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
+        self.chain.try_to_insert_block = MagicMock()
+        fork_before = Fork(2, 2)
+        fork_after = Fork(1, 1)
+        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
         self.chain.execute_action = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
@@ -201,8 +203,10 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.execute_action.called)
 
     def test_process_block_exception_find_action(self):
-        self.chain.try_to_insert_block = MagicMock(return_value=True)
-        self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
+        self.chain.try_to_insert_block = MagicMock()
+        fork_before = Fork(2, 2)
+        fork_after = Fork(1, 1)
+        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
         self.chain.action_service.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute_action = MagicMock()
 
@@ -212,8 +216,10 @@ class ChainTest(unittest.TestCase):
         self.assertFalse(self.chain.execute_action.called)
 
     def test_process_block_exception_execute_action(self):
-        self.chain.try_to_insert_block = MagicMock(return_value=True)
-        self.chain.get_private_public_fork = MagicMock(return_value=Fork(None, None))
+        self.chain.try_to_insert_block = MagicMock()
+        fork_before = Fork(2, 2)
+        fork_after = Fork(1, 1)
+        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
         self.chain.action_service.find_action = MagicMock()
         self.chain.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
 

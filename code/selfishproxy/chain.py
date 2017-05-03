@@ -23,14 +23,19 @@ class Chain:
 
     def process_block(self, block, block_origin):
 
-        if self.try_to_insert_block(block, block_origin):
+        fork_before = self.get_private_public_fork()
+        logging.debug('fork before {}'.format(fork_before))
 
-            fork = self.get_private_public_fork()
-            logging.debug('current {}'.format(fork))
+        self.try_to_insert_block(block, block_origin)
+
+        fork_after = self.get_private_public_fork()
+        logging.debug('fork after {}'.format(fork_after))
+
+        if fork_before != fork_after:
             try:
-                action = self.action_service.find_action(fork.private_height, fork.public_height, block_origin)
+                action = self.action_service.find_action(fork_after.private_height, fork_after.public_height, block_origin)
 
-                self.execute_action(action, fork.private_tip, fork.public_tip)
+                self.execute_action(action, fork_after.private_tip, fork_after.public_tip)
             except ActionException as exception:
                 logging.warn(exception.message)
 
@@ -94,8 +99,6 @@ class Chain:
         if prevBlock is None:
             self.orphan_blocks.append(block)
             logging.info('{} added to orphan blocks'.format(block))
-
-            return False
         else:
             self.insert_block(prevBlock, block)
 
@@ -115,7 +118,6 @@ class Chain:
                 for inserted_orphan_block in inserted_orphan_blocks:
                     if inserted_orphan_block in self.orphan_blocks:
                         self.orphan_blocks.remove(inserted_orphan_block)
-            return True
 
     def insert_block(self, prevBlock, block):
         if prevBlock in self.tips:
@@ -183,6 +185,12 @@ class Block:
     def __repr__(self):
         return 'block(height={} block_origin={})'.format(self.height, self.block_origin)
 
+    def __eq__(self, other):
+        return self.hash == other.hash
+
+    def __ne__(self, other):
+        return self.hash != other.hash
+
 
 class Fork:
     def __init__(self, private_tip, public_tip):
@@ -193,3 +201,9 @@ class Fork:
 
     def __repr__(self):
         return 'fork(private_height={} public_height={})'.format(self.private_height, self.public_height)
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
