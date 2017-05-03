@@ -19,7 +19,7 @@ class Chain:
         self.tips = [self.genesis]
         self.blocks = {genesis_hash: self.genesis}
         self.orphan_blocks = []
-        self.action_service = Strategy(selfish_mining_strategy)
+        self.strategy = Strategy(selfish_mining_strategy)
 
     def process_block(self, block, block_origin):
 
@@ -33,7 +33,7 @@ class Chain:
 
         if fork_before != fork_after:
             try:
-                action = self.action_service.find_action(fork_after.private_height, fork_after.public_height, block_origin)
+                action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
 
                 self.execute_action(action, fork_after.private_tip, fork_after.public_tip)
             except ActionException as exception:

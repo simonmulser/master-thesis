@@ -14,7 +14,7 @@ class ChainTest(unittest.TestCase):
     def setUp(self):
         self.networking = MagicMock()
         self.chain = Chain(self.networking)
-        self.chain.action_service = MagicMock()
+        self.chain.strategy = MagicMock()
 
     def test_try_to_insert_block_without_prevHash(self):
         block = core.CBlock()
@@ -186,7 +186,7 @@ class ChainTest(unittest.TestCase):
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertFalse(self.chain.length_of_fork.called)
-        self.assertFalse(self.chain.action_service.find_action.called)
+        self.assertFalse(self.chain.strategy.find_action.called)
 
     def test_process_block(self):
         self.chain.try_to_insert_block = MagicMock()
@@ -199,7 +199,7 @@ class ChainTest(unittest.TestCase):
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(self.chain.get_private_public_fork.called)
-        self.assertTrue(self.chain.action_service.find_action.called)
+        self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.execute_action.called)
 
     def test_process_block_exception_find_action(self):
@@ -207,12 +207,12 @@ class ChainTest(unittest.TestCase):
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
         self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
-        self.chain.action_service.find_action = MagicMock(side_effect=ActionException('mock_exception'))
+        self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute_action = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
 
-        self.assertTrue(self.chain.action_service.find_action.called)
+        self.assertTrue(self.chain.strategy.find_action.called)
         self.assertFalse(self.chain.execute_action.called)
 
     def test_process_block_exception_execute_action(self):
@@ -220,12 +220,12 @@ class ChainTest(unittest.TestCase):
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
         self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
-        self.chain.action_service.find_action = MagicMock()
+        self.chain.strategy.find_action = MagicMock()
         self.chain.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
 
         self.chain.process_block(None, BlockOrigin.public)
 
-        self.assertTrue(self.chain.action_service.find_action.called)
+        self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.execute_action.called)
 
     def test_match_same_height(self):
