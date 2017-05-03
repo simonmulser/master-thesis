@@ -1,5 +1,8 @@
-from enum import Enum
 import logging
+from strategy import ForkState
+from strategy import Action
+from strategy import ActionException
+from strategy import BlockOrigin
 
 
 class Strategy:
@@ -46,29 +49,3 @@ class Strategy:
             self.fork_state = ForkState.active
 
         return action
-
-
-class Action(Enum):
-    adopt = 'a'
-    override = 'o'
-    match = 'm'
-    wait = 'w'
-
-
-class ForkState(Enum):
-    irrelevant = 0
-    relevant = 1
-    active = 2
-
-
-class BlockOrigin(Enum):
-    private = 0
-    public = 1
-
-
-class ActionException(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)

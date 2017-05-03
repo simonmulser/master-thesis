@@ -1,5 +1,5 @@
 import unittest
-from strategy import Strategy
+from strategy.matrix import Strategy
 from strategy import ActionException
 from strategy import Action
 from strategy import BlockOrigin
@@ -40,6 +40,14 @@ class StrategyTest(unittest.TestCase):
         action_service.fork_state = ForkState.irrelevant
 
         action = action_service.find_action(1, 1, BlockOrigin.public)
+        self.assertEqual(action, Action.adopt)
+        self.assertEqual(action_service.fork_state, ForkState.irrelevant)
+
+    def test_find_action_state_out_of_range(self):
+        action_service = Strategy(self.strategy)
+        action_service.fork_state = ForkState.irrelevant
+
+        action = action_service.find_action(100, 100, BlockOrigin.public)
         self.assertEqual(action, Action.adopt)
         self.assertEqual(action_service.fork_state, ForkState.irrelevant)
 
