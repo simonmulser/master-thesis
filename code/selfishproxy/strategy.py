@@ -32,7 +32,7 @@ class Strategy:
 
         try:
             action = Action(self.strategy[self.fork_state.value][length_private][length_public])
-        except ValueError:
+        except (ValueError, IndexError):
             logging.warn('found no action with length_private={} length_public={} last_block_origin={} fork_state={} '
                          .format(length_private, length_public, last_block_origin, self.fork_state))
 
