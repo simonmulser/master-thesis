@@ -1,9 +1,9 @@
 from bitcoin import core
-from strategy import Strategy
+from strategy.matrix import Strategy
 from strategy import BlockOrigin
 from strategy import Action
 from strategy import ActionException
-from strategies import selfish_mining_strategy
+from strategy.strategies import selfish_mining_strategy
 import logging
 
 
