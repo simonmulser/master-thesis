@@ -13,6 +13,16 @@ from strategy import ActionException
 
 class ChainTest(unittest.TestCase):
 
+    def __init__(self, *args, **kwargs):
+        super(ChainTest, self).__init__(*args, **kwargs)
+
+        self.networking = None
+        self.chain = None
+        self.first_block_chain_a = None
+        self.second_block_chain_a = None
+        self.first_block_chain_b = None
+        self.second_block_chain_b = None
+
     def setUp(self):
         self.networking = MagicMock()
         self.chain = Chain(self.networking)

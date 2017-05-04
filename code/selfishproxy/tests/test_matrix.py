@@ -8,6 +8,11 @@ from strategy import ForkState
 
 class StrategyTest(unittest.TestCase):
 
+    def __init__(self, *args, **kwargs):
+        super(StrategyTest, self).__init__(*args, **kwargs)
+
+        self.strategy = None
+
     def setUp(self):
         self.strategy = [
             [  # irrelevant

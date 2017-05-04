@@ -12,6 +12,14 @@ from chain import BlockOrigin
 
 class NetworkingTest(unittest.TestCase):
 
+    def __init__(self, *args, **kwargs):
+        super(NetworkingTest, self).__init__(*args, **kwargs)
+
+        self.networking = None
+        self.connection_private = None
+        self.connection_public = None
+        self.chain = None
+
     def setUp(self):
         self.networking = Networking()
         self.connection_private = self.networking.connection_private = MagicMock()
