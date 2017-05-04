@@ -9,6 +9,7 @@ from bitcoin import core
 from strategy import BlockOrigin
 from strategy import Action
 from strategy import ActionException
+from testutil import genesis_hash, genesis_block
 
 
 class ChainTest(unittest.TestCase):
