@@ -4,6 +4,7 @@ from chain import Chain
 from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
+from strategy.executor import Executor
 
 
 class Networking(object):
@@ -11,7 +12,8 @@ class Networking(object):
         self.relay = {}
         self.connection_private = None
         self.connection_public = None
-        self.chain = Chain(self)
+        executor = Executor(self)
+        self.chain = Chain(executor)
 
     def start(self):
         client = network.GeventNetworkClient()

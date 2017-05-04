@@ -7,7 +7,6 @@ from mock import MagicMock
 from mock import patch
 from bitcoin import core
 from strategy import BlockOrigin
-from strategy import Action
 from strategy import ActionException
 from testutil import genesis_hash, genesis_block
 
@@ -17,7 +16,7 @@ class ChainTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(ChainTest, self).__init__(*args, **kwargs)
 
-        self.networking = None
+        self.executor = None
         self.chain = None
         self.first_block_chain_a = None
         self.second_block_chain_a = None
@@ -25,8 +24,8 @@ class ChainTest(unittest.TestCase):
         self.second_block_chain_b = None
 
     def setUp(self):
-        self.networking = MagicMock()
-        self.chain = Chain(self.networking)
+        self.executor = MagicMock()
+        self.chain = Chain(self.executor)
         self.chain.strategy = MagicMock()
 
         self.first_block_chain_b = Block('1b', '0', BlockOrigin.public)
@@ -261,7 +260,7 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(mock.called)
         self.assertTrue(self.chain.strategy.find_action.called)
-        self.assertTrue(self.chain.execute_action.called)
+        self.assertTrue(self.chain.executor.execute_action.called)
 
     @patch('chain.get_private_public_fork')
     def test_process_block_exception_find_action(self, mock):
@@ -284,213 +283,9 @@ class ChainTest(unittest.TestCase):
         fork_after = Fork(1, 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock()
-        self.chain.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
+        self.chain.executor.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
 
         self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
-        self.assertTrue(self.chain.execute_action.called)
-
-    def test_match_same_height(self):
-        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 2)
-        self.assertTrue(block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_match_lead_private(self):
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
-        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 2)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_match_lead_public(self):
-        private_tip = Block(None, None, None)
-        private_tip.height = 1
-
-        public_tip = Block(None, None, None)
-        public_tip.height = 2
-
-        with self.assertRaisesRegexp(ActionException, "private tip.*must >= then public tip.*match.*"):
-            self.chain.execute_action(Action.match, private_tip, public_tip)
-
-    def test_override_lead_public(self):
-        private_tip = Block(None, None, None)
-        private_tip.height = 1
-
-        public_tip = Block(None, None, None)
-        public_tip.height = 2
-
-        with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
-            self.chain.execute_action(Action.override, private_tip, public_tip)
-
-    def test_override_same_height(self):
-        private_tip = Block(None, None, None)
-        private_tip.height = 2
-
-        public_tip = Block(None, None, None)
-        public_tip.height = 2
-
-        with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
-            self.chain.execute_action(Action.override, private_tip, public_tip)
-
-    def test_override_lead_private(self):
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
-        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 3)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(second_block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_override_two_blocks_lead_private(self):
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
-        third_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash())
-        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(third_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 3)
-        self.assertTrue(first_block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(second_block_chain_a.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_adopt_private_lead(self):
-        private_tip = Block(None, None, None)
-        private_tip.height = 3
-
-        public_tip = Block(None, None, None)
-        public_tip.height = 2
-
-        with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
-            self.chain.execute_action(Action.adopt, private_tip, public_tip)
-
-    def test_adopt_same_height(self):
-        private_tip = Block(None, None, None)
-        private_tip.height = 2
-
-        public_tip = Block(None, None, None)
-        public_tip.height = 2
-
-        with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
-            self.chain.execute_action(Action.adopt, private_tip, public_tip)
-
-    def test_adopt_lead_public(self):
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
-        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 2)
-        self.assertTrue(first_block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(second_block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_adopt_two_blocks_lead_public(self):
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
-        third_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash())
-        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(third_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-
-        hashes_blocks_transfer_unallowed = [block.hash for block in self.chain.networking.send_inv.call_args[0][0]]
-
-        self.assertEqual(len(hashes_blocks_transfer_unallowed), 3)
-        self.assertTrue(first_block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(second_block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-        self.assertTrue(third_block_chain_b.GetHash() in hashes_blocks_transfer_unallowed)
-
-    def test_execute_action_transfer_allowed_set(self):
-        block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
-
-        fork = get_private_public_fork(self.chain.tips)
-
-        self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
-
-        self.assertTrue(self.chain.networking.send_inv.called)
-        self.assertEqual(len(self.chain.networking.send_inv.call_args[0][0]), 2)
-        for block in self.chain.networking.send_inv.call_args[0][0]:
-            self.assertTrue(block.transfer_allowed)
-
-
-def genesis_hash():
-    return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
-
-genesis_block = Block(genesis_hash(), None, BlockOrigin.public)
-genesis_block.transfer_allowed = True
+        self.assertTrue(self.chain.executor.execute_action.called)
