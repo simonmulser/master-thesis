@@ -1,5 +1,3 @@
-import logging
-from strategy import ForkState
 from strategy import Action
 from strategy import ActionException
 from strategy import BlockOrigin
