@@ -133,7 +133,7 @@ def get_private_public_fork(tips):
     highest_private_tip = None
     highest_public_tip = None
     for tip in tips:
-        if tip.block_origin == BlockOrigin.private:
+        if tip.block_origin == BlockOrigin.private and tip.transfer_allowed is False:
             if highest_private_tip is None:
                 highest_private_tip = tip
             elif highest_private_tip.height < tip.height:
