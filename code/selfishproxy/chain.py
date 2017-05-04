@@ -123,7 +123,6 @@ class Chain:
         if prevBlock in self.tips:
             self.tips.remove(prevBlock)
         self.tips.append(block)
-        prevBlock.child_blocks.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
 
@@ -174,7 +173,6 @@ def get_blocks_transfer_unallowed(block):
 
 class Block:
     def __init__(self, hash, hashPrevBlock, block_origin):
-        self.child_blocks = []
         self.hash = hash
         self.hashPrevBlock = hashPrevBlock
         self.prevBlock = None
