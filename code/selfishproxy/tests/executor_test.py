@@ -40,7 +40,7 @@ class ExecutorTest(unittest.TestCase):
         self.second_block_chain_a.prevBlock = self.first_block_chain_a
 
     def test_match_same_height(self):
-        self.executor.execute_action(Action.match, self.first_block_chain_a, self.first_block_chain_b)
+        self.executor.execute(Action.match, self.first_block_chain_a, self.first_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -51,7 +51,7 @@ class ExecutorTest(unittest.TestCase):
         self.assertTrue('1b' in blocks)
 
     def test_match_lead_private(self):
-        self.executor.execute_action(Action.match, self.second_block_chain_a, self.first_block_chain_b)
+        self.executor.execute(Action.match, self.second_block_chain_a, self.first_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -69,7 +69,7 @@ class ExecutorTest(unittest.TestCase):
         public_tip.height = 2
 
         with self.assertRaisesRegexp(ActionException, "private tip.*must >= then public tip.*match.*"):
-            self.executor.execute_action(Action.match, private_tip, public_tip)
+            self.executor.execute(Action.match, private_tip, public_tip)
 
     def test_override_lead_public(self):
         private_tip = Block(None, None, None)
@@ -79,7 +79,7 @@ class ExecutorTest(unittest.TestCase):
         public_tip.height = 2
 
         with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
-            self.executor.execute_action(Action.override, private_tip, public_tip)
+            self.executor.execute(Action.override, private_tip, public_tip)
 
     def test_override_same_height(self):
         private_tip = Block(None, None, None)
@@ -89,10 +89,10 @@ class ExecutorTest(unittest.TestCase):
         public_tip.height = 2
 
         with self.assertRaisesRegexp(ActionException, "private tip.*must > then public tip.*override.*"):
-            self.executor.execute_action(Action.override, private_tip, public_tip)
+            self.executor.execute(Action.override, private_tip, public_tip)
 
     def test_override_lead_private(self):
-        self.executor.execute_action(Action.override, self.second_block_chain_a, self.first_block_chain_b)
+        self.executor.execute(Action.override, self.second_block_chain_a, self.first_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -108,7 +108,7 @@ class ExecutorTest(unittest.TestCase):
         third_block_chain_a.height = 3
         third_block_chain_a.prevBlock = self.second_block_chain_a
 
-        self.executor.execute_action(Action.override, third_block_chain_a, self.first_block_chain_b)
+        self.executor.execute(Action.override, third_block_chain_a, self.first_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -127,7 +127,7 @@ class ExecutorTest(unittest.TestCase):
         public_tip.height = 2
 
         with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
-            self.executor.execute_action(Action.adopt, private_tip, public_tip)
+            self.executor.execute(Action.adopt, private_tip, public_tip)
 
     def test_adopt_same_height(self):
         private_tip = Block(None, None, None)
@@ -137,10 +137,10 @@ class ExecutorTest(unittest.TestCase):
         public_tip.height = 2
 
         with self.assertRaisesRegexp(ActionException, "public tip.*must > then private tip.*adopt.*"):
-            self.executor.execute_action(Action.adopt, private_tip, public_tip)
+            self.executor.execute(Action.adopt, private_tip, public_tip)
 
     def test_adopt_lead_public(self):
-        self.executor.execute_action(Action.adopt, self.first_block_chain_a, self.second_block_chain_b)
+        self.executor.execute(Action.adopt, self.first_block_chain_a, self.second_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -155,7 +155,7 @@ class ExecutorTest(unittest.TestCase):
         third_block_chain_b.height = 3
         third_block_chain_b.prevBlock = self.second_block_chain_b
 
-        self.executor.execute_action(Action.adopt, self.first_block_chain_a, third_block_chain_b)
+        self.executor.execute(Action.adopt, self.first_block_chain_a, third_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
 
@@ -167,7 +167,7 @@ class ExecutorTest(unittest.TestCase):
         self.assertTrue('3b' in blocks)
 
     def test_execute_action_check_if_transfer_allowed_is_set(self):
-        self.executor.execute_action(Action.match, self.first_block_chain_a, self.first_block_chain_b)
+        self.executor.execute(Action.match, self.first_block_chain_a, self.first_block_chain_b)
 
         self.assertTrue(self.networking.send_inv.called)
         self.assertEqual(len(self.networking.send_inv.call_args[0][0]), 2)

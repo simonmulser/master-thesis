@@ -253,14 +253,14 @@ class ChainTest(unittest.TestCase):
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
         mock.side_effect = [fork_before, fork_after]
-        self.chain.execute_action = MagicMock()
+        self.chain.execute = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(mock.called)
         self.assertTrue(self.chain.strategy.find_action.called)
-        self.assertTrue(self.chain.executor.execute_action.called)
+        self.assertTrue(self.chain.executor.execute.called)
 
     @patch('chain.get_private_public_fork')
     def test_process_block_exception_find_action(self, mock):
@@ -269,12 +269,12 @@ class ChainTest(unittest.TestCase):
         fork_after = Fork(1, 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
-        self.chain.execute_action = MagicMock()
+        self.chain.execute = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
-        self.assertFalse(self.chain.execute_action.called)
+        self.assertFalse(self.chain.execute.called)
 
     @patch('chain.get_private_public_fork')
     def test_process_block_exception_execute_action(self, mock):
@@ -283,9 +283,9 @@ class ChainTest(unittest.TestCase):
         fork_after = Fork(1, 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock()
-        self.chain.executor.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
+        self.chain.executor.execute = MagicMock(side_effect=ActionException('mock_exception'))
 
         self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
-        self.assertTrue(self.chain.executor.execute_action.called)
+        self.assertTrue(self.chain.executor.execute.called)

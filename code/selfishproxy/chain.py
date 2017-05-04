@@ -33,7 +33,7 @@ class Chain:
             try:
                 action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
 
-                self.executor.execute_action(action, fork_after.private_tip, fork_after.public_tip)
+                self.executor.execute(action, fork_after.private_tip, fork_after.public_tip)
             except ActionException as exception:
                 logging.warn(exception.message)
 

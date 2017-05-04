@@ -8,7 +8,7 @@ class Executor:
     def __init__(self, networking):
         self.networking = networking
 
-    def execute_action(self, action, private_tip, public_tip):
+    def execute(self, action, private_tip, public_tip):
         blocks_to_transfer = []
 
         if action is Action.match:
