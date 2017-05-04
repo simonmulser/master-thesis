@@ -2,7 +2,9 @@ import unittest
 from chain import Chain
 from chain import Block
 from chain import Fork
+from chain import get_private_public_fork
 from mock import MagicMock
+from mock import patch
 from bitcoin import core
 from strategy import BlockOrigin
 from strategy import Action
@@ -15,6 +17,22 @@ class ChainTest(unittest.TestCase):
         self.networking = MagicMock()
         self.chain = Chain(self.networking)
         self.chain.strategy = MagicMock()
+
+        self.first_block_chain_b = Block('1b', '0', BlockOrigin.public)
+        self.first_block_chain_b.height = 1
+        self.first_block_chain_b.prevBlock = genesis_block
+
+        self.second_block_chain_b = Block('2b', '1b', BlockOrigin.public)
+        self.second_block_chain_b.height = 2
+        self.second_block_chain_b.prevBlock = self.first_block_chain_b
+
+        self.first_block_chain_a = Block('1a', '0', BlockOrigin.private)
+        self.first_block_chain_a.height = 1
+        self.first_block_chain_a.prevBlock = genesis_block
+
+        self.second_block_chain_a = Block('2a', '1a', BlockOrigin.private)
+        self.second_block_chain_a.height = 2
+        self.second_block_chain_a.prevBlock = self.first_block_chain_a
 
     def test_try_to_insert_block_without_prevHash(self):
         block = core.CBlock()
@@ -82,101 +100,69 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(self.chain.tips[0].prevBlock.height, 2)
 
     def test_get_private_public_fork_no_private_tip(self):
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash())
-        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
-
-        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-
-        self.assertEqual(len(self.chain.tips), 1)
-
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork([self.second_block_chain_b])
         self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash, second_block_chain_b.GetHash())
+        self.assertEqual(fork.private_tip.hash, '2b')
 
         self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash, second_block_chain_b.GetHash())
+        self.assertEqual(fork.public_tip.hash, '2b')
 
     def test_get_private_public_fork_lead_public(self):
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork([self.second_block_chain_b, self.first_block_chain_a])
         self.assertEqual(fork.private_height, 1)
-        self.assertEqual(fork.private_tip.hash, first_block_chain_a.GetHash())
+        self.assertEqual(fork.private_tip.hash, '1a')
 
         self.assertEqual(fork.public_height, 2)
-        self.assertEqual(fork.public_tip.hash, second_block_chain_b.GetHash())
+        self.assertEqual(fork.public_tip.hash, '2b')
 
     def test_get_private_public_fork_lead_private(self):
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
-
-        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork([self.first_block_chain_b, self.second_block_chain_a])
 
         self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash, second_block_chain_a.GetHash())
+        self.assertEqual(fork.private_tip.hash, '2a')
 
         self.assertEqual(fork.public_height, 1)
-        self.assertEqual(fork.public_tip.hash, first_block_chain_b.GetHash())
+        self.assertEqual(fork.public_tip.hash, '1b')
 
     def test_get_private_public_fork_private_fork_point(self):
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_a = core.CBlock(hashPrevBlock=first_block_chain_a.GetHash())
-        third_a_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash(), nNonce=1)
-        fourth_block_chain_a = core.CBlock(hashPrevBlock=third_a_block_chain_a.GetHash())
-        third_b_block_chain_a = core.CBlock(hashPrevBlock=second_block_chain_a.GetHash(), nNonce=2)
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+        third_a_block_chain_a = Block('3a_1', '2a', BlockOrigin.private)
+        third_a_block_chain_a.height = 3
+        third_a_block_chain_a.prevBlock = self.second_block_chain_a
 
-        self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(third_a_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(third_b_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(fourth_block_chain_a, BlockOrigin.private)
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
+        third_b_block_chain_a = Block('3a_2', '2a', BlockOrigin.private)
+        third_b_block_chain_a.height = 3
+        third_b_block_chain_a.prevBlock = self.second_block_chain_a
 
-        self.assertEqual(len(self.chain.tips), 3)
+        fourth_block_chain_a = Block('4a', '3a_1', BlockOrigin.private)
+        fourth_block_chain_a.height = 4
+        fourth_block_chain_a.prevBlock = third_a_block_chain_a
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork([self.second_block_chain_b, fourth_block_chain_a, third_b_block_chain_a])
         self.assertEqual(fork.private_height, 4)
-        self.assertEqual(fork.private_tip.hash, fourth_block_chain_a.GetHash())
+        self.assertEqual(fork.private_tip.hash, '4a')
 
-        self.assertEqual(fork.public_height, 1)
-        self.assertEqual(fork.public_tip.hash, first_block_chain_b.GetHash())
+        self.assertEqual(fork.public_height, 2)
+        self.assertEqual(fork.public_tip.hash, '2b')
 
     def test_get_private_public_fork_public_fork_point(self):
-        first_block_chain_b = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=1)
-        second_block_chain_b = core.CBlock(hashPrevBlock=first_block_chain_b.GetHash())
-        third_a_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash(), nNonce=1)
-        third_b_block_chain_b = core.CBlock(hashPrevBlock=second_block_chain_b.GetHash(), nNonce=2)
-        fourth_block_chain_b = core.CBlock(hashPrevBlock=third_a_block_chain_b.GetHash())
-        first_block_chain_a = core.CBlock(hashPrevBlock=genesis_hash(), nNonce=2)
+        third_a_block_chain_b = Block('3b_1', '2b', BlockOrigin.public)
+        third_a_block_chain_b.height = 3
+        third_a_block_chain_b.prevBlock = self.second_block_chain_b
 
-        self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(first_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(third_a_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(fourth_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(third_b_block_chain_b, BlockOrigin.public)
-        self.chain.try_to_insert_block(first_block_chain_a, BlockOrigin.private)
+        third_b_block_chain_b = Block('3b_2', '2b', BlockOrigin.public)
+        third_b_block_chain_b.height = 3
+        third_b_block_chain_b.prevBlock = self.second_block_chain_b
 
-        self.assertEqual(len(self.chain.tips), 3)
+        fourth_block_chain_b = Block('4b', '3b_1', BlockOrigin.public)
+        fourth_block_chain_b.height = 4
+        fourth_block_chain_b.prevBlock = third_a_block_chain_b
 
-        fork = self.chain.get_private_public_fork()
-        self.assertEqual(fork.private_height, 1)
-        self.assertEqual(fork.private_tip.hash, first_block_chain_a.GetHash() )
+        fork = get_private_public_fork([fourth_block_chain_b, third_b_block_chain_b, self.second_block_chain_a])
+        self.assertEqual(fork.private_height, 2)
+        self.assertEqual(fork.private_tip.hash, '2a')
 
         self.assertEqual(fork.public_height, 4)
-        self.assertEqual(fork.public_tip.hash, fourth_block_chain_b.GetHash())
+        self.assertEqual(fork.public_tip.hash, '4b')
 
     def test_process_block_no_change_in_fork(self):
         self.chain.try_to_insert_block = MagicMock()
@@ -188,25 +174,27 @@ class ChainTest(unittest.TestCase):
         self.assertFalse(self.chain.length_of_fork.called)
         self.assertFalse(self.chain.strategy.find_action.called)
 
-    def test_process_block(self):
+    @patch('chain.get_private_public_fork')
+    def test_process_block(self, mock):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
-        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
+        mock.side_effect = [fork_before, fork_after]
         self.chain.execute_action = MagicMock()
 
         self.chain.process_block(None, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
-        self.assertTrue(self.chain.get_private_public_fork.called)
+        self.assertTrue(mock.called)
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.execute_action.called)
 
-    def test_process_block_exception_find_action(self):
+    @patch('chain.get_private_public_fork')
+    def test_process_block_exception_find_action(self, mock):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
-        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
+        mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute_action = MagicMock()
 
@@ -215,11 +203,12 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertFalse(self.chain.execute_action.called)
 
-    def test_process_block_exception_execute_action(self):
+    @patch('chain.get_private_public_fork')
+    def test_process_block_exception_execute_action(self, mock):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(2, 2)
         fork_after = Fork(1, 1)
-        self.chain.get_private_public_fork = MagicMock(side_effect=[fork_before, fork_after])
+        mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock()
         self.chain.execute_action = MagicMock(side_effect=ActionException('mock_exception'))
 
@@ -235,7 +224,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
@@ -256,7 +245,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
@@ -307,7 +296,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(second_block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
@@ -331,7 +320,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(third_block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.override, fork.private_tip, fork.public_tip)
 
@@ -373,7 +362,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(second_block_chain_b, BlockOrigin.public)
         self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
@@ -396,7 +385,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(third_block_chain_b, BlockOrigin.public)
         self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.adopt, fork.private_tip, fork.public_tip)
 
@@ -416,7 +405,7 @@ class ChainTest(unittest.TestCase):
         self.chain.try_to_insert_block(block_chain_a, BlockOrigin.private)
         self.chain.try_to_insert_block(block_chain_b, BlockOrigin.public)
 
-        fork = self.chain.get_private_public_fork()
+        fork = get_private_public_fork(self.chain.tips)
 
         self.chain.execute_action(Action.match, fork.private_tip, fork.public_tip)
 
@@ -428,3 +417,6 @@ class ChainTest(unittest.TestCase):
 
 def genesis_hash():
     return core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
+
+genesis_block = Block(genesis_hash(), None, BlockOrigin.public)
+genesis_block.transfer_allowed = True

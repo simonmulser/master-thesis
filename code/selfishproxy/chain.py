@@ -23,12 +23,12 @@ class Chain:
 
     def process_block(self, block, block_origin):
 
-        fork_before = self.get_private_public_fork()
+        fork_before = get_private_public_fork(self.tips)
         logging.debug('fork before {}'.format(fork_before))
 
         self.try_to_insert_block(block, block_origin)
 
-        fork_after = self.get_private_public_fork()
+        fork_after = get_private_public_fork(self.tips)
         logging.debug('fork after {}'.format(fork_after))
 
         if fork_before != fork_after:
@@ -128,38 +128,39 @@ class Chain:
 
         logging.info('{} inserted into chain'.format(block))
 
-    def get_private_public_fork(self):
-        highest_private_tip = None
-        highest_public_tip = None
-        for tip in self.tips:
-            if tip.block_origin == BlockOrigin.private:
-                if highest_private_tip is None:
-                    highest_private_tip = tip
-                elif highest_private_tip.height < tip.height:
-                    highest_private_tip = tip
-            else:
-                if highest_public_tip is None:
-                    highest_public_tip = tip
-                elif highest_public_tip.height < tip.height:
-                    highest_public_tip = tip
 
-        fork = Fork(highest_private_tip, highest_public_tip)
+def get_private_public_fork(tips):
+    highest_private_tip = None
+    highest_public_tip = None
+    for tip in tips:
+        if tip.block_origin == BlockOrigin.private:
+            if highest_private_tip is None:
+                highest_private_tip = tip
+            elif highest_private_tip.height < tip.height:
+                highest_private_tip = tip
+        else:
+            if highest_public_tip is None:
+                highest_public_tip = tip
+            elif highest_public_tip.height < tip.height:
+                highest_public_tip = tip
 
-        if fork.private_tip is None:
-            fork.private_tip = fork.public_tip
-            fork.private_height = fork.public_height = 0
-            return fork
+    fork = Fork(highest_private_tip, highest_public_tip)
 
-        fork_point = highest_private_tip
-        while fork_point.block_origin is BlockOrigin.private:
-            fork_point = fork_point.prevBlock
-
-        if highest_public_tip is None:
-            fork.public_tip = fork_point
-
-        fork.private_height = fork.private_tip.height - fork_point.height
-        fork.public_height = fork.public_tip.height - fork_point.height
+    if fork.private_tip is None:
+        fork.private_tip = fork.public_tip
+        fork.private_height = fork.public_height = 0
         return fork
+
+    fork_point = highest_private_tip
+    while fork_point.block_origin is BlockOrigin.private:
+        fork_point = fork_point.prevBlock
+
+    if highest_public_tip is None:
+        fork.public_tip = fork_point
+
+    fork.private_height = fork.private_tip.height - fork_point.height
+    fork.public_height = fork.public_tip.height - fork_point.height
+    return fork
 
 
 def get_blocks_transfer_unallowed(block):
