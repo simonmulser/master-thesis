@@ -17,6 +17,7 @@ class ChainTest(unittest.TestCase):
         super(ChainTest, self).__init__(*args, **kwargs)
 
         self.executor = None
+        self.strategy = None
         self.chain = None
         self.first_block_chain_a = None
         self.second_block_chain_a = None
@@ -25,7 +26,8 @@ class ChainTest(unittest.TestCase):
 
     def setUp(self):
         self.executor = MagicMock()
-        self.chain = Chain(self.executor)
+        self.strategy = MagicMock()
+        self.chain = Chain(self.executor, self.strategy)
         self.chain.strategy = MagicMock()
 
         self.first_block_chain_b = Block('1b', '0', BlockOrigin.public)
