@@ -16,6 +16,8 @@ class Networking(object):
         self.chain = Chain(executor)
 
     def start(self, ip_public, ip_private):
+        logging.debug('starting client')
+
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'

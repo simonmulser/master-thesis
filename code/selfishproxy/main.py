@@ -12,9 +12,16 @@ parser.add_argument('--ip-private', help='set the ip of the private node', defau
 
 args = parser.parse_args()
 
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+rootLogger = logging.getLogger()
+
+consoleHandler = logging.StreamHandler(sys.stdout)
+consoleHandler.setFormatter(logFormatter)
+rootLogger.addHandler(consoleHandler)
+
 if args.verbose:
-    logging.basicConfig(level=logging.DEBUG)
+    rootLogger.setLevel(logging.DEBUG)
 else:
-    logging.basicConfig(level=logging.INFO)
+    rootLogger.setLevel(logging.INFO)
 
 Networking().start(args.ip_public, args.ip_private)
