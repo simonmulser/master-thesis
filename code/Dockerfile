@@ -13,4 +13,4 @@ RUN cd pycoin && \
 
 COPY selfish_proxy /usr/src/
 
-ENTRYPOINT ["python", "/usr/src/main.py"]
+CMD ["python", "/usr/src/main.py"]
