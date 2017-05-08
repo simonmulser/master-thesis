@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 from networking import Networking
 
 parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
@@ -14,6 +15,10 @@ args = parser.parse_args()
 
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 rootLogger = logging.getLogger()
+
+fileHandler = logging.FileHandler("{0}/{1}.log".format('/tmp/', 'selfish_proxy'))
+fileHandler.setFormatter(logFormatter)
+rootLogger.addHandler(fileHandler)
 
 consoleHandler = logging.StreamHandler(sys.stdout)
 consoleHandler.setFormatter(logFormatter)
