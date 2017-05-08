@@ -9,6 +9,7 @@ class Strategy:
     def __init__(self, strategy):
         self.fork_state = ForkState.irrelevant
         self.strategy = strategy
+        logging.warn('this strategy is not used. may contain bugs.')
 
     def find_action(self, length_private, length_public, last_block_origin):
         if length_private is 0 and length_public is 0:
