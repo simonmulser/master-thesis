@@ -1,3 +1,4 @@
+import logging
 from strategy import Action
 from strategy import ActionException
 from strategy import BlockOrigin
@@ -9,6 +10,9 @@ class Strategy:
         self.equal_fork_stubborn = equal_fork_stubborn
         self.trail_stubborn = trail_stubborn * -1
         self.active = False
+
+        logging.info('created strategy lead_stubborn={} equal_fork_stubborn={} trail-stubborn={}'
+                     .format(lead_stubborn, equal_fork_stubborn, trail_stubborn))
 
     def find_action(self, length_private, length_public, last_block_origin):
         if last_block_origin is BlockOrigin.public:

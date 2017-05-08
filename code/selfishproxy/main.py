@@ -6,13 +6,23 @@ from strategy.executor import Executor
 from strategy.code import Strategy
 from chain import Chain
 
+
+def check_positive(value):
+    integer_value = int(value)
+    if integer_value < 0:
+        raise argparse.ArgumentTypeError("%s is an invalid positive int value" % value)
+    return integer_value
+
 parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
 parser.add_argument('-v', '--verbose', help='increase output verbosity', action='store_true')
 
 parser.add_argument('--ip-public', help='set the ip of the public node', default='240.0.0.3')
-
 parser.add_argument('--ip-private', help='set the ip of the private node', default='240.0.0.2')
+
+parser.add_argument('--lead-stubborn', help='use lead-stubbornness in strategy', action='store_true')
+parser.add_argument('--equal-fork-stubborn', help='use equal-fork-stubbornness in strategy', action='store_true')
+parser.add_argument('--trail-stubborn', help='use N-trail-stubbornness in strategy', type=check_positive, default=0)
 
 args = parser.parse_args()
 
@@ -34,7 +44,7 @@ else:
 
 networking = Networking()
 executor = Executor(networking)
-strategy = Strategy()
+strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 chain = Chain(executor, strategy)
 networking.chain = chain
 
