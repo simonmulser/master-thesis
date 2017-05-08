@@ -15,7 +15,7 @@ class Networking(object):
         executor = Executor(self)
         self.chain = Chain(executor)
 
-    def start(self):
+    def start(self, ip_public, ip_private):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'
@@ -33,8 +33,8 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        self.connection_private = client.connect(('240.0.0.2', 18444))
-        self.connection_public = client.connect(('240.0.0.3', 18444))
+        self.connection_private = client.connect((ip_private, 18444))
+        self.connection_public = client.connect((ip_public, 18444))
 
         self.relay[self.connection_private] = Connection(self.connection_public)
         self.relay[self.connection_public] = Connection(self.connection_private)
