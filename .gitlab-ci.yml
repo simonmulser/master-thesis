@@ -3,6 +3,6 @@ before_script:
 
 unittest:
   script:
-    - cd code/selfishproxy
+    - cd code/selfish_proxy
     - python -m unittest discover
 
