@@ -2,6 +2,9 @@ import argparse
 import logging
 import sys
 from networking import Networking
+from strategy.executor import Executor
+from strategy.code import Strategy
+from chain import Chain
 
 parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
@@ -29,4 +32,11 @@ if args.verbose:
 else:
     rootLogger.setLevel(logging.INFO)
 
-Networking().start(args.ip_public, args.ip_private)
+networking = Networking()
+executor = Executor(networking)
+strategy = Strategy()
+chain = Chain(executor, strategy)
+networking.chain = chain
+
+
+networking.start(args.ip_public, args.ip_private)

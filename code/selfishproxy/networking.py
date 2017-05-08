@@ -1,10 +1,8 @@
 from bitcoinnetwork import network
 import logging
-from chain import Chain
 from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
-from strategy.executor import Executor
 
 
 class Networking(object):
@@ -12,8 +10,7 @@ class Networking(object):
         self.relay = {}
         self.connection_private = None
         self.connection_public = None
-        executor = Executor(self)
-        self.chain = Chain(executor)
+        self.chain = None
 
     def start(self, ip_public, ip_private):
         logging.debug('starting client')

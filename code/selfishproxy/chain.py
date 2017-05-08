@@ -1,14 +1,13 @@
 from bitcoin import core
-from strategy.matrix import Strategy
 from strategy import BlockOrigin
 from strategy import ActionException
-from strategy.strategies import selfish_mining_strategy
 import logging
 
 
 class Chain:
-    def __init__(self, executor):
+    def __init__(self, executor, strategy):
         self.executor = executor
+        self.strategy = strategy
 
         genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 
@@ -17,7 +16,6 @@ class Chain:
         self.tips = [self.genesis]
         self.blocks = {genesis_hash: self.genesis}
         self.orphan_blocks = []
-        self.strategy = Strategy(selfish_mining_strategy)
 
     def process_block(self, block, block_origin):
 
