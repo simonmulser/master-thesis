@@ -135,6 +135,9 @@ class Block:
     def __ne__(self, other):
         return self.hash != other.hash
 
+    def __hash__(self):
+        return hash(self.hash)
+
 
 class Fork:
     def __init__(self, private_tip, public_tip):
