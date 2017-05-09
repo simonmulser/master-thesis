@@ -90,13 +90,14 @@ class ChainTest(unittest.TestCase):
     def test_try_to_insert_orphan_blocks(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
-        self.chain.try_to_insert_block(second_block, BlockOrigin.public)
 
+        self.chain.try_to_insert_block(second_block, BlockOrigin.public)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 2)
         self.assertEqual(self.chain.tips[0].prevBlock.height, 1)
+        self.assertEqual(len(self.chain.orphan_blocks), 0)
 
     def test_try_to_insert_two_orphan_blocks(self):
         first_block = core.CBlock(hashPrevBlock=genesis_hash())
@@ -104,12 +105,15 @@ class ChainTest(unittest.TestCase):
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 
         self.chain.try_to_insert_block(third_block, BlockOrigin.public)
+        self.assertEqual(len(self.chain.orphan_blocks), 1)
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
+        self.assertEqual(len(self.chain.orphan_blocks), 2)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 3)
         self.assertEqual(self.chain.tips[0].prevBlock.height, 2)
+        self.assertEqual(len(self.chain.orphan_blocks), 0)
 
     def test_get_private_public_fork_no_private_tip(self):
         fork = get_private_public_fork([self.second_block_chain_b])
