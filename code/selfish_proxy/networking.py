@@ -3,6 +3,7 @@ import logging
 from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
+from threading import Lock
 
 
 class Networking(object):
@@ -11,6 +12,7 @@ class Networking(object):
         self.connection_private = None
         self.connection_public = None
         self.chain = None
+        self.lock = Lock()
 
     def start(self, ip_public, ip_private):
         logging.debug('starting client')
@@ -46,46 +48,54 @@ class Networking(object):
         logging.debug('relayed {} message from {}'.format(message.command, connection.host[0]))
 
     def process_inv(self, connection, message):
-        logging.debug('received inv from {}'.format(connection.host[0]))
+        self.lock.acquire()
+        try:
+            logging.debug('received inv from {}'.format(connection.host[0]))
 
-        relay_inv = []
-        for inv in message.inv:
-            try:
-                if net.CInv.typemap[inv.type] == "Error" or net.CInv.typemap[inv.type] == "TX":
-                    relay_inv.append(inv)
-                elif net.CInv.typemap[inv.type] == "Block":
-                    if inv.hash in self.chain.blocks:
-                        if self.chain.blocks[inv.hash].transfer_allowed:
-                            relay_inv.append(inv)
+            relay_inv = []
+            for inv in message.inv:
+                try:
+                    if net.CInv.typemap[inv.type] == "Error" or net.CInv.typemap[inv.type] == "TX":
+                        relay_inv.append(inv)
+                    elif net.CInv.typemap[inv.type] == "Block":
+                        if inv.hash in self.chain.blocks:
+                            if self.chain.blocks[inv.hash].transfer_allowed:
+                                relay_inv.append(inv)
+                        else:
+                            data_packet = messages.msg_getdata()
+                            data_packet.inv.append(message.inv[0])
+                            connection.send('getdata', data_packet)
+
+                            logging.info('requested new block from {}'.format(connection.host[0]))
+                    elif net.CInv.typemap[inv.type] == "FilteredBlock":
+                        logging.warn("we don't care about filtered blocks")
                     else:
-                        data_packet = messages.msg_getdata()
-                        data_packet.inv.append(message.inv[0])
-                        connection.send('getdata', data_packet)
+                        logging.warn("unknown inv type")
+                except KeyError:
+                    logging.warn("unknown inv type")
 
-                        logging.info('requested new block from {}'.format(connection.host[0]))
-                elif net.CInv.typemap[inv.type] == "FilteredBlock":
-                    logging.debug("we don't care about filtered blocks")
-                else:
-                    logging.debug("unknown inv type")
-            except KeyError:
-                logging.warn("unknown inv type")
-
-        if len(relay_inv) > 0:
-            message.inv = relay_inv
-            self.relay_message(connection, message)
+            if len(relay_inv) > 0:
+                message.inv = relay_inv
+                self.relay_message(connection, message)
+        finally:
+            self.lock.release()
 
     def process_block(self, connection, message):
-        logging.info('received block from {}'.format(connection.host[0]))
+        self.lock.acquire()
+        try:
+            logging.info('received block from {}'.format(connection.host[0]))
 
-        block = message.block
-        if block.GetHash() in self.chain.blocks:
-            if self.chain.blocks[block.GetHash()].transfer_allowed:
-                self.relay_message(connection, message)
-        else:
-            if connection == self.connection_private:
-                self.chain.process_block(block, BlockOrigin.private)
+            block = message.block
+            if block.GetHash() in self.chain.blocks:
+                if self.chain.blocks[block.GetHash()].transfer_allowed:
+                    self.relay_message(connection, message)
             else:
-                self.chain.process_block(block, BlockOrigin.public)
+                if connection == self.connection_private:
+                    self.chain.process_block(block, BlockOrigin.private)
+                else:
+                    self.chain.process_block(block, BlockOrigin.public)
+        finally:
+            self.lock.release()
 
     def send_inv(self, blocks):
         private_block_invs = []
