@@ -26,7 +26,7 @@ parser.add_argument('--trail-stubborn', help='use N-trail-stubbornness in strate
 
 args = parser.parse_args()
 
-logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+logFormatter = logging.Formatter("%(asctime)s.%(msecs)d000 [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
 rootLogger = logging.getLogger()
 
 fileHandler = logging.FileHandler("{0}/{1}.log".format('/tmp/', 'selfish_proxy'))
