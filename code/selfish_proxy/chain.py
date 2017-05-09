@@ -127,7 +127,7 @@ class Block:
         self.transfer_allowed = False
 
     def __repr__(self):
-        return 'block(height={} block_origin={})'.format(self.height, self.block_origin)
+        return 'block(hash={} hashPrevBlock={} height={} block_origin={})'.format(core.b2lx(self.hash), core.b2lx(self.hashPrevBlock), self.height, self.block_origin)
 
     def __eq__(self, other):
         return self.hash == other.hash
