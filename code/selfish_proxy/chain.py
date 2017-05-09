@@ -117,6 +117,23 @@ def get_private_public_fork(tips):
     return fork
 
 
+def get_relevant_public_tips(tips):
+    public_tips = set([tip for tip in tips if tip.block_origin is BlockOrigin.public or tip.transfer_allowed is True])
+    private_tips = [tip for tip in tips if tip.block_origin is BlockOrigin.private and tip.transfer_allowed is False]
+
+    for block in private_tips:
+        tmp = block
+        while tmp.block_origin is BlockOrigin.private and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        public_tips.add(tmp)
+
+    if len(public_tips) is 0:
+        return []
+
+    highest_tip = max(public_tips, key=lambda t: t.height)
+    return [tip for tip in public_tips if tip.height > highest_tip.height - 10]
+
+
 class Block:
     def __init__(self, hash, hashPrevBlock, block_origin):
         self.hash = hash
