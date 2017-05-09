@@ -11,6 +11,8 @@ RUN git clone https://github.com/simonmulser/pycoin.git
 RUN cd pycoin && \
     python setup.py install
 
-COPY selfish_proxy /usr/src/
+COPY selfish_proxy /code
 
-CMD ["python", "/usr/src/main.py"]
+WORKDIR /code
+
+CMD ["python", "main.py"]
