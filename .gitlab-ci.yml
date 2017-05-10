@@ -4,10 +4,5 @@ before_script:
 
 unittest:
   script:
-    - cd code/selfish_proxy
-    - python -m unittest discover
-
-after:
-  - coverage run -m unittest discover
-  - coverage report
-
+    - cd code
+    - PYTHONPATH="selfish_proxy" py.test --cov=selfish_proxy tests
