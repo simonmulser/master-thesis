@@ -48,7 +48,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connection_public.send.called)
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
-        self.assertFalse(mock.called)
+        self.assertTrue(mock.called)
 
     @patch('chain.get_relevant_tips')
     def test_process_inv_msg_block_private_unknown_with_tips(self, mock):
@@ -68,7 +68,10 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.connection_private.send.call_args_list[1][0][0], 'getheaders')
         self.assertEqual(self.connection_private.send.call_args_list[2][0][0], 'getdata')
 
-    def test_process_inv_msg_block_public_unknown(self):
+    @patch('chain.get_relevant_tips')
+    def test_process_inv_msg_block_public_unknown(self, mock):
+        mock.return_value = []
+
         inv = net.CInv()
         inv.hash = 'hash1'
         inv.type = networking.inv_typemap['Block']
