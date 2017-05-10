@@ -9,7 +9,7 @@ import chain
 
 class Networking(object):
     def __init__(self):
-        self.relay = {}
+        self.connections = {}
         self.connection_private = None
         self.connection_public = None
         self.chain = None
@@ -36,18 +36,18 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        self.connection_private = client.connect((ip_private, 18444))
-        self.connection_public = client.connect((ip_public, 18444))
+        conn_private = self.connection_private = client.connect((ip_private, 18444))
+        conn_public = self.connection_public = client.connect((ip_public, 18444))
 
-        self.relay[self.connection_private] = Connection(self.connection_public)
-        self.relay[self.connection_public] = Connection(self.connection_private)
+        self.connections = {conn_public: Connection(conn_public, "public", conn_private),
+                            conn_private: Connection(conn_private, "private", conn_public)}
 
         client.run_forever()
         logging.debug('client started')
 
     def relay_message(self, connection, message):
-        self.relay[connection].connection.send(message.command, message)
-        logging.debug('relayed {} message from {}'.format(message.command, connection.host[0]))
+        self.connections[connection].relay.send(message.command, message)
+        logging.debug('relayed {} message from {}'.format(message.command, self.connections[connection].name))
 
     def process_inv(self, connection, message):
         self.lock.acquire()
@@ -70,7 +70,7 @@ class Networking(object):
                             for tip in relevant_tips:
                                 get_headers.locator.vHave = [tip.hash]
                                 connection.send('getheaders', get_headers)
-                                logging.info('requested new headers from {}'.format(connection.host[0]))
+                                logging.info('requested new headers from {}'.format(self.connections[connection].name))
 
                     elif net.CInv.typemap[inv.type] == "FilteredBlock":
                         logging.warn("we don't care about filtered blocks")
@@ -84,10 +84,10 @@ class Networking(object):
                 self.relay_message(connection, message)
         finally:
             self.lock.release()
-            logging.debug('processed inv message from {}'.format(connection.host[0]))
+            logging.debug('processed inv message from {}'.format(self.connections[connection].name))
 
     def process_block(self, connection, message):
-        logging.info('relaying block message from {}'.format(connection.host[0]))
+        logging.info('relaying block message from {}'.format(self.connections[connection].name))
         self.relay_message(connection, message)
 
     def send_inv(self, blocks):
@@ -123,17 +123,17 @@ class Networking(object):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
     def get_headers_message(self, connection, message):
-        if self.relay[connection].first_headers_ignored:
+        if self.connections[connection].first_headers_ignored:
             self.relay_message(connection, message)
             return
 
-        self.relay[connection].first_headers_ignored = True
-        logging.info('ignoring first getheaders from {}'.format(connection.host[0]))
+        self.connections[connection].first_headers_ignored = True
+        logging.info('ignoring first getheaders from {}'.format(self.connections[connection].name))
 
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received headers message from {}'.format(connection.host[0]))
+            logging.debug('received headers message from {}'.format(self.connections[connection].name))
 
             relay_headers = []
             for header in message.headers:
@@ -152,7 +152,7 @@ class Networking(object):
 
         finally:
             self.lock.release()
-            logging.debug('processed headers message from {}'.format(connection.host[0]))
+            logging.debug('processed headers message from {}'.format(self.connections[connection].name))
 
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
@@ -160,6 +160,8 @@ inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
 
 class Connection:
 
-    def __init__(self, connection):
+    def __init__(self, connection, name, relay):
         self.connection = connection
+        self.name = name
+        self.relay = relay
         self.first_headers_ignored = False
