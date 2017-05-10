@@ -1,8 +1,11 @@
 before_script:
   - python --version
+  - pip install coverage
 
 unittest:
   script:
     - cd code/selfish_proxy
     - python -m unittest discover
+    - coverage -m unittest discover
+    - coverage report
 
