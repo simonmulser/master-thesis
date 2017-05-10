@@ -5,7 +5,7 @@ before_script:
 unittest:
   script:
     - cd code
-    - python -m unittest discover
+    - PYTHONPATH="selfish_proxy" python -m unittest discover
 
 after_script:
   - PYTHONPATH="selfish_proxy" py.test --cov=selfish_proxy tests
