@@ -1,5 +1,6 @@
 import unittest
 from mock import MagicMock
+from mock import patch
 from networking import Networking
 from networking import inv_typemap
 from networking import Connection
@@ -33,7 +34,9 @@ class NetworkingTest(unittest.TestCase):
         self.networking.relay[self.connection_public] = Connection(self.connection_private)
         self.networking.chain = self.chain
 
-    def test_process_inv_msg_block_private_unknown(self):
+    @patch('chain.get_relevant_tips')
+    def test_process_inv_msg_block_private_unknown(self, mock):
+        mock.return_value = []
         inv = net.CInv()
         inv.hash = 'hash1'
         inv.type = inv_typemap['Block']
@@ -44,6 +47,25 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connection_public.send.called)
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
+        self.assertFalse(mock.called)
+
+    @patch('chain.get_relevant_tips')
+    def test_process_inv_msg_block_private_unknown_with_tips(self, mock):
+        block = Block("a1", "a0", "public")
+        mock.return_value = [block, block]
+
+        inv = net.CInv()
+        inv.hash = 'hash1'
+        inv.type = inv_typemap['Block']
+        msg = messages.msg_inv
+        msg.inv = [inv]
+        self.networking.process_inv(self.connection_private, msg)
+
+        self.assertEqual(self.connection_private.send.call_count, 3)
+        self.assertTrue(mock.called)
+        self.assertEqual(self.connection_private.send.call_args_list[0][0][0], 'getheaders')
+        self.assertEqual(self.connection_private.send.call_args_list[1][0][0], 'getheaders')
+        self.assertEqual(self.connection_private.send.call_args_list[2][0][0], 'getdata')
 
     def test_process_inv_msg_block_public_unknown(self):
         inv = net.CInv()

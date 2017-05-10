@@ -4,6 +4,7 @@ from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
 from threading import Lock
+import chain
 
 
 class Networking(object):
@@ -62,6 +63,14 @@ class Networking(object):
                             if self.chain.blocks[inv.hash].transfer_allowed:
                                 relay_inv.append(inv)
                         else:
+                            get_headers = messages.msg_getheaders()
+                            get_headers.locator = messages.CBlockLocator()
+                            relevant_tips = chain.get_relevant_tips(self.chain.tips)
+                            for tip in relevant_tips:
+                                get_headers.locator.vHave = [tip.hash]
+                                connection.send('getheaders', get_headers)
+                                logging.info('requested new headers from {}'.format(connection.host[0]))
+
                             data_packet = messages.msg_getdata()
                             data_packet.inv.append(message.inv[0])
                             connection.send('getdata', data_packet)
