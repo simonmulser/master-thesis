@@ -104,16 +104,17 @@ class Networking(object):
             else:
                 private_block_invs.append(inv)
 
-        msg = messages.msg_inv()
         if len(private_block_invs) > 0:
+            msg = messages.msg_inv()
             msg.inv = private_block_invs
-            self.connection_private.send('inv', private_block_invs)
-            logging.info('{} block invs send to {}'.format(len(private_block_invs), self.connection_private.host[0]))
+            self.connection_private.send('inv', msg)
+            logging.info('{} block invs send to private'.format(len(private_block_invs)))
 
         if len(public_block_invs) > 0:
+            msg = messages.msg_inv()
             msg.inv = public_block_invs
-            self.connection_public.send('inv', public_block_invs)
-            logging.info('{} block invs send to {}'.format(len(public_block_invs), self.connection_public.host[0]))
+            self.connection_public.send('inv', msg)
+            logging.info('{} block invs send to public'.format(len(public_block_invs)))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
