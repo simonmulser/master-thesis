@@ -65,8 +65,8 @@ class Networking(object):
                             data_packet = messages.msg_getdata()
                             data_packet.inv.append(message.inv[0])
                             connection.send('getdata', data_packet)
-
                             logging.info('requested new block from {}'.format(connection.host[0]))
+
                     elif net.CInv.typemap[inv.type] == "FilteredBlock":
                         logging.warn("we don't care about filtered blocks")
                     else:
@@ -79,11 +79,12 @@ class Networking(object):
                 self.relay_message(connection, message)
         finally:
             self.lock.release()
+            logging.debug('processed inv message from {}'.format(connection.host[0]))
 
     def process_block(self, connection, message):
         self.lock.acquire()
         try:
-            logging.info('received block from {}'.format(connection.host[0]))
+            logging.debug('received block message from {}'.format(connection.host[0]))
 
             block = message.block
             if block.GetHash() in self.chain.blocks:
@@ -96,6 +97,7 @@ class Networking(object):
                     self.chain.process_block(block, BlockOrigin.public)
         finally:
             self.lock.release()
+            logging.debug('processed block message from {}'.format(connection.host[0]))
 
     def send_inv(self, blocks):
         private_block_invs = []
