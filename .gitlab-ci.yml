@@ -1,9 +1,11 @@
 before_script:
   - python --version
-  - pip install coverage
+  - pip install pytest-cov
 
 unittest:
   script:
     - cd code
-    - PYTHONPATH="selfish_proxy" coverage run --include=selfish* -m unittest discover
-    - coverage report -m
+    - python -m unittest discover
+
+after_script:
+  - PYTHONPATH="selfish_proxy" py.test --cov=selfish_proxy tests
