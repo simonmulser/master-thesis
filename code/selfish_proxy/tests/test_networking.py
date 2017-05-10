@@ -2,7 +2,7 @@ import unittest
 from mock import MagicMock
 from mock import patch
 from networking import Networking
-from networking import inv_typemap
+import networking
 from networking import Connection
 from bitcoin import net
 from bitcoin import messages
@@ -40,7 +40,7 @@ class NetworkingTest(unittest.TestCase):
         mock.return_value = []
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
@@ -57,7 +57,7 @@ class NetworkingTest(unittest.TestCase):
 
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
@@ -71,7 +71,7 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_block_public_unknown(self):
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_public, msg)
@@ -83,7 +83,7 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_block_known_transfer_unallowed(self):
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
 
@@ -97,7 +97,7 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_public_block_known_transfer_allowed(self):
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
 
@@ -116,7 +116,7 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_private_block_known_transfer_allowed(self):
         inv = net.CInv()
         inv.hash = 'hash1'
-        inv.type = inv_typemap['Block']
+        inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
 
@@ -134,7 +134,7 @@ class NetworkingTest(unittest.TestCase):
 
     def test_process_inv_msg_filtered_block(self):
         inv = net.CInv()
-        inv.type = inv_typemap['FilteredBlock']
+        inv.type = networking.inv_typemap['FilteredBlock']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
@@ -144,7 +144,7 @@ class NetworkingTest(unittest.TestCase):
 
     def test_process_inv_msg_error(self):
         inv = net.CInv()
-        inv.type = inv_typemap['Error']
+        inv.type = networking.inv_typemap['Error']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
@@ -157,7 +157,7 @@ class NetworkingTest(unittest.TestCase):
 
     def test_process_inv_msg_tx(self):
         inv = net.CInv()
-        inv.type = inv_typemap['TX']
+        inv.type = networking.inv_typemap['TX']
         msg = messages.msg_inv
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
@@ -171,9 +171,9 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_allowed_block_and_tx(self):
         block = net.CInv()
         block.hash = 'hash1'
-        block.type = inv_typemap['Block']
+        block.type = networking.inv_typemap['Block']
         tx = net.CInv()
-        tx.type = inv_typemap['TX']
+        tx.type = networking.inv_typemap['TX']
         msg = messages.msg_inv
         msg.inv = [block, tx]
 
