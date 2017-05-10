@@ -3,7 +3,7 @@ from chain import Chain
 from chain import Block
 from chain import Fork
 from chain import get_private_public_fork
-from chain import get_relevant_public_tips
+from chain import get_relevant_tips
 from mock import MagicMock
 from mock import patch
 from bitcoin import core
@@ -297,51 +297,23 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
 
-    def test_get_relevant_public_tips_no_tips(self):
-        tips = get_relevant_public_tips([])
-
-        self.assertEqual(tips, [])
-
-    def test_get_relevant_public_tips_one_public_tip(self):
-        tips = get_relevant_public_tips([self.second_block_chain_b])
-
-        self.assertEqual(tips, [self.second_block_chain_b])
-
-    def test_get_relevant_public_tips_one_private_tip(self):
-        tips = get_relevant_public_tips([self.second_block_chain_a])
-
-        self.assertEqual(tips, [genesis_block])
-
-    def test_get_relevant_public_tips_one_private_tip_transfer_allowed(self):
-        block = self.second_block_chain_a
-        block.transfer_allowed = True
-        tips = get_relevant_public_tips([block])
-
-        self.assertEqual(tips, [block])
-
-    def test_get_relevant_public_tips_one_private_tip_transfer_of_father_allowed(self):
-        self.first_block_chain_a.transfer_allowed = True
-        tips = get_relevant_public_tips([self.second_block_chain_a])
-
-        self.assertEqual(tips, [self.first_block_chain_a])
-
     def test_get_relevant_public_tips_mixed(self):
-        tips = get_relevant_public_tips([self.second_block_chain_a, self.second_block_chain_b])
+        tips = get_relevant_tips([self.second_block_chain_a, self.second_block_chain_b])
 
         self.assertEqual(len(tips), 2)
         self.assertTrue(self.second_block_chain_b in tips)
-        self.assertTrue(genesis_block in tips)
+        self.assertTrue(self.second_block_chain_a in tips)
 
     def test_get_relevant_public_tips_one_tip_too_short_tip(self):
         high_block_chain_b = Block('10b', '0', BlockOrigin.public)
         high_block_chain_b.height = 11
 
-        tips = get_relevant_public_tips([high_block_chain_b, self.first_block_chain_b])
+        tips = get_relevant_tips([high_block_chain_b, self.first_block_chain_b])
 
         self.assertEqual(tips, [high_block_chain_b])
 
     def test_get_relevant_public_tips_two_tips(self):
-        tips = get_relevant_public_tips([self.first_block_chain_b, self.second_block_chain_b])
+        tips = get_relevant_tips([self.first_block_chain_b, self.second_block_chain_b])
 
         self.assertEqual(len(tips), 2)
         self.assertTrue(self.first_block_chain_b in tips)
