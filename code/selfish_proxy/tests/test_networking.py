@@ -7,6 +7,7 @@ from networking import Connection
 from bitcoin import net
 from bitcoin import messages
 from bitcoin import core
+from bitcoin.core import CBlockHeader
 from chain import Block
 from chain import BlockOrigin
 
@@ -292,3 +293,55 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_private.send.called)
 
         self.assertFalse(self.connection_public.send.called)
+
+    def test_headers_message_transfer_allowed(self):
+        header1 = CBlockHeader(nNonce=1)
+        block1 = Block(header1.GetHash(), None, None)
+        block1.transfer_allowed = True
+
+        header2 = CBlockHeader(nNonce=2)
+        block2 = Block(header2.GetHash(), None, None)
+        block2.transfer_allowed = True
+
+        self.chain.blocks = {block1.hash: block1, block2.hash: block2}
+
+        message = messages.msg_headers()
+        message.headers = [header1, header2]
+        self.networking.headers_message(self.connection_public, message)
+
+        self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.chain.process_block.called)
+        self.assertTrue(self.connection_private.send.called)
+        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
+        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 2)
+
+    def test_headers_message_known_blocks(self):
+        header1 = CBlockHeader(nNonce=1)
+        block1 = Block(header1.GetHash(), None, None)
+
+        header2 = CBlockHeader(nNonce=2)
+        block2 = Block(header2.GetHash(), None, None)
+
+        self.chain.blocks = {block1.hash: block1, block2.hash: block2}
+
+        message = messages.msg_headers()
+        message.headers = [header1, header2]
+        self.networking.headers_message(self.connection_public, message)
+
+        self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.chain.process_block.called)
+        self.assertFalse(self.connection_private.send.called)
+
+    def test_headers_message_unknown_blocks(self):
+        header1 = CBlockHeader(nNonce=1)
+        header2 = CBlockHeader(nNonce=2)
+
+        message = messages.msg_headers()
+        message.headers = [header1, header2]
+        self.networking.headers_message(self.connection_private, message)
+
+        self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.connection_private.send.called)
+        self.assertTrue(self.chain.process_block.called)
+        self.assertEqual(self.chain.process_block.call_count, 2)
+        self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)

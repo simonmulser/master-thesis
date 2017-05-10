@@ -21,7 +21,7 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'
-                        'reject', 'headers', 'getaddr',
+                        'reject', 'getaddr',
                         'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
@@ -32,6 +32,7 @@ class Networking(object):
 
         client.register_handler('inv', self.process_inv)
         client.register_handler('block', self.process_block)
+        client.register_handler('headers', self.headers_message)
 
         network.ClientBehavior(client)
 
@@ -147,6 +148,31 @@ class Networking(object):
 
         self.relay[connection].first_headers_ignored = True
         logging.info('ignoring first getheaders from {}'.format(connection.host[0]))
+
+    def headers_message(self, connection, message):
+        self.lock.acquire()
+        try:
+            logging.debug('received headers message from {}'.format(connection.host[0]))
+
+            relay_headers = []
+            for header in message.headers:
+                if header.GetHash() in self.chain.blocks:
+                    if self.chain.blocks[header.GetHash()].transfer_allowed:
+                        relay_headers.append(header)
+                else:
+                    if connection == self.connection_private:
+                        self.chain.process_block(header, BlockOrigin.private)
+                    else:
+                        self.chain.process_block(header, BlockOrigin.public)
+
+            if len(relay_headers) > 0:
+                message.headers = relay_headers
+                self.relay_message(connection, message)
+
+        finally:
+            self.lock.release()
+            logging.debug('processed headers message from {}'.format(connection.host[0]))
+
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
 
