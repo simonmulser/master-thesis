@@ -118,10 +118,18 @@ class ChainTest(unittest.TestCase):
     def test_get_private_public_fork_no_private_tip(self):
         fork = chain.get_private_public_fork([self.second_block_chain_b])
         self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash, '2b')
+        self.assertEqual(fork.private_tip.hash, testutil.genesis_hash())
 
-        self.assertEqual(fork.public_height, 0)
+        self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash, '2b')
+
+    def test_get_private_public_fork_no_public_tip(self):
+        fork = chain.get_private_public_fork([self.second_block_chain_a])
+        self.assertEqual(fork.public_height, 0)
+        self.assertEqual(fork.public_tip.hash, testutil.genesis_hash())
+
+        self.assertEqual(fork.private_height, 2)
+        self.assertEqual(fork.private_tip.hash, '2a')
 
     def test_get_private_public_fork_lead_public(self):
         fork = chain.get_private_public_fork([self.second_block_chain_b, self.first_block_chain_a])
@@ -153,13 +161,12 @@ class ChainTest(unittest.TestCase):
 
     def test_get_private_public_fork_one_private_transferred(self):
         self.first_block_chain_a.transfer_allowed = True
-        fork = chain.get_private_public_fork([self.first_block_chain_b, self.second_block_chain_a])
+        fork = chain.get_private_public_fork([self.second_block_chain_a, self.first_block_chain_b])
 
         self.assertEqual(fork.private_height, 2)
         self.assertEqual(fork.private_tip.hash, '2a')
 
         self.assertEqual(fork.public_height, 1)
-        self.assertEqual(fork.public_tip.hash, '1b')
 
     def test_get_private_public_fork_private_fork_point(self):
         third_a_block_chain_a = Block('3a_1', '2a', BlockOrigin.private)
@@ -173,6 +180,14 @@ class ChainTest(unittest.TestCase):
         fourth_block_chain_a = Block('4a', '3a_1', BlockOrigin.private)
         fourth_block_chain_a.height = 4
         fourth_block_chain_a.prevBlock = third_a_block_chain_a
+
+        fork = chain.get_private_public_fork([fourth_block_chain_a, third_b_block_chain_a, self.second_block_chain_b])
+
+        self.assertEqual(fork.private_height, 4)
+        self.assertEqual(fork.private_tip.hash, '4a')
+
+        self.assertEqual(fork.public_height, 2)
+        self.assertEqual(fork.public_tip.hash, '2b')
 
     def test_get_private_public_fork_half_private_fork_transferred(self):
         self.first_block_chain_a.transfer_allowed = True
@@ -192,10 +207,10 @@ class ChainTest(unittest.TestCase):
         fourth_block_chain_a.prevBlock = third_a_block_chain_a
 
         fork = chain.get_private_public_fork([self.second_block_chain_b, fourth_block_chain_a, third_b_block_chain_a])
-        self.assertEqual(fork.private_height, 4)
+        self.assertEqual(fork.private_height, 2)
         self.assertEqual(fork.private_tip.hash, '4a')
 
-        self.assertEqual(fork.public_height, 3)
+        self.assertEqual(fork.public_height, 1)
         self.assertEqual(fork.public_tip.hash, '3a_2')
 
     def test_get_private_public_fork_longest_private_fork_transferred(self):
@@ -217,10 +232,10 @@ class ChainTest(unittest.TestCase):
         fourth_block_chain_a.prevBlock = third_a_block_chain_a
 
         fork = chain.get_private_public_fork([self.second_block_chain_b, fourth_block_chain_a, third_b_block_chain_a])
-        self.assertEqual(fork.private_height, 3)
-        self.assertEqual(fork.private_tip.hash, '3a_2')
+        self.assertEqual(fork.private_height, 0)
+        self.assertEqual(fork.private_tip.hash, '4a')
 
-        self.assertEqual(fork.public_height, 4)
+        self.assertEqual(fork.public_height, 0)
         self.assertEqual(fork.public_tip.hash, '4a')
 
     def test_get_private_public_fork_public_fork_point(self):
@@ -243,6 +258,17 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_height, 4)
         self.assertEqual(fork.public_tip.hash, '4b')
 
+    def test_get_private_public_fork_after_match(self):
+        self.first_block_chain_a.transfer_allowed = True
+        self.first_block_chain_b.transfer_allowed = True
+        fork = chain.get_private_public_fork([self.first_block_chain_a, self.second_block_chain_b])
+
+        self.assertEqual(fork.private_height, 1)
+        self.assertEqual(fork.private_tip.hash, '1a')
+
+        self.assertEqual(fork.public_height, 2)
+        self.assertEqual(fork.public_tip.hash, '2b')
+
     def test_process_block_no_change_in_fork(self):
         self.chain.try_to_insert_block = MagicMock()
         self.chain.length_of_fork = MagicMock()
@@ -256,8 +282,8 @@ class ChainTest(unittest.TestCase):
     @patch('chain.get_private_public_fork')
     def test_process_block(self, mock):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork(2, 2)
-        fork_after = Fork(1, 1)
+        fork_before = Fork("blocka", 2, "blockb", 2)
+        fork_after = Fork("blockaa", 1, "blockbb", 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.execute = MagicMock()
 
@@ -271,8 +297,8 @@ class ChainTest(unittest.TestCase):
     @patch('chain.get_private_public_fork')
     def test_process_block_exception_find_action(self, mock):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork(2, 2)
-        fork_after = Fork(1, 1)
+        fork_before = Fork("blocka", 2, "blockb", 2)
+        fork_after = Fork("blockaa", 1, "blockbb", 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute = MagicMock()
@@ -285,8 +311,8 @@ class ChainTest(unittest.TestCase):
     @patch('chain.get_private_public_fork')
     def test_process_block_exception_execute_action(self, mock):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork(2, 2)
-        fork_after = Fork(1, 1)
+        fork_before = Fork("blocka", 2, "blockb", 2)
+        fork_after = Fork("blockaa", 1, "blockbb", 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock()
         self.chain.executor.execute = MagicMock(side_effect=ActionException('mock_exception'))

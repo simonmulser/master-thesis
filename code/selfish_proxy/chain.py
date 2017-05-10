@@ -90,34 +90,48 @@ def get_private_public_fork(tips):
     highest_private_tip = None
     highest_public_tip = None
     for tip in tips:
-        if tip.block_origin == BlockOrigin.private and tip.transfer_allowed is False:
+        if tip.block_origin == BlockOrigin.private or tip.transfer_allowed is True:
             if highest_private_tip is None:
                 highest_private_tip = tip
             elif highest_private_tip.height < tip.height:
                 highest_private_tip = tip
-        else:
+        if tip.block_origin == BlockOrigin.public or tip.transfer_allowed is True:
             if highest_public_tip is None:
                 highest_public_tip = tip
             elif highest_public_tip.height < tip.height:
                 highest_public_tip = tip
 
-    fork = Fork(highest_private_tip, highest_public_tip)
-
-    if fork.private_tip is None:
-        fork.private_tip = fork.public_tip
-        fork.private_height = fork.public_height = 0
-        return fork
-
-    fork_point = highest_private_tip
-    while fork_point.block_origin is BlockOrigin.private:
-        fork_point = fork_point.prevBlock
-
     if highest_public_tip is None:
-        fork.public_tip = fork_point
+        tmp = highest_private_tip
+        while tmp.block_origin is BlockOrigin.private and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        highest_public_tip = tmp
 
-    fork.private_height = fork.private_tip.height - fork_point.height
-    fork.public_height = fork.public_tip.height - fork_point.height
-    return fork
+    if highest_private_tip is None:
+        tmp = highest_public_tip
+        while tmp.block_origin is BlockOrigin.public and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        highest_private_tip = tmp
+
+    higher_tip = lower_tip = None
+
+    if highest_private_tip.height > highest_public_tip.height:
+        higher_tip = highest_private_tip
+        lower_tip = highest_public_tip
+    else:
+        higher_tip = highest_public_tip
+        lower_tip = highest_private_tip
+
+    while higher_tip.height > lower_tip.height:
+        higher_tip = higher_tip.prevBlock
+
+    while higher_tip.hash is not lower_tip.hash:
+        higher_tip = higher_tip.prevBlock
+        lower_tip = lower_tip.prevBlock
+
+    fork_height = higher_tip.height
+    return Fork(highest_private_tip, highest_private_tip.height - fork_height,
+                highest_public_tip, highest_public_tip.height - fork_height)
 
 
 def get_relevant_tips(tips):
@@ -148,11 +162,11 @@ class Block:
 
 
 class Fork:
-    def __init__(self, private_tip, public_tip):
+    def __init__(self, private_tip, private_height, public_tip, public_height):
         self.private_tip = private_tip
-        self.private_height = -1
+        self.private_height = private_height
         self.public_tip = public_tip
-        self.public_height = -1
+        self.public_height = public_height
 
     def __repr__(self):
         return 'fork(private_height={} public_height={})'.format(self.private_height, self.public_height)
