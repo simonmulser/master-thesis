@@ -15,6 +15,8 @@ class Strategy:
                      .format(lead_stubborn, equal_fork_stubborn, trail_stubborn))
 
     def find_action(self, length_private, length_public, last_block_origin):
+        logging.debug('executing find_action with length_private={}, length_public={} and last_block_origin={}'
+                      .format(length_private, length_public, last_block_origin))
         if last_block_origin is BlockOrigin.public:
             length_public -= 1
             self.active = False

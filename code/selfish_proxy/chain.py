@@ -30,10 +30,13 @@ class Chain:
         if fork_before != fork_after:
             try:
                 action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
+                logging.info('found action={}'.format(action))
 
                 self.executor.execute(action, fork_after.private_tip, fork_after.public_tip)
             except ActionException as exception:
                 logging.warn(exception.message)
+        else:
+            logging.debug('the two forks are the same - needs to be taken')
 
     def try_to_insert_block(self, received_block, block_origin):
         prevBlock = None
