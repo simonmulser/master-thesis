@@ -1,6 +1,6 @@
 before_script:
   - python --version
-  - pip install coverage
+  - pip install pytest-cov
 
 unittest:
   script:
