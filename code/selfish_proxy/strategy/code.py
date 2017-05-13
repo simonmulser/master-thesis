@@ -24,20 +24,25 @@ class Strategy:
             length_private -= 1
 
         private_lead = length_private - length_public
+        print(private_lead)
 
         if private_lead == 0:
-            if last_block_origin is BlockOrigin.public:
-                return Action.adopt
+            if length_private == 0:
+                if last_block_origin is BlockOrigin.public:
+                    return Action.adopt
+                else:
+                    return Action.wait
             else:
-                if self.active:
-                    if self.equal_fork_stubborn:
+                if last_block_origin is BlockOrigin.public:
+                    if self.trail_stubborn < 0:
+                        return Action.wait
+                    else:
+                        return Action.adopt
+                else:
+                    if self.active and self.equal_fork_stubborn:
                         return Action.wait
                     else:
                         return Action.override
-                elif length_private > 0:
-                    return Action.override
-                else:
-                    return Action.wait
 
         elif private_lead > 0:
             if private_lead == 1:

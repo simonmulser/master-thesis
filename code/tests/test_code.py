@@ -30,7 +30,7 @@ class StrategyTest(unittest.TestCase):
         strategy = Strategy()
         strategy.active = True
 
-        action = strategy.find_action(1, 0, BlockOrigin.private)
+        action = strategy.find_action(2, 1, BlockOrigin.private)
         self.assertEqual(action, Action.override)
 
     def test_match_stubborn_block_origin_public(self):
@@ -46,6 +46,30 @@ class StrategyTest(unittest.TestCase):
 
         action = strategy.find_action(1, 0, BlockOrigin.private)
         self.assertEqual(action, Action.wait)
+
+    def test_match_block_both_chain_same_length_not_active_origin_public(self):
+        strategy = Strategy()
+
+        action = strategy.find_action(2, 3, BlockOrigin.public)
+        self.assertEqual(action, Action.adopt)
+
+    def test_match_block_both_chain_same_length_trail_stubborn_not_active_origin_public(self):
+        strategy = Strategy(trail_stubborn=1)
+
+        action = strategy.find_action(2, 3, BlockOrigin.public)
+        self.assertEqual(action, Action.wait)
+
+    def test_match_block_both_chain_same_length_not_active_origin_private(self):
+        strategy = Strategy()
+
+        action = strategy.find_action(3, 2, BlockOrigin.private)
+        self.assertEqual(action, Action.override)
+
+    def test_match_block_both_chain_same_length_trail_stubborn_not_active_origin_private(self):
+        strategy = Strategy(trail_stubborn=1)
+
+        action = strategy.find_action(3, 2, BlockOrigin.private)
+        self.assertEqual(action, Action.override)
 
     def test_private_lead1_block_origin_public(self):
         strategy = Strategy()
