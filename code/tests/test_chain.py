@@ -8,7 +8,6 @@ from mock import patch
 from bitcoin import core
 from strategy import BlockOrigin
 from strategy import ActionException
-import testutil
 
 
 class ChainTest(unittest.TestCase):
@@ -32,7 +31,7 @@ class ChainTest(unittest.TestCase):
 
         self.first_block_chain_b = Block('1b', '0', BlockOrigin.public)
         self.first_block_chain_b.height = 1
-        self.first_block_chain_b.prevBlock = testutil.genesis_block
+        self.first_block_chain_b.prevBlock = chain.genesis_block
 
         self.second_block_chain_b = Block('2b', '1b', BlockOrigin.public)
         self.second_block_chain_b.height = 2
@@ -40,7 +39,7 @@ class ChainTest(unittest.TestCase):
 
         self.first_block_chain_a = Block('1a', '0', BlockOrigin.private)
         self.first_block_chain_a.height = 1
-        self.first_block_chain_a.prevBlock = testutil.genesis_block
+        self.first_block_chain_a.prevBlock = chain.genesis_block
 
         self.second_block_chain_a = Block('2a', '1a', BlockOrigin.private)
         self.second_block_chain_a.height = 2
@@ -60,14 +59,14 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(len(self.chain.blocks), 2)
 
     def test_try_to_insert_block(self):
-        block = core.CBlock(hashPrevBlock=testutil.genesis_hash())
+        block = core.CBlock(hashPrevBlock=chain.genesis_hash)
         self.chain.try_to_insert_block(block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 1)
 
     def test_try_to_insert_two_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=testutil.genesis_hash())
+        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
@@ -77,10 +76,10 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(self.chain.tips[0].height, 2)
 
     def test_try_to_insert_fork(self):
-        first_block = core.CBlock(hashPrevBlock=testutil.genesis_hash(), nNonce=1)
+        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash, nNonce=1)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
-        second_block = core.CBlock(hashPrevBlock=testutil.genesis_hash(), nNonce=2)
+        second_block = core.CBlock(hashPrevBlock=chain.genesis_hash, nNonce=2)
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 2)
@@ -88,7 +87,7 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(self.chain.tips[1].height, 1)
 
     def test_try_to_insert_orphan_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=testutil.genesis_hash())
+        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
 
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
@@ -100,7 +99,7 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(len(self.chain.orphan_blocks), 0)
 
     def test_try_to_insert_two_orphan_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=testutil.genesis_hash())
+        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 
@@ -118,7 +117,9 @@ class ChainTest(unittest.TestCase):
     def test_get_private_public_fork_no_private_tip(self):
         fork = chain.get_private_public_fork([self.second_block_chain_b])
         self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash, testutil.genesis_hash())
+        print(fork.private_tip.hash)
+        print()
+        self.assertEqual(fork.private_tip.hash, chain.genesis_hash)
 
         self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash, '2b')
@@ -126,7 +127,7 @@ class ChainTest(unittest.TestCase):
     def test_get_private_public_fork_no_public_tip(self):
         fork = chain.get_private_public_fork([self.second_block_chain_a])
         self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash, testutil.genesis_hash())
+        self.assertEqual(fork.public_tip.hash, chain.genesis_hash)
 
         self.assertEqual(fork.private_height, 2)
         self.assertEqual(fork.private_tip.hash, '2a')
@@ -343,3 +344,41 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(len(tips), 2)
         self.assertTrue(self.first_block_chain_b in tips)
         self.assertTrue(self.second_block_chain_b in tips)
+
+    def test_get_highest_block_genesis_block(self):
+        tip = chain.get_highest_block([chain.genesis_block], BlockOrigin.private)
+
+        self.assertEqual(tip, chain.genesis_block)
+
+    def test_get_highest_block_same_origin(self):
+        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.private)
+
+        self.assertEqual(tip, self.first_block_chain_a)
+
+    def test_get_highest_block_different_origin(self):
+        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.public)
+
+        self.assertEqual(tip, chain.genesis_block)
+
+    def test_get_highest_block_different_origin_transfer_allowed(self):
+        self.first_block_chain_a.transfer_allowed = True
+        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.public)
+
+        self.assertEqual(tip, self.first_block_chain_a)
+
+    def test_get_highest_block_public_tip_lower_then_transferable_public_block(self):
+        third_a_block_chain_a = Block('3a', '2a', BlockOrigin.private)
+        third_a_block_chain_a.height = 3
+        third_a_block_chain_a.prevBlock = self.second_block_chain_a
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chain.get_highest_block([third_a_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
+
+        self.assertEqual(tip, self.second_block_chain_a)
+
+    def test_get_highest_block_public_tip_same_height_then_transferable_public_block(self):
+        self.first_block_chain_a.transfer_allowed = True
+
+        tip = chain.get_highest_block([self.second_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
+
+        self.assertEqual(tip, self.first_block_chain_b)

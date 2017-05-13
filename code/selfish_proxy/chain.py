@@ -1,6 +1,7 @@
 from bitcoin import core
 from strategy import BlockOrigin
 from strategy import ActionException
+import strategy
 import logging
 
 
@@ -9,12 +10,8 @@ class Chain:
         self.executor = executor
         self.strategy = strategy
 
-        genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
-
-        self.genesis = Block(genesis_hash, None, BlockOrigin.public)
-        self.genesis.transfer_allowed = True
-        self.tips = [self.genesis]
-        self.blocks = {genesis_hash: self.genesis}
+        self.tips = [genesis_block]
+        self.blocks = {genesis_hash: genesis_block}
         self.orphan_blocks = []
 
     def process_block(self, block, block_origin):
@@ -87,51 +84,41 @@ class Chain:
 
 
 def get_private_public_fork(tips):
-    highest_private_tip = None
-    highest_public_tip = None
+    highest_private = get_highest_block(tips, BlockOrigin.private)
+    highest_public = get_highest_block(tips, BlockOrigin.public)
+
+    high_tip, low_tip = (highest_private, highest_public) \
+        if highest_private.height > highest_public.height else (highest_public, highest_private)
+
+    while high_tip.height > low_tip.height:
+        high_tip = high_tip.prevBlock
+
+    while high_tip is not low_tip:
+        high_tip = high_tip.prevBlock
+        low_tip = low_tip.prevBlock
+
+    fork_height = high_tip.height
+    return Fork(highest_private, highest_private.height - fork_height,
+                highest_public, highest_public.height - fork_height)
+
+
+def get_highest_block(tips, block_origin):
+    highest_block = genesis_block
+
     for tip in tips:
-        if tip.block_origin == BlockOrigin.private or tip.transfer_allowed is True:
-            if highest_private_tip is None:
-                highest_private_tip = tip
-            elif highest_private_tip.height < tip.height:
-                highest_private_tip = tip
-        if tip.block_origin == BlockOrigin.public or tip.transfer_allowed is True:
-            if highest_public_tip is None:
-                highest_public_tip = tip
-            elif highest_public_tip.height < tip.height:
-                highest_public_tip = tip
-
-    if highest_public_tip is None:
-        tmp = highest_private_tip
-        while tmp.block_origin is BlockOrigin.private and tmp.transfer_allowed is False:
-            tmp = tmp.prevBlock
-        highest_public_tip = tmp
-
-    if highest_private_tip is None:
-        tmp = highest_public_tip
-        while tmp.block_origin is BlockOrigin.public and tmp.transfer_allowed is False:
-            tmp = tmp.prevBlock
-        highest_private_tip = tmp
-
-    higher_tip = lower_tip = None
-
-    if highest_private_tip.height > highest_public_tip.height:
-        higher_tip = highest_private_tip
-        lower_tip = highest_public_tip
-    else:
-        higher_tip = highest_public_tip
-        lower_tip = highest_private_tip
-
-    while higher_tip.height > lower_tip.height:
-        higher_tip = higher_tip.prevBlock
-
-    while higher_tip.hash is not lower_tip.hash:
-        higher_tip = higher_tip.prevBlock
-        lower_tip = lower_tip.prevBlock
-
-    fork_height = higher_tip.height
-    return Fork(highest_private_tip, highest_private_tip.height - fork_height,
-                highest_public_tip, highest_public_tip.height - fork_height)
+        if tip.block_origin is block_origin:
+            if highest_block.height <= tip.height:
+                highest_block = tip
+        elif tip.transfer_allowed is True:
+            if highest_block.height < tip.height:
+                highest_block = tip
+        else:
+            tmp = tip
+            while strategy.opposite_origin(tmp.block_origin) is block_origin and tmp.transfer_allowed is False:
+                tmp = tmp.prevBlock
+            if highest_block.height < tmp.height:
+                highest_block = tmp
+    return highest_block
 
 
 def get_relevant_tips(tips):
@@ -176,3 +163,8 @@ class Fork:
 
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
+
+genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
+genesis_block = Block(genesis_hash, None, BlockOrigin.public)
+genesis_block.transfer_allowed = True
+genesis_block.height = 0

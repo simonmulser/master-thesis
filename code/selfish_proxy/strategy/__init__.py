@@ -19,6 +19,13 @@ class BlockOrigin(Enum):
     public = 1
 
 
+def opposite_origin(block_origin):
+    if block_origin is BlockOrigin.private:
+        return BlockOrigin.public
+    else:
+        return BlockOrigin.private
+
+
 class ActionException(Exception):
     def __init__(self, message):
         self.message = message

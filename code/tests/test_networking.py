@@ -6,7 +6,6 @@ import networking
 from networking import Connection
 from bitcoin import net
 from bitcoin import messages
-from bitcoin import core
 from bitcoin.core import CBlockHeader
 from chain import Block
 from chain import BlockOrigin
