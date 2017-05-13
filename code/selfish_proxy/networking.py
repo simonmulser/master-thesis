@@ -43,7 +43,6 @@ class Networking(object):
                             conn_private: Connection(conn_private, "private", conn_public)}
 
         client.run_forever()
-        logging.debug('client started')
 
     def relay_message(self, connection, message):
         self.connections[connection].relay.send(message.command, message)
@@ -148,6 +147,7 @@ class Networking(object):
                         self.chain.process_block(header, BlockOrigin.public)
 
             if len(relay_headers) > 0:
+                logging.debug('there are {} headers to be relayed'.format(len(relay_headers)))
                 message.headers = relay_headers
                 self.relay_message(connection, message)
 
