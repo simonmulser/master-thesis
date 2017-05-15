@@ -24,9 +24,10 @@ class Networking(object):
                         'reject', 'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
+        for message in ['getaddr', 'alert', 'addr']:
+            client.register_handler(message, self.ignore_message)
+
         client.register_handler('ping', self.ping_message)
-        client.register_handler('alert', self.ignore_message)
-        client.register_handler('addr', self.ignore_message)
         client.register_handler('getheaders', self.get_headers_message)
 
         client.register_handler('inv', self.process_inv)
