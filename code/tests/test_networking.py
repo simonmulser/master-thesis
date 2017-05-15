@@ -20,6 +20,7 @@ class NetworkingTest(unittest.TestCase):
         self.connection_private = None
         self.connection_public = None
         self.chain = None
+        self.block_relay = None
 
     def setUp(self):
         self.networking = Networking()
@@ -29,6 +30,7 @@ class NetworkingTest(unittest.TestCase):
         self.connection_public.host = ('127.0.0.1', '4444')
 
         self.chain = self.networking.chain = MagicMock()
+        self.block_relay = self.networking.block_relay = MagicMock()
 
         self.networking.connections = {conn_public: Connection(conn_public, 'public', conn_private),
                                        conn_private: Connection(conn_private, 'private', conn_public)}
@@ -181,6 +183,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.send_inv([block1, block2])
 
         self.assertTrue(self.networking.connection_public.send.called)
+        self.assertTrue(self.networking.block_relay.send_inv.called)
         inv = self.networking.connection_public.send.call_args[0][1].inv
         self.assertEqual(len(inv), 2)
 
@@ -192,6 +195,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.send_inv([block1, block2])
 
         self.assertFalse(self.connection_public.send.called)
+        self.assertFalse(self.networking.block_relay.send_inv.called)
 
         self.assertTrue(self.connection_private.send.called)
         inv = self.networking.connection_private.send.call_args[0][1].inv

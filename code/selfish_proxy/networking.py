@@ -14,6 +14,7 @@ class Networking(object):
         self.connection_public = None
         self.chain = None
         self.lock = Lock()
+        self.block_relay = None
 
     def start(self, ip_public, ip_private):
         logging.debug('starting client')
@@ -113,6 +114,7 @@ class Networking(object):
             msg = messages.msg_inv()
             msg.inv = public_block_invs
             self.connection_public.send('inv', msg)
+            self.block_relay.send_inv(msg)
             logging.info('{} block invs send to public'.format(len(public_block_invs)))
 
     def ping_message(self, connection, message):
