@@ -28,11 +28,10 @@ class NetworkingTest(unittest.TestCase):
         self.connection_private.host = ('127.0.0.1', '4444')
         self.connection_public.host = ('127.0.0.1', '4444')
 
-        self.chain = MagicMock()
+        self.chain = self.networking.chain = MagicMock()
 
         self.networking.connections = {conn_public: Connection(conn_public, 'public', conn_private),
                                        conn_private: Connection(conn_private, 'private', conn_public)}
-        self.networking.chain = self.chain
 
     @patch('chain.get_relevant_tips')
     def test_process_inv_msg_block_private_unknown_with_tips(self, mock):
