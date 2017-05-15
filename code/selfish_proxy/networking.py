@@ -21,8 +21,7 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'
-                        'reject', 'getaddr',
-                        'getdata', 'mempool']:
+                        'reject', 'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
         client.register_handler('ping', self.ping_message)
