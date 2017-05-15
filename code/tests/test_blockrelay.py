@@ -53,3 +53,11 @@ class BlockRelayTest(unittest.TestCase):
         self.assertTrue(self.connection.send.called)
         self.assertTrue(self.representative_connection.send.called)
         self.assertFalse(self.networking.connection_private.send.called)
+
+    def test_start_with_empty_ips(self):
+        self.block_relay = BlockRelay(None, [])
+
+        self.block_relay.start()
+        self.block_relay.send_inv("test")
+
+        self.assertEqual(len(self.block_relay.connections), 0)
