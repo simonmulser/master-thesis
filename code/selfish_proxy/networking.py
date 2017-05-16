@@ -53,7 +53,8 @@ class Networking(object):
     def process_inv(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received inv with {} invs from {}'.format(len(message.inv), connection.host[0]))
+            logging.debug('received inv with {} invs from {}'
+                          .format(len(message.inv), self.connections[connection].name))
 
             relay_inv = []
             for inv in message.inv:

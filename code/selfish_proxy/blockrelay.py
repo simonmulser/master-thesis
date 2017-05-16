@@ -43,7 +43,7 @@ class BlockRelay(object):
     def relay_message(self, connection, message):
         if connection is self.representative_connection:
             self.networking.connection_private.send(message.command, message)
-            logging.info('relayed message={} from {} to private-alice'.format(connection.host[0], message.command))
+            logging.info('relayed message={} from {} to private-alice'.format(message.command, connection.host[0]))
         elif connection is self.networking.connection_private:
             for connection in self.connections:
                 connection.send(message.command, message)
