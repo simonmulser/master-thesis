@@ -130,8 +130,8 @@ def get_relevant_tips(tips):
 
 
 class Block:
-    def __init__(self, hash, hashPrevBlock, block_origin):
-        self.hash = hash
+    def __init__(self, block_hash, hashPrevBlock, block_origin):
+        self.hash = block_hash
         self.hashPrevBlock = hashPrevBlock
         self.prevBlock = None
         self.height = 0
