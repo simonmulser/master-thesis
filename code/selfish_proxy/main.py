@@ -21,6 +21,7 @@ parser.add_argument('-v', '--verbose', help='increase output verbosity', action=
 
 parser.add_argument('--ip-public', help='set the ip of the public node', default='240.0.0.3')
 parser.add_argument('--ip-private', help='set the ip of the private node', default='240.0.0.2')
+parser.add_argument('--ips-send-blocks', help='set the ips which receive blocks', nargs='+', default=[])
 
 parser.add_argument('--lead-stubborn', help='use lead-stubbornness in strategy', action='store_true')
 parser.add_argument('--equal-fork-stubborn', help='use equal-fork-stubbornness in strategy', action='store_true')
@@ -45,7 +46,7 @@ else:
     rootLogger.setLevel(logging.INFO)
 
 networking = Networking()
-block_relay = BlockRelay(networking, [])
+block_relay = BlockRelay(networking, args.ips_send_blocks)
 networking.block_relay = block_relay
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
