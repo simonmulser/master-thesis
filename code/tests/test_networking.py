@@ -223,15 +223,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.connection_public.send.called)
         self.assertFalse(self.connection_private.send.called)
 
-    def test_receive_get_headers(self):
-        self.networking.get_headers_message(self.connection_public, messages.msg_getheaders)
-        self.assertFalse(self.connection_private.send.called)
-
-        self.networking.get_headers_message(self.connection_public, messages.msg_getheaders)
-        self.assertTrue(self.connection_private.send.called)
-
-        self.assertFalse(self.connection_public.send.called)
-
     def test_headers_message_known_blocks(self):
         header1 = CBlockHeader(nNonce=1)
         block1 = Block(header1.GetHash(), None, None)
