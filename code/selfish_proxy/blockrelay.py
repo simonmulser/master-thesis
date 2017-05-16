@@ -38,13 +38,16 @@ class BlockRelay(object):
     def send_inv(self, msg):
         for connection in self.connections:
             connection.send('inv', msg)
+        logging.info('relayed inv message to to all connections')
 
     def relay_message(self, connection, message):
         if connection is self.representative_connection:
             self.networking.connection_private.send(message.command, message)
+            logging.info('relayed message={} from {} to private-alice'.format(connection.host[0], message.command))
         elif connection is self.networking.connection_private:
             for connection in self.connections:
                 connection.send(message.command, message)
+            logging.info('relayed message={} from private-alice to to all connections'.format(message.command))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)

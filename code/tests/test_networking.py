@@ -32,8 +32,8 @@ class NetworkingTest(unittest.TestCase):
         self.chain = self.networking.chain = MagicMock()
         self.block_relay = self.networking.block_relay = MagicMock()
 
-        self.networking.connections = {conn_public: Connection(conn_public, 'public', conn_private),
-                                       conn_private: Connection(conn_private, 'private', conn_public)}
+        self.networking.connections = {conn_public: Connection(conn_public, 'alice-public', conn_private),
+                                       conn_private: Connection(conn_private, 'alice-private', conn_public)}
 
     @patch('chain.get_relevant_tips')
     def test_process_inv_msg_block_private_unknown_with_tips(self, mock):

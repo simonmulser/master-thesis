@@ -15,14 +15,17 @@ class Chain:
         self.orphan_blocks = []
 
     def process_block(self, block, block_origin):
+        logging.info("process Block(hash={}) from {}".format(core.b2lx(block.GetHash()), block_origin))
 
         fork_before = get_private_public_fork(self.tips)
-        logging.debug('fork before {}'.format(fork_before))
+        logging.info('fork before {}'.format(fork_before))
 
         self.try_to_insert_block(block, block_origin)
 
         fork_after = get_private_public_fork(self.tips)
-        logging.debug('fork after {}'.format(fork_after))
+        logging.info('fork after {}'.format(fork_after))
+        logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash)))
+        logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash)))
 
         if fork_before != fork_after:
             try:
@@ -136,7 +139,12 @@ class Block:
         self.transfer_allowed = False
 
     def __repr__(self):
-        return 'block(height={} block_origin={})'.format(self.height, self.block_origin)
+        return '{}(hash={} height={} block_origin={})'\
+            .format(self.__class__.__name__, core.b2lx(self.hash), self.height, self.block_origin)
+
+    def hash_repr(self):
+        return 'Block(hash={})' \
+            .format(core.b2lx(self.hash))
 
     def __eq__(self, other):
         return self.hash == other.hash
@@ -156,7 +164,7 @@ class Fork:
         self.public_height = public_height
 
     def __repr__(self):
-        return 'fork(private_height={} public_height={})'.format(self.private_height, self.public_height)
+        return '{}(private_height={} public_height={})'.format(self.__class__.__name__, self.private_height, self.public_height)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__

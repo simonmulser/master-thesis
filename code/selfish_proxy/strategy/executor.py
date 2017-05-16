@@ -41,7 +41,7 @@ class Executor:
                                       " adopt not possible".format(public_tip.height, private_tip.height))
             blocks_to_transfer.extend(get_blocks_transfer_unallowed(public_tip))
 
-        logging.info('there are {} block invs to be send'.format(len(blocks_to_transfer)))
+        logging.info('there are {} block to be send'.format(len(blocks_to_transfer)))
         if len(blocks_to_transfer) > 0:
             for block in blocks_to_transfer:
                 block.transfer_allowed = True
