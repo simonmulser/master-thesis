@@ -270,55 +270,63 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash, '2b')
 
-    def test_process_block_no_change_in_fork(self):
+    @patch('bitcoin.core.b2lx')
+    def test_process_block_no_change_in_fork(self, _):
         self.chain.try_to_insert_block = MagicMock()
         self.chain.length_of_fork = MagicMock()
+        block = MagicMock()
 
-        self.chain.process_block(None, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertFalse(self.chain.length_of_fork.called)
         self.assertFalse(self.chain.strategy.find_action.called)
 
+    @patch('bitcoin.core.b2lx')
     @patch('chain.get_private_public_fork')
-    def test_process_block(self, mock):
+    def test_process_block(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork("blocka", 2, "blockb", 2)
-        fork_after = Fork("blockaa", 1, "blockbb", 1)
+        fork_before = Fork(Block("a", "0", BlockOrigin.private), 2, Block("b", "0", BlockOrigin.private), 2)
+        fork_after = Fork(Block("aa", "0", BlockOrigin.private), 1, Block("bb", "0", BlockOrigin.private), 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.execute = MagicMock()
+        block = MagicMock()
 
-        self.chain.process_block(None, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(mock.called)
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
 
+    @patch('bitcoin.core.b2lx')
     @patch('chain.get_private_public_fork')
-    def test_process_block_exception_find_action(self, mock):
+    def test_process_block_exception_find_action(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork("blocka", 2, "blockb", 2)
-        fork_after = Fork("blockaa", 1, "blockbb", 1)
+        fork_before = Fork(Block("a", "0", BlockOrigin.private), 2, Block("b", "0", BlockOrigin.private), 2)
+        fork_after = Fork(Block("aa", "0", BlockOrigin.private), 1, Block("bb", "0", BlockOrigin.private), 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute = MagicMock()
+        block = MagicMock()
 
-        self.chain.process_block(None, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertFalse(self.chain.execute.called)
 
+    @patch('bitcoin.core.b2lx')
     @patch('chain.get_private_public_fork')
-    def test_process_block_exception_execute_action(self, mock):
+    def test_process_block_exception_execute_action(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
-        fork_before = Fork("blocka", 2, "blockb", 2)
-        fork_after = Fork("blockaa", 1, "blockbb", 1)
+        fork_before = Fork(Block("a", "0", BlockOrigin.private), 2, Block("b", "0", BlockOrigin.private), 2)
+        fork_after = Fork(Block("aa", "0", BlockOrigin.private), 1, Block("bb", "0", BlockOrigin.private), 1)
         mock.side_effect = [fork_before, fork_after]
         self.chain.strategy.find_action = MagicMock()
         self.chain.executor.execute = MagicMock(side_effect=ActionException('mock_exception'))
+        block = MagicMock()
 
-        self.chain.process_block(None, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
