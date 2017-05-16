@@ -30,7 +30,6 @@ class BlockRelay(object):
         for ip in self.ips:
             connection = client.connect((ip, 18444))
             self.connections.append(connection)
-            logging.debug('connecting to {}'.format(ip))
         if len(self.connections) > 0:
             self.representative_connection = self.connections[0]
 
