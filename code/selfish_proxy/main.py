@@ -55,7 +55,9 @@ networking.chain = chain
 
 
 thread = Thread(target=block_relay.start)
+thread.daemon = True
 thread.start()
-thread.join()
 
 networking.start(args.ip_public, args.ip_private)
+
+thread.join()
