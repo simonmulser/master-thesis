@@ -48,4 +48,3 @@ class BlockRelay(object):
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
-        logging.debug('send pong to {}'.format(connection.host[0]))

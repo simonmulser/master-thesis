@@ -119,7 +119,6 @@ class Networking(object):
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
-        logging.debug('send pong to {}'.format(connection.host[0]))
 
     def ignore_message(self, connection, message):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
