@@ -31,7 +31,6 @@ class Networking(object):
         # also all the other messages are ignored (but not logged)
 
         client.register_handler('ping', self.ping_message)
-        client.register_handler('getheaders', self.get_headers_message)
 
         client.register_handler('inv', self.process_inv)
         client.register_handler('block', self.process_block)
