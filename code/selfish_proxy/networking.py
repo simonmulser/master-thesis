@@ -23,11 +23,12 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'
-                        'reject', 'getdata', 'mempool']:
+                        'reject', 'getdata', 'mempool', 'getheaders']:
             client.register_handler(message, self.relay_message)
 
-        for message in ['getaddr', 'alert', 'addr']:
+        for message in ['getaddr', 'addr']:
             client.register_handler(message, self.ignore_message)
+        # also all the other messages are ignored (but not logged)
 
         client.register_handler('ping', self.ping_message)
         client.register_handler('getheaders', self.get_headers_message)
@@ -129,14 +130,6 @@ class Networking(object):
     def ignore_message(self, connection, message):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
-    def get_headers_message(self, connection, message):
-        if self.connections[connection].first_headers_ignored:
-            self.relay_message(connection, message)
-            return
-
-        self.connections[connection].first_headers_ignored = True
-        logging.info('ignoring first getheaders from {}'.format(self.connections[connection].name))
-
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
@@ -173,4 +166,3 @@ class Connection:
         self.connection = connection
         self.name = name
         self.relay = relay
-        self.first_headers_ignored = False
