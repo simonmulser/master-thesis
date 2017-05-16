@@ -24,7 +24,6 @@ class Strategy:
             length_private -= 1
 
         private_lead = length_private - length_public
-        print(private_lead)
 
         if private_lead == 0:
             if length_private == 0:
