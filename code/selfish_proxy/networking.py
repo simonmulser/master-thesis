@@ -71,7 +71,7 @@ class Networking(object):
                             get_headers.locator = messages.CBlockLocator()
                             relevant_tips = chain.get_relevant_tips(self.chain.tips)
                             for tip in relevant_tips:
-                                get_headers.locator.vHave = [tip.hash]
+                                get_headers.locator.vHave = [tip.hash()]
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
                                              .format(core.b2lx(tip.hash()), self.connections[connection].name))
