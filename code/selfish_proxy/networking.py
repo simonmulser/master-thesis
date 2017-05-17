@@ -148,7 +148,7 @@ class Networking(object):
                         self.chain.process_block(header, BlockOrigin.public)
 
             if len(relay_headers) > 0:
-                logging.debug('there are {} block headers to be relayed'.format(len(relay_headers)))
+                logging.debug('there is/are {} block/blocks headers to be relayed'.format(len(relay_headers)))
                 message.headers = relay_headers
                 self.relay_message(connection, message)
 
