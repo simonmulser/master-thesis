@@ -10,21 +10,18 @@ import chain
 
 class Networking(object):
     def __init__(self):
-        self.connections = {}
+        self.public_connections = []
         self.connection_private = None
-        self.connection_public = None
         self.chain = None
         self.lock = Lock()
-        self.block_relay = None
 
-    def start(self, ip_public, ip_private):
+    def start(self, ips_public, ip_private):
         logging.debug('starting client')
 
         client = network.GeventNetworkClient()
 
-        for message in ['notfound', 'tx', 'getblocks'
-                        'reject', 'getdata', 'mempool']:
-            client.register_handler(message, self.relay_message)
+        #for message in ['notfound', 'tx', 'getblocks'
+        #                'reject', 'getdata', 'mempool']:
 
         for message in ['getaddr', 'addr']:
             client.register_handler(message, self.ignore_message)
@@ -39,35 +36,26 @@ class Networking(object):
 
         network.ClientBehavior(client)
 
-        conn_private = self.connection_private = client.connect((ip_private, 18444))
-        conn_public = self.connection_public = client.connect((ip_public, 18444))
-
-        self.connections = {conn_public: Connection(conn_public, "alice-public", conn_private),
-                            conn_private: Connection(conn_private, "alice-private", conn_public)}
+        self.connection_private = client.connect((ip_private, 18444))
+        for ip in ips_public:
+            connection = client.connect((ip, 18444))
+            self.public_connections.append(connection)
 
         client.run_forever()
-
-    def relay_message(self, connection, message):
-        self.connections[connection].relay.send(message.command, message)
-        logging.debug('relayed message={} from {}'.format(message.command, self.connections[connection].name))
 
     def process_inv(self, connection, message):
         self.lock.acquire()
         try:
             logging.debug('received inv with {} invs from {}'
-                          .format(len(message.inv), self.connections[connection].name))
+                          .format(len(message.inv), self.repr_connection(connection)))
 
-            relay_inv = []
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Error" or net.CInv.typemap[inv.type] == "TX":
-                        relay_inv.append(inv)
+                        pass
                     elif net.CInv.typemap[inv.type] == "Block":
                         logging.debug("received {}".format(inv))
-                        if inv.hash in self.chain.blocks:
-                            if self.chain.blocks[inv.hash].transfer_allowed:
-                                relay_inv.append(inv)
-                        else:
+                        if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
                             relevant_tips = chain.get_relevant_tips(self.chain.tips)
@@ -75,7 +63,7 @@ class Networking(object):
                                 get_headers.locator.vHave = [tip.hash()]
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
-                                             .format(core.b2lx(tip.hash()), self.connections[connection].name))
+                                             .format(core.b2lx(tip.hash()), self.repr_connection(connection)))
 
                     elif net.CInv.typemap[inv.type] == "FilteredBlock":
                         logging.warn("we don't care about filtered blocks")
@@ -84,17 +72,13 @@ class Networking(object):
                 except KeyError:
                     logging.warn("unknown inv type")
 
-            if len(relay_inv) > 0:
-                message.inv = relay_inv
-                self.relay_message(connection, message)
         finally:
             self.lock.release()
-            logging.debug('processed inv message from {}'.format(self.connections[connection].name))
+            logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def process_block(self, connection, message):
         logging.info('relaying CBlock(hash={}) from {}'
-                     .format(core.b2lx(message.block.GetHash()), self.connections[connection].name))
-        self.relay_message(connection, message)
+                     .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
@@ -121,8 +105,8 @@ class Networking(object):
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = public_block_invs
-            self.connection_public.send('inv', msg)
-            self.block_relay.send_inv(msg)
+            for connection in self.public_connections:
+                connection.send('inv', msg)
             logging.info('{} block invs send to public'.format(len(public_block_invs)))
 
     def ping_message(self, connection, message):
@@ -134,7 +118,7 @@ class Networking(object):
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received {} headers message from {}'.format(len(message.headers), self.connections[connection].name))
+            logging.debug('received {} headers message from {}'.format(len(message.headers), self.repr_connection(connection)))
 
             for header in message.headers:
                 if header.GetHash() in self.chain.blocks:
@@ -146,7 +130,7 @@ class Networking(object):
                         self.chain.process_block(header, BlockOrigin.public)
         finally:
             self.lock.release()
-            logging.debug('processed headers message from {}'.format(self.connections[connection].name))
+            logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
 
     def getheaders_message(self, connection, message):
         found_block = None
@@ -163,15 +147,10 @@ class Networking(object):
                 tmp = tmp.nextBlock
         connection.send('headers', message)
 
-
-
+    def repr_connection(self, connection):
+        if connection is self.connection_private:
+            return 'private'
+        else:
+            'public(ip={})'.format(connection.host[0])
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
-
-
-class Connection:
-
-    def __init__(self, connection, name, relay):
-        self.connection = connection
-        self.name = name
-        self.relay = relay

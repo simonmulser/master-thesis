@@ -246,7 +246,8 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(fork.public_tip.hash(), '4a')
 
     def test_get_private_public_fork_public_fork_point(self):
-        fork = chain.get_private_public_fork([self.fourth_block_chain_b, self.third_b_block_chain_b, self.second_block_chain_a])
+        fork = chain.get_private_public_fork(
+            [self.fourth_block_chain_b, self.third_b_block_chain_b, self.second_block_chain_a])
         self.assertEqual(fork.private_height, 2)
         self.assertEqual(fork.private_tip.hash(), '2a')
 
