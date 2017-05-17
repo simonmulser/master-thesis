@@ -165,7 +165,7 @@ class Block:
         return self.hash() != other.hash()
 
     def __hash__(self):
-        return hash(self.hash())
+        return self.hash()
 
 
 class Fork:
