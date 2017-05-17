@@ -20,10 +20,7 @@ class Networking(object):
 
         client = network.GeventNetworkClient()
 
-        #for message in ['notfound', 'tx', 'getblocks'
-        #                'reject', 'getdata', 'mempool']:
-
-        for message in ['getaddr', 'addr']:
+        for message in ['getaddr', 'addr', 'notfound', 'reject', 'getblocks', 'mempool']:
             client.register_handler(message, self.ignore_message)
         # also all the other messages are ignored (but not logged)
 
@@ -33,6 +30,7 @@ class Networking(object):
         client.register_handler('block', self.process_block)
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
+        # tx, getdata missing
 
         network.ClientBehavior(client)
 
