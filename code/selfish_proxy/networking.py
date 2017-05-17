@@ -118,7 +118,8 @@ class Networking(object):
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received {} headers message from {}'.format(len(message.headers), self.repr_connection(connection)))
+            logging.debug('received {} headers message from {}'
+                          .format(len(message.headers), self.repr_connection(connection)))
 
             for header in message.headers:
                 if header.GetHash() in self.chain.blocks:
