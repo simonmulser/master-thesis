@@ -6,6 +6,7 @@ import networking
 from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
+from bitcoin.core import CBlock
 from bitcoin.net import CBlockLocator
 from chain import Block
 from chain import BlockOrigin
@@ -329,3 +330,34 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
         self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 1)
         self.assertTrue('cblock2' in self.connection_private.send.call_args[0][1].headers)
+
+    def test_process_block(self):
+        message = messages.msg_block()
+        cblock = CBlock()
+        message.block = cblock
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = message.block.GetHash()
+
+        self.chain.blocks = {block.hash():  block}
+
+        self.networking.process_block(self.connection_private, message)
+
+        self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock)
+
+    def test_process_block_two_times(self):
+        message = messages.msg_block()
+        cblock1 = CBlock(nNonce=1)
+        cblock2 = CBlock(nNonce=2)
+        message.block = cblock1
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = message.block.GetHash()
+
+        self.chain.blocks = {block.hash():  block}
+
+        self.networking.process_block(self.connection_private, message)
+        message.block = cblock2
+        self.networking.process_block(self.connection_private, message)
+
+        self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)

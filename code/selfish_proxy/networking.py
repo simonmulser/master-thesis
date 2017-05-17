@@ -77,8 +77,15 @@ class Networking(object):
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def process_block(self, connection, message):
-        logging.info('relaying CBlock(hash={}) from {}'
-                     .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
+        if message.block.GetHash() in self.chain.blocks:
+            block = self.chain.blocks[message.block.GetHash()]
+            if block.cblock is None:
+                block.cblock = message.block
+                logging.info('set cblock in {}'.format(block.hash_repr()))
+
+        logging.debug('received CBlock(hash={}) from {}'
+                      .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
+
 
     def send_inv(self, blocks):
         private_block_invs = []

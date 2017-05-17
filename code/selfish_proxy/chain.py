@@ -136,6 +136,7 @@ class Block:
     def __init__(self, cblock_header, block_origin):
         self.cblock_header = cblock_header
         self.prevBlock = None
+        self.cblock = None
         self.height = 0
         self.block_origin = block_origin
         self.transfer_allowed = False
