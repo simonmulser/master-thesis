@@ -23,7 +23,7 @@ class Networking(object):
         client = network.GeventNetworkClient()
 
         for message in ['notfound', 'tx', 'getblocks'
-                        'reject', 'getdata', 'mempool', 'getheaders']:
+                        'reject', 'getdata', 'mempool']:
             client.register_handler(message, self.relay_message)
 
         for message in ['getaddr', 'addr']:
@@ -35,6 +35,7 @@ class Networking(object):
         client.register_handler('inv', self.process_inv)
         client.register_handler('block', self.process_block)
         client.register_handler('headers', self.headers_message)
+        client.register_handler('getheaders', self.getheaders_message)
 
         network.ClientBehavior(client)
 
@@ -146,6 +147,23 @@ class Networking(object):
         finally:
             self.lock.release()
             logging.debug('processed headers message from {}'.format(self.connections[connection].name))
+
+    def getheaders_message(self, connection, message):
+        found_block = None
+        for block_hash in message.locator.vHave:
+            if block_hash in self.chain.blocks:
+                found_block = self.chain.blocks[block_hash]
+                break
+
+        message = messages.msg_headers()
+        if found_block:
+            tmp = found_block.nextBlock
+            while tmp and tmp.transfer_allowed:
+                message.headers.append(tmp.cblock)
+                tmp = tmp.nextBlock
+        connection.send('headers', message)
+
+
 
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
