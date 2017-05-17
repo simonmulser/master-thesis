@@ -3,6 +3,7 @@ from strategy import BlockOrigin
 from strategy import ActionException
 import strategy
 import logging
+from bitcoin.core import CBlock
 
 
 class Chain:
@@ -41,17 +42,17 @@ class Chain:
     def try_to_insert_block(self, received_block, block_origin):
         prevBlock = None
         for tip in self.tips:
-            if tip.hash == received_block.hashPrevBlock:
+            if tip.hash() == received_block.hashPrevBlock:
                 prevBlock = tip
                 break
         if prevBlock is None:
             for block in self.blocks.values():
-                if block.hash == received_block.hashPrevBlock:
+                if block.hash() == received_block.hashPrevBlock:
                     prevBlock = block
                     break
 
-        block = Block(received_block.GetHash(), received_block.hashPrevBlock, block_origin)
-        self.blocks[block.hash] = block
+        block = Block(received_block, block_origin)
+        self.blocks[block.hash()] = block
 
         if prevBlock is None:
             self.orphan_blocks.append(block)
@@ -64,7 +65,7 @@ class Chain:
 
                 inserted_orphan_blocks = []
                 for orphan_block in self.orphan_blocks:
-                    if block.hash == orphan_block.hashPrevBlock:
+                    if block.hash() == orphan_block.hashPrevBlock():
                         self.insert_block(block, orphan_block)
                         inserted_orphan_blocks.append(orphan_block)
                         block = orphan_block
@@ -130,30 +131,41 @@ def get_relevant_tips(tips):
 
 
 class Block:
-    def __init__(self, block_hash, hashPrevBlock, block_origin):
-        self.hash = block_hash
-        self.hashPrevBlock = hashPrevBlock
+
+    def __init__(self, cblock, block_origin):
+        self.cblock = cblock
         self.prevBlock = None
         self.height = 0
         self.block_origin = block_origin
         self.transfer_allowed = False
+        self.cached_hash = None
 
     def __repr__(self):
         return '{}(hash={} height={} block_origin={})'\
-            .format(self.__class__.__name__, core.b2lx(self.hash), self.height, self.block_origin)
+            .format(self.__class__.__name__, core.b2lx(self.hash()), self.height, self.block_origin)
 
     def hash_repr(self):
         return 'Block(hash={})' \
-            .format(core.b2lx(self.hash))
+            .format(core.b2lx(self.hash()))
+
+    def hash(self):
+        if self.cached_hash:
+            return self.cached_hash
+        else:
+            self.cached_hash = self.cblock.GetHash()
+            return self.cached_hash
+
+    def hashPrevBlock(self):
+        return self.cblock.hashPrevBlock
 
     def __eq__(self, other):
-        return self.hash == other.hash
+        return self.hash() == other.hash()
 
     def __ne__(self, other):
-        return self.hash != other.hash
+        return self.hash() != other.hash()
 
     def __hash__(self):
-        return hash(self.hash)
+        return hash(self.hash())
 
 
 class Fork:
@@ -173,6 +185,6 @@ class Fork:
         return self.__dict__ != other.__dict__
 
 genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
-genesis_block = Block(genesis_hash, None, BlockOrigin.public)
+genesis_block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
 genesis_block.transfer_allowed = True
 genesis_block.height = 0
