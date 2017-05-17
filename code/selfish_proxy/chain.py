@@ -176,7 +176,8 @@ class Fork:
         self.public_height = public_height
 
     def __repr__(self):
-        return '{}(private_height={} public_height={})'.format(self.__class__.__name__, self.private_height, self.public_height)
+        return '{}(private_height={} public_height={})'\
+            .format(self.__class__.__name__, self.private_height, self.public_height)
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
