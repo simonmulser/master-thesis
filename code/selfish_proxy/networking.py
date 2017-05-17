@@ -84,7 +84,6 @@ class Networking(object):
         logging.debug('received CBlock(hash={}) from {}'
                       .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
 
-
     def send_inv(self, blocks):
         private_block_invs = []
         public_block_invs = []
