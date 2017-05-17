@@ -135,23 +135,14 @@ class Networking(object):
         try:
             logging.debug('received {} headers message from {}'.format(len(message.headers), self.connections[connection].name))
 
-            relay_headers = []
             for header in message.headers:
                 if header.GetHash() in self.chain.blocks:
-                    if self.chain.blocks[header.GetHash()].transfer_allowed:
-                        relay_headers.append(header)
-                        logging.debug("header with hash={} to be relayed".format(core.b2lx(header.GetHash())))
+                    logging.debug("already received header with hash={}".format(core.b2lx(header.GetHash())))
                 else:
                     if connection == self.connection_private:
                         self.chain.process_block(header, BlockOrigin.private)
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
-
-            if len(relay_headers) > 0:
-                logging.debug('there is/are {} block/blocks headers to be relayed'.format(len(relay_headers)))
-                message.headers = relay_headers
-                self.relay_message(connection, message)
-
         finally:
             self.lock.release()
             logging.debug('processed headers message from {}'.format(self.connections[connection].name))
