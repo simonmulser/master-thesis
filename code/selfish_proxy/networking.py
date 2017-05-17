@@ -109,12 +109,6 @@ class Networking(object):
                 connection.send('inv', msg)
             logging.info('{} block invs send to public'.format(len(public_block_invs)))
 
-    def ping_message(self, connection, message):
-        connection.send('pong', message)
-
-    def ignore_message(self, connection, message):
-        logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
-
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
@@ -147,6 +141,12 @@ class Networking(object):
                 message.headers.append(tmp.cblock)
                 tmp = tmp.nextBlock
         connection.send('headers', message)
+
+    def ping_message(self, connection, message):
+        connection.send('pong', message)
+
+    def ignore_message(self, connection, message):
+        logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
     def repr_connection(self, connection):
         if connection is self.connection_private:
