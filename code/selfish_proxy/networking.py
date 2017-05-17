@@ -148,7 +148,7 @@ class Networking(object):
         if found_block:
             tmp = found_block.nextBlock
             while tmp and tmp.transfer_allowed:
-                message.headers.append(tmp.cblock)
+                message.headers.append(tmp.cblock_header)
                 tmp = tmp.nextBlock
         connection.send('headers', message)
 

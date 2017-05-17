@@ -242,7 +242,7 @@ class NetworkingTest(unittest.TestCase):
         message.locator = CBlockLocator()
         message.locator.vHave = ['hash1']
 
-        nextBlock = Block('cblock2', BlockOrigin.private)
+        nextBlock = Block('cblock_header2', BlockOrigin.private)
         nextBlock.cached_hash = 'hash2'
         nextBlock.transfer_allowed = True
         block = Block(None, BlockOrigin.private)
@@ -255,7 +255,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
         self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 1)
-        self.assertEqual(self.connection_private.send.call_args[0][1].headers[0], 'cblock2')
+        self.assertEqual(self.connection_private.send.call_args[0][1].headers[0], 'cblock_header2')
 
     def test_getheaders_message_no_next_block(self):
         message = messages.msg_getheaders()
