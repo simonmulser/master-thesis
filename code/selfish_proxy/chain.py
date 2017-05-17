@@ -133,8 +133,8 @@ def get_relevant_tips(tips):
 
 class Block:
 
-    def __init__(self, cblock, block_origin):
-        self.cblock = cblock
+    def __init__(self, cblock_header, block_origin):
+        self.cblock_header = cblock_header
         self.prevBlock = None
         self.height = 0
         self.block_origin = block_origin
@@ -154,11 +154,11 @@ class Block:
         if self.cached_hash:
             return self.cached_hash
         else:
-            self.cached_hash = self.cblock.GetHash()
+            self.cached_hash = self.cblock_header.GetHash()
             return self.cached_hash
 
     def hashPrevBlock(self):
-        return self.cblock.hashPrevBlock
+        return self.cblock_header.hashPrevBlock
 
     def __eq__(self, other):
         return self.hash() == other.hash()
