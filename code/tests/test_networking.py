@@ -207,7 +207,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.chain.process_block.called)
         self.assertFalse(self.connection_private.send.called)
 
-    def test_headers_message_unknown_blocks(self):
+    def test_headers_message_two_unknown_blocks(self):
         header1 = CBlockHeader(nNonce=1)
         header2 = CBlockHeader(nNonce=2)
 
@@ -217,10 +217,24 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
-        self.assertFalse(self.connection_private.send.called)
+        self.assertTrue(self.connection_private.send.called)
+        self.assertEqual(self.connection_private.send.call_count, 2)
         self.assertTrue(self.chain.process_block.called)
         self.assertEqual(self.chain.process_block.call_count, 2)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)
+
+    def test_headers_message_unknown_blocks(self):
+        header = CBlockHeader(nNonce=1)
+
+        message = messages.msg_headers()
+        message.headers = [header]
+        self.networking.headers_message(self.public_connection1, message)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertEqual(self.public_connection1.send.call_args[0][0], 'getdata')
+        self.assertEqual(self.public_connection1.send.call_args[0][1].inv[0], header.GetHash())
+        self.assertTrue(self.chain.process_block.called)
+        self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.public)
 
     def test_getheaders_message_one_next_block(self):
         message = messages.msg_getheaders()

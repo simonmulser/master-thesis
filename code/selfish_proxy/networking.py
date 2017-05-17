@@ -119,6 +119,9 @@ class Networking(object):
                 if header.GetHash() in self.chain.blocks:
                     logging.debug("already received header with hash={}".format(core.b2lx(header.GetHash())))
                 else:
+                    message = messages.msg_getdata()
+                    message.inv.append(header.GetHash())
+                    connection.send('getdata', message)
                     if connection == self.connection_private:
                         self.chain.process_block(header, BlockOrigin.private)
                     else:
