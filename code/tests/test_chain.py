@@ -381,3 +381,22 @@ class ChainTest(unittest.TestCase):
         tip = chain.get_highest_block([self.second_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
 
         self.assertEqual(tip, self.first_block_chain_b)
+
+    def test_insert_block(self):
+        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock.cached_hash = 'hash2'
+        prevBlock.height = 45
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = 'hash1'
+        self.chain.tips = [prevBlock]
+
+        self.chain.insert_block(prevBlock, block)
+
+        self.assertFalse(prevBlock in self.chain.tips)
+        self.assertEqual(len(self.chain.tips), 1)
+
+        retrieved_block = self.chain.tips[0]
+        self.assertEqual(retrieved_block, block)
+        self.assertEqual(retrieved_block.prevBlock, prevBlock)
+        self.assertEqual(retrieved_block.prevBlock.nextBlock, block)
+        self.assertEqual(retrieved_block.height, 46)
