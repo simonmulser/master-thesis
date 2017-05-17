@@ -74,7 +74,7 @@ class Networking(object):
                                 get_headers.locator.vHave = [tip.hash]
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
-                                             .format(core.b2lx(tip.hash), self.connections[connection].name))
+                                             .format(core.b2lx(tip.hash()), self.connections[connection].name))
 
                     elif net.CInv.typemap[inv.type] == "FilteredBlock":
                         logging.warn("we don't care about filtered blocks")
