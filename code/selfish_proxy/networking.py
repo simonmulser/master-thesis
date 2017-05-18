@@ -117,12 +117,12 @@ class Networking(object):
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received {} headers message from {}'
+            logging.debug('received headers with {} headers message from {}'
                           .format(len(message.headers), self.repr_connection(connection)))
 
             for header in message.headers:
                 if header.GetHash() in self.chain.blocks:
-                    logging.debug("already received header with hash={}".format(core.b2lx(header.GetHash())))
+                    logging.debug('already received header with hash={}'.format(core.b2lx(header.GetHash())))
                 else:
                     message = messages.msg_getdata()
                     message.inv.append(header.GetHash())
@@ -167,6 +167,6 @@ class Networking(object):
         if connection is self.connection_private:
             return 'private'
         else:
-            'public(ip={})'.format(connection.host[0])
+            return 'public(ip={})'.format(connection.host[0])
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
