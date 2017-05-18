@@ -171,5 +171,4 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         retrieved_block = self.chain.tips[0]
         self.assertEqual(retrieved_block, block)
         self.assertEqual(retrieved_block.prevBlock, prevBlock)
-        self.assertEqual(retrieved_block.prevBlock.nextBlock, block)
         self.assertEqual(retrieved_block.height, 46)

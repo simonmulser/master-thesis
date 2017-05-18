@@ -82,7 +82,6 @@ class Chain:
         self.tips.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
-        prevBlock.nextBlock = block
 
         logging.info('{} inserted into chain'.format(block))
 
@@ -97,7 +96,6 @@ class Block:
         self.block_origin = block_origin
         self.transfer_allowed = False
         self.cached_hash = None
-        self.nextBlock = None
 
     def __repr__(self):
         return '{}(hash={} height={} block_origin={})'\
