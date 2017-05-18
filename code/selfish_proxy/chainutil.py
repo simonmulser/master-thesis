@@ -56,7 +56,7 @@ def get_headers_after_block(tips, block):
 
     headers = []
     if len(relevant_tips) > 0:
-        highest_block = get_highest_block(relevant_tips, block_origin, BlockOrigin.private)
+        highest_block = get_highest_block(relevant_tips, block.block_origin, BlockOrigin.private)
 
         tmp = highest_block
         while tmp is not block and tmp is not None:
