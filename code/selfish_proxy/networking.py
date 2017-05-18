@@ -83,9 +83,10 @@ class Networking(object):
                 if block.cblock is None:
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
+            else:
+                logging.warn('received CBlock(hash={}) from {} which is not in the chain'
+                             .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
 
-            logging.debug('received CBlock(hash={}) from {}'
-                          .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
         finally:
             self.lock.release()
             logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
