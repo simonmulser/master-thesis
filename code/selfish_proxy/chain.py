@@ -82,7 +82,7 @@ class Chain:
         self.tips.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
-        prevBlock.nextBlocks.append(block)
+        prevBlock.nextBlock = block
 
         logging.info('{} inserted into chain'.format(block))
 

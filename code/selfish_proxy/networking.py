@@ -5,7 +5,7 @@ from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
 from threading import Lock
-import chain
+import chainutil
 
 
 class Networking(object):
@@ -58,7 +58,7 @@ class Networking(object):
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
-                            relevant_tips = chain.get_relevant_tips(self.chain.tips)
+                            relevant_tips = chainutil.get_relevant_tips(self.chain.tips)
                             for tip in relevant_tips:
                                 get_headers.locator.vHave = [tip.hash()]
                                 connection.send('getheaders', get_headers)
