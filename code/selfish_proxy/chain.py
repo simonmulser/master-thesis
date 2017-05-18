@@ -1,9 +1,8 @@
 from bitcoin import core
 from strategy import BlockOrigin
 from strategy import ActionException
-import strategy
 import logging
-from bitcoin.core import CBlock
+import chainutil
 
 
 class Chain:
@@ -18,12 +17,12 @@ class Chain:
     def process_block(self, block, block_origin):
         logging.info("process Block(hash={}) from {}".format(core.b2lx(block.GetHash()), block_origin))
 
-        fork_before = get_private_public_fork(self.tips)
+        fork_before = chainutil.get_private_public_fork(self.tips)
         logging.info('fork before {}'.format(fork_before))
 
         self.try_to_insert_block(block, block_origin)
 
-        fork_after = get_private_public_fork(self.tips)
+        fork_after = chainutil.get_private_public_fork(self.tips)
         logging.info('fork after {}'.format(fork_after))
         logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash())))
         logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash())))
@@ -83,52 +82,9 @@ class Chain:
         self.tips.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
-        prevBlock.nextBlock = block
+        prevBlock.nextBlocks.append(block)
 
         logging.info('{} inserted into chain'.format(block))
-
-
-def get_private_public_fork(tips):
-    highest_private = get_highest_block(tips, BlockOrigin.private)
-    highest_public = get_highest_block(tips, BlockOrigin.public)
-
-    high_tip, low_tip = (highest_private, highest_public) \
-        if highest_private.height > highest_public.height else (highest_public, highest_private)
-
-    while high_tip.height > low_tip.height:
-        high_tip = high_tip.prevBlock
-
-    while high_tip is not low_tip:
-        high_tip = high_tip.prevBlock
-        low_tip = low_tip.prevBlock
-
-    fork_height = high_tip.height
-    return Fork(highest_private, highest_private.height - fork_height,
-                highest_public, highest_public.height - fork_height)
-
-
-def get_highest_block(tips, block_origin):
-    highest_block = genesis_block
-
-    for tip in tips:
-        if tip.block_origin is block_origin:
-            if highest_block.height <= tip.height:
-                highest_block = tip
-        elif tip.transfer_allowed is True:
-            if highest_block.height < tip.height:
-                highest_block = tip
-        else:
-            tmp = tip
-            while strategy.opposite_origin(tmp.block_origin) is block_origin and tmp.transfer_allowed is False:
-                tmp = tmp.prevBlock
-            if highest_block.height < tmp.height:
-                highest_block = tmp
-    return highest_block
-
-
-def get_relevant_tips(tips):
-    highest_tip = max(tips, key=lambda t: t.height)
-    return [tip for tip in tips if tip.height > highest_tip.height - 10]
 
 
 class Block:
@@ -169,24 +125,6 @@ class Block:
 
     def __hash__(self):
         return self.hash()
-
-
-class Fork:
-    def __init__(self, private_tip, private_height, public_tip, public_height):
-        self.private_tip = private_tip
-        self.private_height = private_height
-        self.public_tip = public_tip
-        self.public_height = public_height
-
-    def __repr__(self):
-        return '{}(private_height={} public_height={})'\
-            .format(self.__class__.__name__, self.private_height, self.public_height)
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return self.__dict__ != other.__dict__
 
 genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 genesis_block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)

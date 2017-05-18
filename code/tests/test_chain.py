@@ -1,7 +1,7 @@
 import unittest
 from chain import Chain
 from chain import Block
-from chain import Fork
+from chainutil import Fork
 import chain
 from mock import MagicMock
 from mock import patch
@@ -154,117 +154,6 @@ class ChainTest(unittest.TestCase):
         self.assertEqual(self.chain.tips[0].prevBlock.height, 2)
         self.assertEqual(len(self.chain.orphan_blocks), 0)
 
-    def test_get_private_public_fork_no_private_tip(self):
-        fork = chain.get_private_public_fork([self.second_block_chain_b])
-        self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash(), chain.genesis_hash)
-
-        self.assertEqual(fork.public_height, 2)
-        self.assertEqual(fork.public_tip.hash(), '2b')
-
-    def test_get_private_public_fork_no_public_tip(self):
-        fork = chain.get_private_public_fork([self.second_block_chain_a])
-        self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash(), chain.genesis_hash)
-
-        self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash(), '2a')
-
-    def test_get_private_public_fork_lead_public(self):
-        fork = chain.get_private_public_fork([self.second_block_chain_b, self.first_block_chain_a])
-        self.assertEqual(fork.private_height, 1)
-        self.assertEqual(fork.private_tip.hash(), '1a')
-
-        self.assertEqual(fork.public_height, 2)
-        self.assertEqual(fork.public_tip.hash(), '2b')
-
-    def test_get_private_public_fork_lead_private(self):
-        fork = chain.get_private_public_fork([self.first_block_chain_b, self.second_block_chain_a])
-
-        self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash(), '2a')
-
-        self.assertEqual(fork.public_height, 1)
-        self.assertEqual(fork.public_tip.hash(), '1b')
-
-    def test_get_private_public_fork_private_transferred(self):
-        self.first_block_chain_a.transfer_allowed = True
-        self.second_block_chain_a.transfer_allowed = True
-        fork = chain.get_private_public_fork([self.first_block_chain_b, self.second_block_chain_a])
-
-        self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash(), '2a')
-
-        self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash(), '2a')
-
-    def test_get_private_public_fork_one_private_transferred(self):
-        self.first_block_chain_a.transfer_allowed = True
-        fork = chain.get_private_public_fork([self.second_block_chain_a, self.first_block_chain_b])
-
-        self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash(), '2a')
-
-        self.assertEqual(fork.public_height, 1)
-
-    def test_get_private_public_fork_private_fork_point(self):
-        fork = chain.get_private_public_fork(
-            [self.fourth_block_chain_a, self.third_b_block_chain_a, self.second_block_chain_b])
-
-        self.assertEqual(fork.private_height, 4)
-        self.assertEqual(fork.private_tip.hash(), '4a')
-
-        self.assertEqual(fork.public_height, 2)
-        self.assertEqual(fork.public_tip.hash(), '2b')
-
-    def test_get_private_public_fork_half_private_fork_transferred(self):
-        self.first_block_chain_a.transfer_allowed = True
-        self.second_block_chain_a.transfer_allowed = True
-        self.third_b_block_chain_a.transfer_allowed = True
-
-        fork = chain.get_private_public_fork(
-            [self.second_block_chain_b, self.fourth_block_chain_a, self.third_b_block_chain_a])
-
-        self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash(), '4a')
-
-        self.assertEqual(fork.public_height, 1)
-        self.assertEqual(fork.public_tip.hash(), '3a_2')
-
-    def test_get_private_public_fork_longest_private_fork_transferred(self):
-        self.first_block_chain_a.transfer_allowed = True
-        self.second_block_chain_a.transfer_allowed = True
-        self.third_a_block_chain_a.transfer_allowed = True
-        self.fourth_block_chain_a.transfer_allowed = True
-
-        fork = chain.get_private_public_fork(
-            [self.second_block_chain_b, self.fourth_block_chain_a, self.third_b_block_chain_a])
-        self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash(), '4a')
-
-        self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash(), '4a')
-
-    def test_get_private_public_fork_public_fork_point(self):
-        fork = chain.get_private_public_fork(
-            [self.fourth_block_chain_b, self.third_b_block_chain_b, self.second_block_chain_a])
-        self.assertEqual(fork.private_height, 2)
-        self.assertEqual(fork.private_tip.hash(), '2a')
-
-        self.assertEqual(fork.public_height, 4)
-        self.assertEqual(fork.public_tip.hash(), '4b')
-
-    def test_get_private_public_fork_after_match(self):
-        self.first_block_chain_a.transfer_allowed = True
-        self.first_block_chain_b.transfer_allowed = True
-        fork = chain.get_private_public_fork([self.first_block_chain_a, self.second_block_chain_b])
-
-        self.assertEqual(fork.private_height, 1)
-        self.assertEqual(fork.private_tip.hash(), '1a')
-
-        self.assertEqual(fork.public_height, 2)
-        self.assertEqual(fork.public_tip.hash(), '2b')
-
     @patch('bitcoin.core.b2lx')
     def test_process_block_no_change_in_fork(self, _):
         self.chain.try_to_insert_block = MagicMock()
@@ -278,7 +167,7 @@ class ChainTest(unittest.TestCase):
         self.assertFalse(self.chain.strategy.find_action.called)
 
     @patch('bitcoin.core.b2lx')
-    @patch('chain.get_private_public_fork')
+    @patch('chainutil.get_private_public_fork')
     def test_process_block(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
@@ -295,7 +184,7 @@ class ChainTest(unittest.TestCase):
         self.assertTrue(self.chain.executor.execute.called)
 
     @patch('bitcoin.core.b2lx')
-    @patch('chain.get_private_public_fork')
+    @patch('chainutil.get_private_public_fork')
     def test_process_block_exception_find_action(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
@@ -311,7 +200,7 @@ class ChainTest(unittest.TestCase):
         self.assertFalse(self.chain.execute.called)
 
     @patch('bitcoin.core.b2lx')
-    @patch('chain.get_private_public_fork')
+    @patch('chainutil.get_private_public_fork')
     def test_process_block_exception_execute_action(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
         fork_before = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
@@ -325,63 +214,6 @@ class ChainTest(unittest.TestCase):
 
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
-
-    def test_get_relevant_public_tips_mixed(self):
-        tips = chain.get_relevant_tips([self.second_block_chain_a, self.second_block_chain_b])
-
-        self.assertEqual(len(tips), 2)
-        self.assertTrue(self.second_block_chain_b in tips)
-        self.assertTrue(self.second_block_chain_a in tips)
-
-    def test_get_relevant_public_tips_one_tip_too_short_tip(self):
-        high_block_chain_b = Block('10b', BlockOrigin.public)
-        high_block_chain_b.height = 11
-
-        tips = chain.get_relevant_tips([high_block_chain_b, self.first_block_chain_b])
-
-        self.assertEqual(tips, [high_block_chain_b])
-
-    def test_get_relevant_public_tips_two_tips(self):
-        tips = chain.get_relevant_tips([self.first_block_chain_b, self.second_block_chain_b])
-
-        self.assertEqual(len(tips), 2)
-        self.assertTrue(self.first_block_chain_b in tips)
-        self.assertTrue(self.second_block_chain_b in tips)
-
-    def test_get_highest_block_genesis_block(self):
-        tip = chain.get_highest_block([chain.genesis_block], BlockOrigin.private)
-
-        self.assertEqual(tip, chain.genesis_block)
-
-    def test_get_highest_block_same_origin(self):
-        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.private)
-
-        self.assertEqual(tip, self.first_block_chain_a)
-
-    def test_get_highest_block_different_origin(self):
-        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.public)
-
-        self.assertEqual(tip, chain.genesis_block)
-
-    def test_get_highest_block_different_origin_transfer_allowed(self):
-        self.first_block_chain_a.transfer_allowed = True
-        tip = chain.get_highest_block([self.first_block_chain_a], BlockOrigin.public)
-
-        self.assertEqual(tip, self.first_block_chain_a)
-
-    def test_get_highest_block_public_tip_lower_then_transferable_public_block(self):
-        self.second_block_chain_a.transfer_allowed = True
-
-        tip = chain.get_highest_block([self.third_a_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
-
-        self.assertEqual(tip, self.second_block_chain_a)
-
-    def test_get_highest_block_public_tip_same_height_then_transferable_public_block(self):
-        self.first_block_chain_a.transfer_allowed = True
-
-        tip = chain.get_highest_block([self.second_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
-
-        self.assertEqual(tip, self.first_block_chain_b)
 
     def test_insert_block(self):
         prevBlock = Block(None, BlockOrigin.private)
