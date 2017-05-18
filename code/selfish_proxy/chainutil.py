@@ -45,7 +45,7 @@ def get_relevant_tips(tips):
     return [tip for tip in tips if tip.height > highest_tip.height - 10]
 
 
-def get_headers_of_corresponding_longest_chain_if_match_use_private_tip(tips, block, block_origin):
+def get_headers_after_block(tips, block):
     relevant_tips = []
     for tip in tips:
         tmp = tip
