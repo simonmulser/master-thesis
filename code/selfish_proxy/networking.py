@@ -63,13 +63,10 @@ class Networking(object):
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
                                              .format(core.b2lx(tip.hash()), self.repr_connection(connection)))
-
-                    elif net.CInv.typemap[inv.type] == "FilteredBlock":
-                        logging.warn("we don't care about filtered blocks")
                     else:
-                        logging.warn("unknown inv type")
+                        logging.warn("we don't care about inv type={}".format(inv.type))
                 except KeyError:
-                    logging.warn("unknown inv type")
+                    logging.warn("unknown inv type={}")
 
         finally:
             self.lock.release()
