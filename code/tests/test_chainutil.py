@@ -161,3 +161,81 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         tip = chainutil.get_highest_block([self.second_block_chain_a, self.first_block_chain_b], BlockOrigin.public)
 
         self.assertEqual(tip, self.first_block_chain_b)
+
+    def test_get_highest_block_tips_same_height_override_private(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.second_block_chain_a, self.second_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.private)
+
+        self.assertEqual(tip, self.second_block_chain_a)
+
+    def test_get_highest_block_lead_private_override_private(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.third_a_block_chain_a, self.second_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.private)
+
+        self.assertEqual(tip, self.second_block_chain_a)
+
+    def test_get_highest_block_lead_public_override_private(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.third_a_block_chain_a, self.third_a_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.private)
+
+        self.assertEqual(tip, self.third_a_block_chain_b)
+
+    def test_get_highest_block_tips_same_height_override_public(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.second_block_chain_a, self.second_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.public)
+
+        self.assertEqual(tip, self.second_block_chain_b)
+
+    def test_get_highest_block_lead_private_override_public(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.third_a_block_chain_a, self.second_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.public)
+
+        self.assertEqual(tip, self.second_block_chain_b)
+
+    def test_get_highest_block_lead_public_override_public(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        tip = chainutil.get_highest_block([self.third_a_block_chain_a, self.third_a_block_chain_b],
+                                          BlockOrigin.public, BlockOrigin.public)
+
+        self.assertEqual(tip, self.third_a_block_chain_b)
+
+    def test_get_headers_of_corresponding_longest_chain_if_match_use_private_tip_private_block(self):
+
+        headers = chainutil.get_headers_of_corresponding_longest_chain_if_match_use_private_tip(
+            [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_a, BlockOrigin.private)
+
+        self.assertEqual(len(headers), 2)
+        self.assertFalse(self.first_block_chain_a.cblock_header in headers)
+        self.assertTrue(self.second_block_chain_a.cblock_header in headers)
+        self.assertTrue(self.third_a_block_chain_a.cblock_header in headers)
+
+    def test_get_headers_of_corresponding_longest_chain_if_match_use_private_tip_public_block(self):
+
+        headers = chainutil.get_headers_of_corresponding_longest_chain_if_match_use_private_tip(
+            [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_b, BlockOrigin.public)
+
+        self.assertEqual(len(headers), 2)
+        self.assertFalse(self.first_block_chain_b.cblock_header in headers)
+        self.assertTrue(self.second_block_chain_b.cblock_header in headers)
+        self.assertTrue(self.third_a_block_chain_b.cblock_header in headers)
+
+    def test_get_headers_of_corresponding_longest_chain_if_match_use_private_tip_match_and_private_tip(self):
+        self.first_block_chain_a.transfer_allowed = True
+        self.first_block_chain_b.transfer_allowed = True
+
+        headers = chainutil.get_headers_of_corresponding_longest_chain_if_match_use_private_tip(
+            [self.first_block_chain_b, self.first_block_chain_a, self.first_block_chain_b], chain.genesis_block, BlockOrigin.public)
+
+        self.assertEqual(len(headers), 1)
+        self.assertTrue(self.first_block_chain_a.cblock_header in headers)

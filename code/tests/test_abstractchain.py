@@ -1,13 +1,8 @@
 import unittest
-from chain import Chain
 from chain import Block
-from chainutil import Fork
 import chain
-from mock import MagicMock
-from mock import patch
-from bitcoin import core
 from strategy import BlockOrigin
-from strategy import ActionException
+from bitcoin.core import CBlockHeader
 
 
 class AbstractChainTest(unittest.TestCase):
@@ -31,48 +26,58 @@ class AbstractChainTest(unittest.TestCase):
         self.first_block_chain_a.height = 1
         self.first_block_chain_a.prevBlock = chain.genesis_block
         self.first_block_chain_a.cached_hash = '1a'
+        self.first_block_chain_a.cblock_header = CBlockHeader(nNonce=11)
 
         self.second_block_chain_a = Block(None, BlockOrigin.private)
         self.second_block_chain_a.height = 2
         self.second_block_chain_a.prevBlock = self.first_block_chain_a
         self.second_block_chain_a.cached_hash = '2a'
+        self.second_block_chain_a.cblock_header = CBlockHeader(nNonce=21)
 
         self.third_a_block_chain_a = Block(None, BlockOrigin.private)
         self.third_a_block_chain_a.height = 3
         self.third_a_block_chain_a.prevBlock = self.second_block_chain_a
         self.third_a_block_chain_a.cached_hash = '3a_1'
+        self.third_a_block_chain_a.cblock_header = CBlockHeader(nNonce=311)
 
         self.third_b_block_chain_a = Block(None, BlockOrigin.private)
         self.third_b_block_chain_a.height = 3
         self.third_b_block_chain_a.prevBlock = self.second_block_chain_a
         self.third_b_block_chain_a.cached_hash = '3a_2'
+        self.third_b_block_chain_a.cblock_header = CBlockHeader(nNonce=312)
 
         self.fourth_block_chain_a = Block(None, BlockOrigin.private)
         self.fourth_block_chain_a.height = 4
         self.fourth_block_chain_a.prevBlock = self.third_a_block_chain_a
         self.fourth_block_chain_a.cached_hash = '4a'
+        self.fourth_block_chain_a.cblock_header = CBlockHeader(nNonce=41)
 
         self.first_block_chain_b = Block(None, BlockOrigin.public)
         self.first_block_chain_b.height = 1
         self.first_block_chain_b.prevBlock = chain.genesis_block
         self.first_block_chain_b.cached_hash = '1b'
+        self.first_block_chain_b.cblock_header = CBlockHeader(nNonce=12)
 
         self.second_block_chain_b = Block(None, BlockOrigin.public)
         self.second_block_chain_b.height = 2
         self.second_block_chain_b.prevBlock = self.first_block_chain_b
         self.second_block_chain_b.cached_hash = '2b'
+        self.second_block_chain_b.cblock_header = CBlockHeader(nNonce=22)
 
         self.third_a_block_chain_b = Block(None, BlockOrigin.public)
         self.third_a_block_chain_b.height = 3
         self.third_a_block_chain_b.prevBlock = self.second_block_chain_b
         self.third_a_block_chain_b.cached_hash = '3b_1'
+        self.third_a_block_chain_b.cblock_header = CBlockHeader(nNonce=321)
 
         self.third_b_block_chain_b = Block(None, BlockOrigin.public)
         self.third_b_block_chain_b.height = 3
         self.third_b_block_chain_b.prevBlock = self.second_block_chain_b
         self.third_b_block_chain_b.cached_hash = '3b_2'
+        self.third_b_block_chain_b.cblock_header = CBlockHeader(nNonce=322)
 
         self.fourth_block_chain_b = Block(None, BlockOrigin.public)
         self.fourth_block_chain_b.height = 4
         self.fourth_block_chain_b.prevBlock = self.third_a_block_chain_b
         self.fourth_block_chain_b.cached_hash = '4b'
+        self.fourth_block_chain_b.cblock_header = CBlockHeader(nNonce=42)

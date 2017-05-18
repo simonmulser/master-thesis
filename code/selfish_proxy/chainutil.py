@@ -22,14 +22,16 @@ def get_private_public_fork(tips):
                 highest_public, highest_public.height - fork_height)
 
 
-def get_highest_block(tips, block_origin):
+def get_highest_block(tips, block_origin, override_block_origin=None):
+    if not override_block_origin:
+        override_block_origin = block_origin
     highest_block = chain.genesis_block
 
     for tip in tips:
         tmp = tip
         while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
             tmp = tmp.prevBlock
-        if tmp.block_origin is block_origin:
+        if tmp.block_origin is override_block_origin:
             if highest_block.height <= tmp.height:
                 highest_block = tmp
         else:
@@ -41,6 +43,26 @@ def get_highest_block(tips, block_origin):
 def get_relevant_tips(tips):
     highest_tip = max(tips, key=lambda t: t.height)
     return [tip for tip in tips if tip.height > highest_tip.height - 10]
+
+
+def get_headers_of_corresponding_longest_chain_if_match_use_private_tip(tips, block, block_origin):
+    relevant_tips = []
+    for tip in tips:
+        tmp = tip
+        while tmp is not block and tmp.prevBlock is not None:
+            tmp = tmp.prevBlock
+        if tmp is block:
+            relevant_tips.append(tip)
+
+    headers = []
+    if len(relevant_tips) > 0:
+        highest_block = get_highest_block(relevant_tips, block_origin, BlockOrigin.private)
+
+        tmp = highest_block
+        while tmp is not block and tmp is not None:
+            headers.append(tmp.cblock_header)
+            tmp = tmp.prevBlock
+    return headers
 
 
 class Fork:
