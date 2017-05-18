@@ -26,16 +26,13 @@ def get_highest_block(tips, block_origin):
     highest_block = chain.genesis_block
 
     for tip in tips:
-        if tip.block_origin is block_origin:
-            if highest_block.height <= tip.height:
-                highest_block = tip
-        elif tip.transfer_allowed is True:
-            if highest_block.height < tip.height:
-                highest_block = tip
+        tmp = tip
+        while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        if tmp.block_origin is block_origin:
+            if highest_block.height <= tmp.height:
+                highest_block = tmp
         else:
-            tmp = tip
-            while strategy.opposite_origin(tmp.block_origin) is block_origin and tmp.transfer_allowed is False:
-                tmp = tmp.prevBlock
             if highest_block.height < tmp.height:
                 highest_block = tmp
     return highest_block
