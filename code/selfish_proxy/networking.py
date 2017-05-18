@@ -76,14 +76,22 @@ class Networking(object):
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def process_block(self, connection, message):
-        if message.block.GetHash() in self.chain.blocks:
-            block = self.chain.blocks[message.block.GetHash()]
-            if block.cblock is None:
-                block.cblock = message.block
-                logging.info('set cblock in {}'.format(block.hash_repr()))
+        self.lock.acquire()
+        try:
+            logging.debug('received block message from {}'
+                          .format(message.block, self.repr_connection(connection)))
 
-        logging.debug('received CBlock(hash={}) from {}'
-                      .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
+            if message.block.GetHash() in self.chain.blocks:
+                block = self.chain.blocks[message.block.GetHash()]
+                if block.cblock is None:
+                    block.cblock = message.block
+                    logging.info('set cblock in {}'.format(block.hash_repr()))
+
+            logging.debug('received CBlock(hash={}) from {}'
+                          .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
+        finally:
+            self.lock.release()
+            logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
@@ -147,26 +155,45 @@ class Networking(object):
             logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
 
     def getheaders_message(self, connection, message):
-        found_block = None
-        for block_hash in message.locator.vHave:
-            if block_hash in self.chain.blocks:
-                found_block = self.chain.blocks[block_hash]
-                break
+        self.lock.acquire()
+        try:
+            logging.debug('received getheaders message from {}'
+                          .format(len(message.inv), self.repr_connection(connection)))
 
-        message = messages.msg_headers()
-        if found_block:
-            tmp = found_block.nextBlock
-            while tmp and tmp.transfer_allowed:
-                message.headers.append(tmp.cblock_header)
-                tmp = tmp.nextBlock
-        connection.send('headers', message)
+            found_block = None
+            for block_hash in message.locator.vHave:
+                if block_hash in self.chain.blocks:
+                    found_block = self.chain.blocks[block_hash]
+                    break
+
+            message = messages.msg_headers()
+            if found_block:
+                tmp = found_block.nextBlock
+                while tmp and tmp.transfer_allowed:
+                    message.headers.append(tmp.cblock_header)
+                    tmp = tmp.nextBlock
+            connection.send('headers', message)
+            logging.debug('sent headers message with {} headers to {}'
+                          .format(len(message.headers)), self.repr_connection(connection))
+
+        finally:
+            self.lock.release()
+            logging.debug('processed getheaders message from {}'.format(self.repr_connection(connection)))
 
     def getdata_message(self, connection, message):
-        for inv in message.inv:
-            if inv in self.chain.blocks:
-                message = messages.msg_block()
-                message.block = self.chain.blocks[inv].cblock
-                connection.send('block', message)
+        self.lock.acquire()
+        try:
+            logging.debug('received getdata with {} inv message from {}'
+                          .format(len(message.inv), self.repr_connection(connection)))
+
+            for inv in message.inv:
+                if inv in self.chain.blocks:
+                    message = messages.msg_block()
+                    message.block = self.chain.blocks[inv].cblock
+                    connection.send('block', message)
+        finally:
+            self.lock.release()
+            logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
