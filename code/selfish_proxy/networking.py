@@ -120,17 +120,28 @@ class Networking(object):
             logging.debug('received headers with {} headers message from {}'
                           .format(len(message.headers), self.repr_connection(connection)))
 
+            getdata_inv = []
             for header in message.headers:
                 if header.GetHash() in self.chain.blocks:
                     logging.debug('already received header with hash={}'.format(core.b2lx(header.GetHash())))
                 else:
-                    message = messages.msg_getdata()
-                    message.inv.append(header.GetHash())
-                    connection.send('getdata', message)
+                    getdata_inv.append(header.GetHash())
+
                     if connection == self.connection_private:
                         self.chain.process_block(header, BlockOrigin.private)
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
+
+            if len(getdata_inv) > 0:
+                message = messages.msg_getdata()
+                for inv in getdata_inv:
+                    cInv = net.CInv()
+                    cInv.type = inv_typemap['Block']
+                    cInv.hash = inv
+                    message.inv.append(cInv)
+                connection.send('getdata', message)
+                logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
+
         finally:
             self.lock.release()
             logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
