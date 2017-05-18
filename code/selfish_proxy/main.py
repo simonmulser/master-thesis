@@ -5,8 +5,6 @@ from networking import Networking
 from strategy.executor import Executor
 from strategy.code import Strategy
 from chain import Chain
-from blockrelay import BlockRelay
-from threading import Thread
 
 
 def check_positive(value):
@@ -46,18 +44,9 @@ else:
     rootLogger.setLevel(logging.INFO)
 
 networking = Networking()
-block_relay = BlockRelay(networking, args.ips_send_blocks)
-networking.block_relay = block_relay
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 chain = Chain(executor, strategy)
 networking.chain = chain
 
-
-thread = Thread(target=block_relay.start)
-thread.daemon = True
-thread.start()
-
 networking.start(args.ip_public, args.ip_private)
-
-thread.join()
