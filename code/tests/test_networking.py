@@ -382,6 +382,21 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.public_connection1.send.call_args[0][0], 'block')
         self.assertEqual(self.public_connection1.send.call_args[0][1].block, cblock)
 
+    def test_getdata_message_with_block_not_available(self):
+        cblock = CBlock()
+        block = Block(cblock, BlockOrigin.private)
+        message = messages.msg_getdata()
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['Block']
+        cInv.hash = cblock.GetHash()
+        message.inv = [cInv]
+
+        self.chain.blocks = {cblock.GetHash(): block}
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertFalse(self.public_connection1.send.called)
+
     def test_getdata_message_with_unknown_hashes(self):
         message = messages.msg_getdata()
         cInv1 = CInv()

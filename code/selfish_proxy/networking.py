@@ -158,11 +158,12 @@ class Networking(object):
                 try:
                     if net.CInv.typemap[inv.type] == 'Block':
                         if inv.hash in self.chain.blocks:
-                            message = messages.msg_block()
-                            message.block = self.chain.blocks[inv.hash].cblock
-                            connection.send('block', message)
-                            logging.info('send CBlock(hash={}) to {}'
-                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                            if self.chain.blocks[inv.hash].cblock:
+                                message = messages.msg_block()
+                                message.block = self.chain.blocks[inv.hash].cblock
+                                connection.send('block', message)
+                                logging.info('send CBlock(hash={}) to {}'
+                                             .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     else:
