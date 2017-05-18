@@ -155,10 +155,21 @@ class Networking(object):
                           .format(len(message.inv), self.repr_connection(connection)))
 
             for inv in message.inv:
-                if inv in self.chain.blocks:
-                    message = messages.msg_block()
-                    message.block = self.chain.blocks[inv].cblock
-                    connection.send('block', message)
+                try:
+                    if net.CInv.typemap[inv.type] == 'Block':
+                        if inv.hash in self.chain.blocks:
+                            message = messages.msg_block()
+                            message.block = self.chain.blocks[inv.hash].cblock
+                            connection.send('block', message)
+                            logging.info('send CBlock(hash={}) to {}'
+                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                        else:
+                            logging.info('CBlock(hash={}) not found'.format(inv.hash))
+                    else:
+                        logging.warn("we don't care about inv type={}".format(inv.type))
+                except KeyError:
+                    logging.warn("unknown inv type={}")
+
         finally:
             self.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))

@@ -7,6 +7,7 @@ from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
+from bitcoin.net import CInv
 from bitcoin.net import CBlockLocator
 from chain import Block
 from chain import BlockOrigin
@@ -368,7 +369,10 @@ class NetworkingTest(unittest.TestCase):
         block = Block(cblock, BlockOrigin.private)
         block.cblock = cblock
         message = messages.msg_getdata()
-        message.inv = [cblock.GetHash()]
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['Block']
+        cInv.hash = cblock.GetHash()
+        message.inv = [cInv]
 
         self.chain.blocks = {cblock.GetHash(): block}
 
@@ -380,7 +384,13 @@ class NetworkingTest(unittest.TestCase):
 
     def test_getdata_message_with_unknown_hashes(self):
         message = messages.msg_getdata()
-        message.inv = ['hash1', 'hash2']
+        cInv1 = CInv()
+        cInv1.type = networking.inv_typemap['Block']
+        cInv1.hash = 'hash1'
+        cInv2 = CInv()
+        cInv2.type = networking.inv_typemap['Block']
+        cInv2.hash = 'hash2'
+        message.inv = [cInv1, cInv2]
 
         self.chain.blocks = {}
 
@@ -392,11 +402,17 @@ class NetworkingTest(unittest.TestCase):
         cblock1 = CBlock()
         block1 = Block(cblock1, BlockOrigin.private)
         block1.cblock = cblock1
+        cInv1 = CInv()
+        cInv1.type = networking.inv_typemap['Block']
+        cInv1.hash = cblock1.GetHash()
         cblock2 = CBlock()
         block2 = Block(cblock2, BlockOrigin.private)
         block2.cblock = cblock2
+        cInv2 = CInv()
+        cInv2.type = networking.inv_typemap['Block']
+        cInv2.hash = cblock2.GetHash()
         message = messages.msg_getdata()
-        message.inv = [cblock1.GetHash(), cblock2.GetHash()]
+        message.inv = [cInv1, cInv2]
 
         self.chain.blocks = {cblock1.GetHash(): block1, cblock2.GetHash(): block2}
 
