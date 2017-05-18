@@ -415,6 +415,24 @@ class NetworkingTest(unittest.TestCase):
         self.networking.getdata_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.send.called)
+        self.assertEqual(self.networking.deferred_requests[cblock.GetHash()], [self.public_connection1])
+
+    def test_getdata_message_second_deferred_request(self):
+        cblock = CBlock()
+        block = Block(cblock, BlockOrigin.private)
+        message = messages.msg_getdata()
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['Block']
+        cInv.hash = cblock.GetHash()
+        message.inv = [cInv]
+
+        self.chain.blocks = {cblock.GetHash(): block}
+
+        self.networking.getdata_message(self.public_connection1, message)
+        self.networking.getdata_message(self.public_connection2, message)
+
+        self.assertTrue(self.public_connection1 in self.networking.deferred_requests[cblock.GetHash()])
+        self.assertTrue(self.public_connection2 in self.networking.deferred_requests[cblock.GetHash()])
 
     def test_getdata_message_with_unknown_hashes(self):
         message = messages.msg_getdata()

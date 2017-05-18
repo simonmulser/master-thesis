@@ -173,6 +173,13 @@ class Networking(object):
                                 connection.send('block', message)
                                 logging.info('send CBlock(hash={}) to {}'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                            else:
+                                if inv.hash in self.deferred_requests:
+                                    self.deferred_requests[inv.hash].append(connection)
+                                else:
+                                    self.deferred_requests[inv.hash] = [connection]
+                                logging.info('CBlock(hash={}) not available, added to deferred_requests'
+                                             .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     else:
