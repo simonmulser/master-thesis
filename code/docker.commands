@@ -1,8 +1,8 @@
 docker network create --subnet=240.0.0.0/4 --driver bridge isolated_network
 
 recommended starting order:
-docker run --detach=true --net=isolated_network --ip=240.0.0.4 --name=bob1 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -keypool=1 -datadir=/data -regtest -logtimemicros -debug -addnode=240.0.0.3
-docker run --detach=true --net=isolated_network --ip=240.0.0.5 --name=bob2 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -keypool=1 -datadir=/data -regtest -logtimemicros -debug -addnode=240.0.0.3
+docker run --detach=true --net=isolated_network --ip=240.0.0.4 --name=bob1 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -keypool=1 -datadir=/data -regtest -logtimemicros -debug
+docker run --detach=true --net=isolated_network --ip=240.0.0.5 --name=bob2 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -keypool=1 -datadir=/data -regtest -logtimemicros -debug
 docker run --detach=true --net=isolated_network --ip=240.0.0.2 --name=alice node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -keypool=1 -datadir=/data -regtest -logtimemicros -debug
 
 docker run -v $PWD/selfish_proxy:/code --net=isolated_network --ip=240.0.0.10 --rm --name=proxy proxy python main.py -v --ips-send-blocks 240.0.0.4 240.0.0.5
