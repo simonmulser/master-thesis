@@ -25,8 +25,8 @@ class Chain:
 
         fork_after = get_private_public_fork(self.tips)
         logging.info('fork after {}'.format(fork_after))
-        logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash)))
-        logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash)))
+        logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash())))
+        logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash())))
 
         if fork_before != fork_after:
             try:
