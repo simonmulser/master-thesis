@@ -45,7 +45,7 @@ class Networking(object):
     def process_inv(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received inv with {} invs from {}'
+            logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
 
             for inv in message.inv:
@@ -99,13 +99,13 @@ class Networking(object):
                 logging.debug("{} to be send to public".format(block.hash_repr()))
             else:
                 private_block_invs.append(inv)
-                logging.debug("{} to be send to alice-private".format(block.hash_repr()))
+                logging.debug("{} to be send to alice".format(block.hash_repr()))
 
         if len(private_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = private_block_invs
             self.connection_private.send('inv', msg)
-            logging.info('{} block invs send to alice-private'.format(len(private_block_invs)))
+            logging.info('{} block invs send to alice'.format(len(private_block_invs)))
 
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()
@@ -117,7 +117,7 @@ class Networking(object):
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received headers with {} headers message from {}'
+            logging.debug('received headers message with {} headers message from {}'
                           .format(len(message.headers), self.repr_connection(connection)))
 
             getdata_inv = []
