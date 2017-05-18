@@ -14,6 +14,7 @@ class Networking(object):
         self.connection_private = None
         self.chain = None
         self.lock = Lock()
+        self.deferred_requests = {}
 
     def start(self, ips_public, ip_private):
         logging.debug('starting client')
@@ -78,14 +79,21 @@ class Networking(object):
             logging.debug('received block message from {}'
                           .format(self.repr_connection(connection)))
 
-            if message.block.GetHash() in self.chain.blocks:
-                block = self.chain.blocks[message.block.GetHash()]
+            block_hash = message.block.GetHash()
+            if block_hash in self.chain.blocks:
+                block = self.chain.blocks[block_hash]
                 if block.cblock is None:
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
+
+                if block_hash in self.deferred_requests:
+                    for connection in self.deferred_requests[message.block.GetHash()]:
+                        connection.send('block', message)
+                        logging.info('full-filled deferred block request for CBlock(hash={}) to {}'
+                                     .format(core.b2lx(block_hash), self.repr_connection(connection)))
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
-                             .format(core.b2lx(message.block.GetHash()), self.repr_connection(connection)))
+                             .format(core.b2lx(block_hash), self.repr_connection(connection)))
 
         finally:
             self.lock.release()

@@ -342,10 +342,29 @@ class NetworkingTest(unittest.TestCase):
         block.cached_hash = message.block.GetHash()
 
         self.chain.blocks = {block.hash():  block}
+        self.networking.deferred_requests = {}
 
         self.networking.process_block(self.connection_private, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock)
+
+    def test_process_block_with_deferred_block_requests(self):
+        message = messages.msg_block()
+        cblock = CBlock()
+        message.block = cblock
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = message.block.GetHash()
+
+        self.chain.blocks = {block.hash():  block}
+        self.networking.deferred_requests = {block.hash(): [self.public_connection1, self.public_connection2]}
+
+        self.networking.process_block(self.connection_private, message)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertTrue(self.public_connection2.send.called)
+        self.assertEqual(self.public_connection2.send.call_args[0][0], 'block')
+        self.assertEqual(self.public_connection2.send.call_args[0][1], message)
 
     def test_process_block_two_times(self):
         message = messages.msg_block()
