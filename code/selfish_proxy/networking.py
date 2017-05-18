@@ -30,7 +30,7 @@ class Networking(object):
         client.register_handler('block', self.process_block)
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
-        client.register_handler('gedata', self.getdata_message)
+        client.register_handler('getdata', self.getdata_message)
         # tx missing
 
         network.ClientBehavior(client)
