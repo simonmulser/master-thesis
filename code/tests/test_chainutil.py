@@ -210,7 +210,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         self.assertEqual(tip, self.third_a_block_chain_b)
 
-    def test_get_headers_after_block_private_block(self):
+    def test_get_headers_after_block_with_private_block(self):
 
         headers = chainutil.get_headers_after_block(
             [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_a, BlockOrigin.private)
@@ -220,7 +220,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(self.second_block_chain_a.cblock_header in headers)
         self.assertTrue(self.third_a_block_chain_a.cblock_header in headers)
 
-    def test_get_headers_after_block_public_block(self):
+    def test_get_headers_after_block_with_public_block(self):
 
         headers = chainutil.get_headers_after_block(
             [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_b, BlockOrigin.public)
@@ -230,7 +230,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(self.second_block_chain_b.cblock_header in headers)
         self.assertTrue(self.third_a_block_chain_b.cblock_header in headers)
 
-    def test_get_headers_after_block_match_and_private_tip(self):
+    def test_get_headers_after_block_with_match_and_private_tip(self):
         self.first_block_chain_a.transfer_allowed = True
         self.first_block_chain_b.transfer_allowed = True
 
