@@ -30,7 +30,8 @@ class Networking(object):
         client.register_handler('block', self.process_block)
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
-        # tx, getdata missing
+        client.register_handler('gedata', self.getdata_message)
+        # tx missing
 
         network.ClientBehavior(client)
 
@@ -148,6 +149,13 @@ class Networking(object):
                 message.headers.append(tmp.cblock_header)
                 tmp = tmp.nextBlock
         connection.send('headers', message)
+
+    def getdata_message(self, connection, message):
+        for inv in message.inv:
+            if inv in self.chain.blocks:
+                message = messages.msg_block()
+                message.block = self.chain.blocks[inv].cblock
+                connection.send('block', message)
 
     def ping_message(self, connection, message):
         connection.send('pong', message)

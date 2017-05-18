@@ -361,3 +361,45 @@ class NetworkingTest(unittest.TestCase):
         self.networking.process_block(self.connection_private, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)
+
+    def test_getdata_message_with_block(self):
+        cblock = CBlock()
+        block = Block(cblock, BlockOrigin.private)
+        block.cblock = cblock
+        message = messages.msg_getdata()
+        message.inv = [cblock.GetHash()]
+
+        self.chain.blocks = {cblock.GetHash(): block}
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertEqual(self.public_connection1.send.call_args[0][0], 'block')
+        self.assertEqual(self.public_connection1.send.call_args[0][1].block, cblock)
+
+    def test_getdata_message_with_unknown_hashes(self):
+        message = messages.msg_getdata()
+        message.inv = ['hash1', 'hash2']
+
+        self.chain.blocks = {}
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertFalse(self.public_connection1.send.called)
+
+    def test_getdata_message_with_two_blocks(self):
+        cblock1 = CBlock()
+        block1 = Block(cblock1, BlockOrigin.private)
+        block1.cblock = cblock1
+        cblock2 = CBlock()
+        block2 = Block(cblock2, BlockOrigin.private)
+        block2.cblock = cblock2
+        message = messages.msg_getdata()
+        message.inv = [cblock1.GetHash(), cblock2.GetHash()]
+
+        self.chain.blocks = {cblock1.GetHash(): block1, cblock2.GetHash(): block2}
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertEqual(self.public_connection1.send.call_count, 2)
