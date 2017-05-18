@@ -17,9 +17,8 @@ parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
 parser.add_argument('-v', '--verbose', help='increase output verbosity', action='store_true')
 
-parser.add_argument('--ip-public', help='set the ip of the public node', default='240.0.0.3')
 parser.add_argument('--ip-private', help='set the ip of the private node', default='240.0.0.2')
-parser.add_argument('--ips-send-blocks', help='set the ips which receive blocks', nargs='+', default=[])
+parser.add_argument('--ips-public', help='set the ips of the public nodes', nargs='+', default=[])
 
 parser.add_argument('--lead-stubborn', help='use lead-stubbornness in strategy', action='store_true')
 parser.add_argument('--equal-fork-stubborn', help='use equal-fork-stubbornness in strategy', action='store_true')
@@ -50,4 +49,4 @@ strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stu
 chain = Chain(executor, strategy)
 networking.chain = chain
 
-networking.start(args.ip_public, args.ip_private)
+networking.start(args.ips_public, args.ip_private)
