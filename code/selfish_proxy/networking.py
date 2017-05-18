@@ -93,35 +93,6 @@ class Networking(object):
             self.lock.release()
             logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
-    def send_inv(self, blocks):
-        private_block_invs = []
-        public_block_invs = []
-
-        for block in blocks:
-            inv = net.CInv()
-            inv.type = inv_typemap['Block']
-            inv.hash = block.hash
-
-            if block.block_origin is BlockOrigin.private:
-                public_block_invs.append(inv)
-                logging.debug("{} to be send to public".format(block.hash_repr()))
-            else:
-                private_block_invs.append(inv)
-                logging.debug("{} to be send to alice".format(block.hash_repr()))
-
-        if len(private_block_invs) > 0:
-            msg = messages.msg_inv()
-            msg.inv = private_block_invs
-            self.connection_private.send('inv', msg)
-            logging.info('{} block invs send to alice'.format(len(private_block_invs)))
-
-        if len(public_block_invs) > 0:
-            msg = messages.msg_inv()
-            msg.inv = public_block_invs
-            for connection in self.public_connections:
-                connection.send('inv', msg)
-            logging.info('{} block invs send to public'.format(len(public_block_invs)))
-
     def headers_message(self, connection, message):
         self.lock.acquire()
         try:
@@ -194,6 +165,35 @@ class Networking(object):
         finally:
             self.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
+
+    def send_inv(self, blocks):
+        private_block_invs = []
+        public_block_invs = []
+
+        for block in blocks:
+            inv = net.CInv()
+            inv.type = inv_typemap['Block']
+            inv.hash = block.hash
+
+            if block.block_origin is BlockOrigin.private:
+                public_block_invs.append(inv)
+                logging.debug("{} to be send to public".format(block.hash_repr()))
+            else:
+                private_block_invs.append(inv)
+                logging.debug("{} to be send to alice".format(block.hash_repr()))
+
+        if len(private_block_invs) > 0:
+            msg = messages.msg_inv()
+            msg.inv = private_block_invs
+            self.connection_private.send('inv', msg)
+            logging.info('{} block invs send to alice'.format(len(private_block_invs)))
+
+        if len(public_block_invs) > 0:
+            msg = messages.msg_inv()
+            msg.inv = public_block_invs
+            for connection in self.public_connections:
+                connection.send('inv', msg)
+            logging.info('{} block invs send to public'.format(len(public_block_invs)))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
