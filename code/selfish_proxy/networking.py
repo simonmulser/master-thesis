@@ -158,7 +158,7 @@ class Networking(object):
         self.lock.acquire()
         try:
             logging.debug('received getheaders message from {}'
-                          .format(len(message.inv), self.repr_connection(connection)))
+                          .format(len(message.locator.vHave), self.repr_connection(connection)))
 
             found_block = None
             for block_hash in message.locator.vHave:
@@ -174,7 +174,7 @@ class Networking(object):
                     tmp = tmp.nextBlock
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
-                          .format(len(message.headers)), self.repr_connection(connection))
+                          .format(len(message.headers), self.repr_connection(connection)))
 
         finally:
             self.lock.release()
