@@ -79,7 +79,7 @@ class Networking(object):
         self.lock.acquire()
         try:
             logging.debug('received block message from {}'
-                          .format(message.block, self.repr_connection(connection)))
+                          .format(self.repr_connection(connection)))
 
             if message.block.GetHash() in self.chain.blocks:
                 block = self.chain.blocks[message.block.GetHash()]
@@ -157,7 +157,7 @@ class Networking(object):
     def getheaders_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received getheaders message from {}'
+            logging.debug('received getheaders message with {} headers from {}'
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
             found_block = None
@@ -183,7 +183,7 @@ class Networking(object):
     def getdata_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received getdata with {} inv message from {}'
+            logging.debug('received getdata message with {} inv from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
 
             for inv in message.inv:
