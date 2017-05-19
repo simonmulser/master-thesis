@@ -1,5 +1,4 @@
 from strategy import BlockOrigin
-import strategy
 import chain
 
 
