@@ -122,7 +122,7 @@ class Block:
         return self.hash() != other.hash()
 
     def __hash__(self):
-        return self.hash()
+        return hash(self.hash())
 
 genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
 genesis_block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)

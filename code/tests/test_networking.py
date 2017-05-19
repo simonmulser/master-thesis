@@ -38,7 +38,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain = self.networking.chain = MagicMock()
         self.block_relay = self.networking.block_relay = MagicMock()
 
-    @patch('chainutil.get_relevant_tips')
+    @patch('chainutil.get_tips_for_block_origin')
     def test_process_inv_msg_block_private_unknown_with_tips(self, mock):
         block = Block(None, "public")
         block.cached_hash = 'a1'

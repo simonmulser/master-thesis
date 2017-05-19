@@ -58,7 +58,12 @@ class Networking(object):
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
-                            relevant_tips = chainutil.get_relevant_tips(self.chain.tips)
+
+                            if connection is self.connection_private:
+                                relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.private)
+                            else:
+                                relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.public)
+
                             for tip in relevant_tips:
                                 get_headers.locator.vHave = [tip.hash()]
                                 connection.send('getheaders', get_headers)

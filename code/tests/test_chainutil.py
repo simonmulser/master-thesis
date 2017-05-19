@@ -239,3 +239,44 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         self.assertEqual(len(headers), 1)
         self.assertTrue(self.first_block_chain_a.cblock_header in headers)
+
+    def test_get_tips_for_block_origin_with_transfer_allowed(self):
+        self.third_a_block_chain_b.transfer_allowed = True
+
+        tips = chainutil.get_tips_for_block_origin([self.third_a_block_chain_b], BlockOrigin.private)
+
+        self.assertEqual(len(tips), 1)
+        self.assertEqual(tips[0], self.third_a_block_chain_b)
+
+    def test_get_tips_for_block_origin_with_transfer_allowed_of_parent(self):
+        self.second_block_chain_b.transfer_allowed = True
+
+        tips = chainutil.get_tips_for_block_origin([self.third_a_block_chain_b], BlockOrigin.private)
+
+        self.assertEqual(len(tips), 1)
+        self.assertEqual(tips[0], self.second_block_chain_b)
+
+    def test_get_tips_for_block_origin_with_same_origin(self):
+        tips = chainutil.get_tips_for_block_origin([self.third_a_block_chain_a], BlockOrigin.private)
+
+        self.assertEqual(len(tips), 1)
+        self.assertEqual(tips[0], self.third_a_block_chain_a)
+
+    def test_get_tips_for_block_origin_with_two_same_tips(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        self.second_block_chain_b.prevBlock = self.first_block_chain_a
+        tips = chainutil.get_tips_for_block_origin([self.third_a_block_chain_a, self.third_b_block_chain_a], BlockOrigin.public)
+
+        self.assertEqual(len(tips), 1)
+        self.assertEqual(tips[0], self.second_block_chain_a)
+
+    def test_get_tips_for_block_origin_with_two_tips(self):
+        self.second_block_chain_a.transfer_allowed = True
+
+        self.second_block_chain_b.prevBlock = self.first_block_chain_a
+        tips = chainutil.get_tips_for_block_origin([self.second_block_chain_a, self.second_block_chain_b], BlockOrigin.public)
+
+        self.assertEqual(len(tips), 2)
+        self.assertTrue(self.second_block_chain_a in tips)
+        self.assertTrue(self.second_block_chain_b in tips)

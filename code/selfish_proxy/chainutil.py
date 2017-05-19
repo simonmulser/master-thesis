@@ -1,5 +1,6 @@
 from strategy import BlockOrigin
 import chain
+from sets import Set
 
 
 def get_private_public_fork(tips):
@@ -37,6 +38,16 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
             if highest_block.height < tmp.height:
                 highest_block = tmp
     return highest_block
+
+
+def get_tips_for_block_origin(tips, block_origin):
+    tips_for_block_origin = Set()
+    for tip in tips:
+        tmp = tip
+        while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        tips_for_block_origin.add(tmp)
+    return list(tips_for_block_origin)
 
 
 def get_relevant_tips(tips):
