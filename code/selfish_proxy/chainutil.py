@@ -46,8 +46,9 @@ def get_relevant_tips(tips):
 
 
 def get_headers_after_block(tips, block):
+    potential_tips = get_relevant_tips(tips)
     relevant_tips = []
-    for tip in tips:
+    for tip in potential_tips:
         tmp = tip
         while tmp is not block and tmp.prevBlock is not None:
             tmp = tmp.prevBlock

@@ -145,8 +145,7 @@ class Networking(object):
 
             message = messages.msg_headers()
             if found_block:
-                relevant_tips = chainutil.get_relevant_tips(self.chain.tips)
-                message.headers = chainutil.get_headers_after_block(relevant_tips, found_block)
+                message.headers = chainutil.get_headers_after_block(self.chain.tips, found_block)
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
                           .format(len(message.headers), self.repr_connection(connection)))

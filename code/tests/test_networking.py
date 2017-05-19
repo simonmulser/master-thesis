@@ -239,27 +239,8 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.chain.process_block.called)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.public)
 
-    def test_getheaders_message_one_next_block(self):
-        message = messages.msg_getheaders()
-        message.locator = CBlockLocator()
-        message.locator.vHave = ['hash1']
-
-        nextBlock = Block('cblock_header2', BlockOrigin.private)
-        nextBlock.cached_hash = 'hash2'
-        nextBlock.transfer_allowed = True
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = 'hash1'
-        block.nextBlock = nextBlock
-        self.chain.blocks = {block.hash(): block, nextBlock.hash(): nextBlock}
-
-        self.networking.getheaders_message(self.connection_private, message)
-
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 1)
-        self.assertEqual(self.connection_private.send.call_args[0][1].headers[0], 'cblock_header2')
-
-    def test_getheaders_message_no_next_block(self):
+    @patch('chainutil.get_headers_after_block')
+    def test_getheaders_message_block_found(self, mock):
         message = messages.msg_getheaders()
         message.locator = CBlockLocator()
         message.locator.vHave = ['hash1']
@@ -267,71 +248,33 @@ class NetworkingTest(unittest.TestCase):
         block = Block(None, BlockOrigin.private)
         block.cached_hash = 'hash1'
         self.chain.blocks = {block.hash(): block}
+        self.chain.tips = ['hash45', 'hash95']
+
+        headers = mock.return_value = ['header44', 'header45']
+
+        self.networking.getheaders_message(self.connection_private, message)
+
+        self.assertTrue(mock.called)
+        self.assertEqual(mock.call_args[0][0], self.chain.tips)
+        self.assertEqual(mock.call_args[0][1], block)
+        self.assertTrue(self.connection_private.send.called)
+        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
+        self.assertEqual(self.connection_private.send.call_args[0][1].headers, headers)
+
+    @patch('chainutil.get_headers_after_block')
+    def test_getheaders_message_no_block_found(self, mock):
+        message = messages.msg_getheaders()
+        message.locator = CBlockLocator()
+        message.locator.vHave = ['hash1']
+
+        self.chain.blocks = {'some_hash': 'some_block'}
 
         self.networking.getheaders_message(self.connection_private, message)
 
         self.assertTrue(self.connection_private.send.called)
+        self.assertFalse(mock.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
         self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 0)
-
-    def test_getheaders_message_no_block(self):
-        message = messages.msg_getheaders()
-        message.locator = CBlockLocator()
-        message.locator.vHave = ['hash1']
-
-        self.networking.getheaders_message(self.connection_private, message)
-
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 0)
-
-    def test_getheaders_message_two_next_block(self):
-        message = messages.msg_getheaders()
-        message.locator = CBlockLocator()
-        message.locator.vHave = ['hash1']
-
-        nextNextBlock = Block('cblock3', BlockOrigin.private)
-        nextNextBlock.cached_hash = 'hash3'
-        nextNextBlock.transfer_allowed = True
-        nextBlock = Block('cblock2', BlockOrigin.private)
-        nextBlock.cached_hash = 'hash2'
-        nextBlock.nextBlock = nextNextBlock
-        nextBlock.transfer_allowed = True
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = 'hash1'
-        block.nextBlock = nextBlock
-        self.chain.blocks = {block.hash(): block, nextBlock.hash(): nextBlock, nextNextBlock.hash(): nextNextBlock}
-
-        self.networking.getheaders_message(self.connection_private, message)
-
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 2)
-        self.assertTrue('cblock3' in self.connection_private.send.call_args[0][1].headers)
-        self.assertTrue('cblock2' in self.connection_private.send.call_args[0][1].headers)
-
-    def test_getheaders_message_two_next_block_transfer_not_allowed(self):
-        message = messages.msg_getheaders()
-        message.locator = CBlockLocator()
-        message.locator.vHave = ['hash1']
-
-        nextNextBlock = Block('cblock3', BlockOrigin.private)
-        nextNextBlock.cached_hash = 'hash3'
-        nextBlock = Block('cblock2', BlockOrigin.private)
-        nextBlock.cached_hash = 'hash2'
-        nextBlock.nextBlock = nextNextBlock
-        nextBlock.transfer_allowed = True
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = 'hash1'
-        block.nextBlock = nextBlock
-        self.chain.blocks = {block.hash(): block, nextBlock.hash(): nextBlock, nextNextBlock.hash(): nextNextBlock}
-
-        self.networking.getheaders_message(self.connection_private, message)
-
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 1)
-        self.assertTrue('cblock2' in self.connection_private.send.call_args[0][1].headers)
 
     def test_process_block(self):
         message = messages.msg_block()
