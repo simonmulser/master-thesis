@@ -27,16 +27,13 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
         override_block_origin = block_origin
     highest_block = chain.genesis_block
 
-    for tip in tips:
-        tmp = tip
-        while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
-            tmp = tmp.prevBlock
-        if tmp.block_origin is override_block_origin:
-            if highest_block.height <= tmp.height:
-                highest_block = tmp
+    for tip in get_tips_for_block_origin(tips, block_origin):
+        if tip.block_origin is override_block_origin:
+            if highest_block.height <= tip.height:
+                highest_block = tip
         else:
-            if highest_block.height < tmp.height:
-                highest_block = tmp
+            if highest_block.height < tip.height:
+                highest_block = tip
     return highest_block
 
 
