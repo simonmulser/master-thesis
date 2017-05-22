@@ -92,10 +92,10 @@ class Networking(object):
                     logging.info('set cblock in {}'.format(block.hash_repr()))
 
                 if block_hash in self.deferred_requests:
-                    for connection in self.deferred_requests[message.block.GetHash()]:
-                        connection.send('block', message)
+                    for saved_connection in self.deferred_requests[message.block.GetHash()]:
+                        saved_connection.send('block', message)
                         logging.info('full-filled deferred block request for CBlock(hash={}) to {}'
-                                     .format(core.b2lx(block_hash), self.repr_connection(connection)))
+                                     .format(core.b2lx(block_hash), self.repr_connection(saved_connection)))
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
