@@ -36,7 +36,7 @@ class Chain:
             except ActionException as exception:
                 logging.warn(exception.message)
         else:
-            logging.debug('the two forks are the same - needs to be taken')
+            logging.debug('the two forks are the same - no action needs to be taken')
 
     def try_to_insert_block(self, received_block, block_origin):
         prevBlock = None
