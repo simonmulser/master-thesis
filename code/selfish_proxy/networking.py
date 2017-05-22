@@ -142,15 +142,13 @@ class Networking(object):
             logging.debug('received getheaders message with {} headers from {}'
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
-            found_block = None
-            for block_hash in message.locator.vHave:
-                if block_hash in self.chain.blocks:
-                    found_block = self.chain.blocks[block_hash]
-                    break
+            if connection is self.connection_private:
+                blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.private, message.locator.vHave)
+            else:
+                blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.public, message.locator.vHave)
 
             message = messages.msg_headers()
-            if found_block:
-                message.headers = chainutil.get_headers_after_block(self.chain.tips, found_block)
+            message.headers = [block.cblock_header for block in blocks][::-1]
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
                           .format(len(message.headers), self.repr_connection(connection)))

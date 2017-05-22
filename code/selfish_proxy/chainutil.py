@@ -37,6 +37,16 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
     return highest_block
 
 
+def get_longest_chain(tips, block_origin, until):
+    block = get_highest_block(tips, block_origin, BlockOrigin.private)
+
+    blocks = []
+    while block and block.hash() not in until:
+        blocks.append(block)
+        block = block.prevBlock
+    return blocks
+
+
 def get_tips_for_block_origin(tips, block_origin):
     tips_for_block_origin = Set()
     for tip in tips:
@@ -50,27 +60,6 @@ def get_tips_for_block_origin(tips, block_origin):
 def get_relevant_tips(tips):
     highest_tip = max(tips, key=lambda t: t.height)
     return [tip for tip in tips if tip.height > highest_tip.height - 10]
-
-
-def get_headers_after_block(tips, block):
-    potential_tips = get_relevant_tips(tips)
-    relevant_tips = []
-    for tip in potential_tips:
-        tmp = tip
-        while tmp is not block and tmp.prevBlock is not None:
-            tmp = tmp.prevBlock
-        if tmp is block:
-            relevant_tips.append(tip)
-
-    headers = []
-    if len(relevant_tips) > 0:
-        highest_block = get_highest_block(relevant_tips, block.block_origin, BlockOrigin.private)
-
-        tmp = highest_block
-        while tmp is not block and tmp is not None:
-            headers.append(tmp.cblock_header)
-            tmp = tmp.prevBlock
-    return headers
 
 
 class Fork:

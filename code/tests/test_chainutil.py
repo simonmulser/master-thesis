@@ -2,6 +2,7 @@ import test_abstractchain
 import chain
 import chainutil
 from strategy import BlockOrigin
+from mock import patch
 
 
 class ChainUtilTest(test_abstractchain.AbstractChainTest):
@@ -210,36 +211,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         self.assertEqual(tip, self.third_a_block_chain_b)
 
-    def test_get_headers_after_block_with_private_block(self):
-
-        headers = chainutil.get_headers_after_block(
-            [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_a)
-
-        self.assertEqual(len(headers), 2)
-        self.assertFalse(self.first_block_chain_a.cblock_header in headers)
-        self.assertTrue(self.second_block_chain_a.cblock_header in headers)
-        self.assertTrue(self.third_a_block_chain_a.cblock_header in headers)
-
-    def test_get_headers_after_block_with_public_block(self):
-
-        headers = chainutil.get_headers_after_block(
-            [self.third_a_block_chain_a, self.third_a_block_chain_b], self.first_block_chain_b)
-
-        self.assertEqual(len(headers), 2)
-        self.assertFalse(self.first_block_chain_b.cblock_header in headers)
-        self.assertTrue(self.second_block_chain_b.cblock_header in headers)
-        self.assertTrue(self.third_a_block_chain_b.cblock_header in headers)
-
-    def test_get_headers_after_block_with_match_and_private_tip(self):
-        self.first_block_chain_a.transfer_allowed = True
-        self.first_block_chain_b.transfer_allowed = True
-
-        headers = chainutil.get_headers_after_block(
-            [self.first_block_chain_b, self.first_block_chain_a, self.first_block_chain_b], chain.genesis_block)
-
-        self.assertEqual(len(headers), 1)
-        self.assertTrue(self.first_block_chain_a.cblock_header in headers)
-
     def test_get_tips_for_block_origin_with_transfer_allowed(self):
         self.third_a_block_chain_b.transfer_allowed = True
 
@@ -280,3 +251,50 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(len(tips), 2)
         self.assertTrue(self.second_block_chain_a in tips)
         self.assertTrue(self.second_block_chain_b in tips)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_with_genesis_block(self, mock):
+        mock.return_value = chain.genesis_block
+
+        print(chainutil.get_highest_block)
+
+        blocks = chainutil.get_longest_chain([], None, [])
+
+        self.assertEqual(len(blocks), 1)
+        self.assertTrue(chain.genesis_block in blocks)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_empty_until(self, mock):
+        mock.return_value = self.second_block_chain_b
+
+        blocks = chainutil.get_longest_chain([], None, [])
+
+        self.assertEqual(len(blocks), 3)
+        self.assertTrue(chain.genesis_block in blocks)
+        self.assertTrue(self.first_block_chain_b in blocks)
+        self.assertTrue(self.second_block_chain_b in blocks)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_with_until(self, mock):
+        mock.return_value = self.second_block_chain_a
+
+        print(self.first_block_chain_a.hash())
+        print(self.second_block_chain_a.hash())
+
+        blocks = chainutil.get_longest_chain([], None, [chain.genesis_block.hash()])
+
+        self.assertEqual(len(blocks), 2)
+        self.assertTrue(self.first_block_chain_a in blocks)
+        self.assertTrue(self.second_block_chain_a in blocks)
+
+
+    @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_until_like_tip(self, mock):
+        mock.return_value = self.third_a_block_chain_b
+
+        print(self.first_block_chain_a.hash())
+        print(self.second_block_chain_a.hash())
+
+        blocks = chainutil.get_longest_chain([], None, [self.third_a_block_chain_b.hash()])
+
+        self.assertEqual(len(blocks), 0)
