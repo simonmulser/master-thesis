@@ -216,17 +216,20 @@ class Networking(object):
     def tx_message(self, connection, message):
         self.lock.acquire()
         try:
-            logging.debug('received tx message with hash={} from {}'
-                          .format(message.tx.GetHash(), self.repr_connection(connection)))
+            logging.debug('received tx message from {}'
+                          .format(self.repr_connection(connection)))
 
             self.transactions[message.tx.GetHash()] = message.tx
+            logging.debug('set tx={} in transaction map'.format(message.tx))
 
             tx_hash = message.tx.GetHash()
             if tx_hash in self.deferred_requests:
                 for connection in self.deferred_requests[tx_hash]:
                     connection.send('tx', message)
+                    logging.debug('fulfilled deferred request for tx with hash={} for connection={}'
+                                  .format(core.b2lx(tx_hash), self.repr_connection(connection)))
 
-                self.deferred_requests[tx_hash] = []
+            self.deferred_requests[tx_hash] = []
         finally:
             self.lock.release()
             logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
