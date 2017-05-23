@@ -442,6 +442,48 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_count, 2)
 
+    def test_getdata_message_with_tx_not_available(self):
+        message = messages.msg_getdata()
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['TX']
+        cInv.hash = 'hash1'
+        message.inv = [cInv]
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertFalse(self.public_connection1.send.called)
+        self.assertEqual(self.networking.deferred_requests[cInv.hash], [self.public_connection1])
+
+    def test_getdata_message_two_times_with_tx_not_available(self):
+        message = messages.msg_getdata()
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['TX']
+        cInv.hash = 'hash1'
+        message.inv = [cInv]
+
+        self.networking.getdata_message(self.public_connection1, message)
+        self.networking.getdata_message(self.public_connection2, message)
+
+        self.assertFalse(self.public_connection1.send.called)
+        self.assertEqual(len(self.networking.deferred_requests[cInv.hash]), 2)
+
+    def test_getdata_message_with_tx_available(self):
+        tx = CTransaction()
+
+        message = messages.msg_getdata()
+        cInv = CInv()
+        cInv.type = networking.inv_typemap['TX']
+        cInv.hash = tx.GetHash()
+        message.inv = [cInv]
+
+        self.networking.transactions = {cInv.hash: tx}
+
+        self.networking.getdata_message(self.public_connection1, message)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertEqual(self.public_connection1.send.call_args[0][0], 'tx')
+        self.assertEqual(self.public_connection1.send.call_args[0][1].tx, tx)
+
     def test_tx_message_one_tx(self):
         msg = messages.msg_tx()
         msg.tx = CTransaction(nLockTime=1)

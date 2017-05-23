@@ -194,6 +194,16 @@ class Networking(object):
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
+                    elif net.CInv.typemap[inv.type] == 'TX':
+                        if inv.hash in self.transactions:
+                            msg = messages.msg_tx
+                            msg.tx = self.transactions[inv.hash]
+                            connection.send('tx', msg)
+                        else:
+                            if inv.hash in self.deferred_requests:
+                                self.deferred_requests[inv.hash].append(connection)
+                            else:
+                                self.deferred_requests[inv.hash] = [connection]
                     else:
                         logging.warn("we don't care about inv type={}".format(inv.type))
                 except KeyError:
