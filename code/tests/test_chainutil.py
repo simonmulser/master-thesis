@@ -256,8 +256,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_longest_chain_with_genesis_block(self, mock):
         mock.return_value = chain.genesis_block
 
-        print(chainutil.get_highest_block)
-
         blocks = chainutil.get_longest_chain([], None, [])
 
         self.assertEqual(len(blocks), 1)
@@ -278,9 +276,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_longest_chain_with_until(self, mock):
         mock.return_value = self.second_block_chain_a
 
-        print(self.first_block_chain_a.hash())
-        print(self.second_block_chain_a.hash())
-
         blocks = chainutil.get_longest_chain([], None, [chain.genesis_block.hash()])
 
         self.assertEqual(len(blocks), 2)
@@ -291,9 +286,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     @patch('chainutil.get_highest_block')
     def test_get_longest_chain_until_like_tip(self, mock):
         mock.return_value = self.third_a_block_chain_b
-
-        print(self.first_block_chain_a.hash())
-        print(self.second_block_chain_a.hash())
 
         blocks = chainutil.get_longest_chain([], None, [self.third_a_block_chain_b.hash()])
 
