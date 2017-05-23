@@ -130,9 +130,9 @@ class Networking(object):
                     getdata_inv.append(header.GetHash())
 
                     if connection == self.connection_private:
-                        self.chain.block_message(header, BlockOrigin.private)
+                        self.chain.process_block(header, BlockOrigin.private)
                     else:
-                        self.chain.block_message(header, BlockOrigin.public)
+                        self.chain.process_block(header, BlockOrigin.public)
 
             if len(getdata_inv) > 0:
                 message = messages.msg_getdata()
