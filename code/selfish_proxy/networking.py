@@ -28,8 +28,8 @@ class Networking(object):
 
         client.register_handler('ping', self.ping_message)
 
-        client.register_handler('inv', self.process_inv)
-        client.register_handler('block', self.process_block)
+        client.register_handler('inv', self.inv_message)
+        client.register_handler('block', self.block_message)
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
         client.register_handler('getdata', self.getdata_message)
@@ -44,7 +44,7 @@ class Networking(object):
 
         client.run_forever()
 
-    def process_inv(self, connection, message):
+    def inv_message(self, connection, message):
         self.lock.acquire()
         try:
             logging.debug('received inv message with {} invs from {}'
@@ -88,7 +88,7 @@ class Networking(object):
             self.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
-    def process_block(self, connection, message):
+    def block_message(self, connection, message):
         self.lock.acquire()
         try:
             logging.debug('received block message from {}'
@@ -130,9 +130,9 @@ class Networking(object):
                     getdata_inv.append(header.GetHash())
 
                     if connection == self.connection_private:
-                        self.chain.process_block(header, BlockOrigin.private)
+                        self.chain.block_message(header, BlockOrigin.private)
                     else:
-                        self.chain.process_block(header, BlockOrigin.public)
+                        self.chain.block_message(header, BlockOrigin.public)
 
             if len(getdata_inv) > 0:
                 message = messages.msg_getdata()
