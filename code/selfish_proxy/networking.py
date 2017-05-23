@@ -15,6 +15,7 @@ class Networking(object):
         self.chain = None
         self.lock = Lock()
         self.deferred_requests = {}
+        self.transactions = {}
 
     def start(self, ips_public, ip_private):
         logging.debug('starting client')
@@ -48,11 +49,13 @@ class Networking(object):
         try:
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
-
+            missing_inv = []
             for inv in message.inv:
                 try:
-                    if net.CInv.typemap[inv.type] == "Error" or net.CInv.typemap[inv.type] == "TX":
-                        pass
+                    if net.CInv.typemap[inv.type] == "TX":
+                        logging.debug("received {}".format(inv))
+                        if inv.hash not in self.transactions:
+                            missing_inv.append(inv.hash)
                     elif net.CInv.typemap[inv.type] == "Block":
                         logging.debug("received {}".format(inv))
                         if inv.hash not in self.chain.blocks:
@@ -69,10 +72,17 @@ class Networking(object):
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
                                              .format(core.b2lx(tip.hash()), self.repr_connection(connection)))
+                    elif net.CInv.typemap[inv.type] == "Error":
+                        logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
                         logging.warn("we don't care about inv type={}".format(inv.type))
                 except KeyError:
                     logging.warn("unknown inv type={}")
+
+            if len(missing_inv) > 0:
+                msg = messages.msg_getdata()
+                msg.inv = missing_inv
+                connection.send('getdata', msg)
 
         finally:
             self.lock.release()

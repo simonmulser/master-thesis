@@ -97,13 +97,43 @@ class NetworkingTest(unittest.TestCase):
     def test_process_inv_msg_tx(self):
         inv = net.CInv()
         inv.type = networking.inv_typemap['TX']
-        msg = messages.msg_inv
+        inv.hash = 'hash1'
+        msg = messages.msg_inv()
         msg.inv = [inv]
         self.networking.process_inv(self.connection_private, msg)
 
-        self.assertFalse(self.connection_private.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
+        self.assertTrue(self.connection_private.send.called)
+        self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
+        self.assertEqual(self.connection_private.send.call_args[0][1].inv, [inv.hash])
+
+    def test_process_inv_msg_two_tx(self):
+        inv1 = net.CInv()
+        inv1.type = networking.inv_typemap['TX']
+        inv1.hash = 'hash1'
+        inv2 = net.CInv()
+        inv2.type = networking.inv_typemap['TX']
+        inv2.hash = 'hash1'
+        msg = messages.msg_inv()
+        msg.inv = [inv1, inv2]
+        self.networking.process_inv(self.connection_private, msg)
+
+        self.assertTrue(self.connection_private.send.called)
+        self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
+        self.assertEqual(len(self.connection_private.send.call_args[0][1].inv), 2)
+
+    def test_process_inv_msg_tx_known(self):
+        inv = net.CInv()
+        inv.type = networking.inv_typemap['TX']
+        inv.hash = 'hash1'
+        msg = messages.msg_inv()
+        msg.inv = [inv]
+        self.networking.transactions = {inv.hash: 'saved_transaction'}
+
+        self.networking.process_inv(self.connection_private, msg)
+
+        self.assertFalse(self.connection_private.send.called)
 
     def test_process_inv_msg_allowed_block_and_tx(self):
         block = net.CInv()
