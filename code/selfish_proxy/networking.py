@@ -207,7 +207,7 @@ class Networking(object):
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
                         if inv.hash in self.transactions:
-                            msg = messages.msg_tx
+                            msg = messages.msg_tx()
                             msg.tx = self.transactions[inv.hash]
                             connection.send('tx', msg)
                         else:
