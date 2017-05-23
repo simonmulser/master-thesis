@@ -100,7 +100,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.length_of_fork = MagicMock()
         block = MagicMock()
 
-        self.chain.block_message(block, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertFalse(self.chain.length_of_fork.called)
@@ -116,7 +116,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.execute = MagicMock()
         block = MagicMock()
 
-        self.chain.block_message(block, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.try_to_insert_block.called)
         self.assertTrue(mock.called)
@@ -134,7 +134,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.execute = MagicMock()
         block = MagicMock()
 
-        self.chain.block_message(block, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertFalse(self.chain.execute.called)
@@ -150,7 +150,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.executor.execute = MagicMock(side_effect=ActionException('mock_exception'))
         block = MagicMock()
 
-        self.chain.block_message(block, BlockOrigin.public)
+        self.chain.process_block(block, BlockOrigin.public)
 
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
