@@ -55,7 +55,7 @@ class Networking(object):
                     if net.CInv.typemap[inv.type] == "TX":
                         logging.debug("received {}".format(inv))
                         if inv.hash not in self.transactions:
-                            missing_inv.append(inv.hash)
+                            missing_inv.append(inv)
                     elif net.CInv.typemap[inv.type] == "Block":
                         logging.debug("received {}".format(inv))
                         if inv.hash not in self.chain.blocks:

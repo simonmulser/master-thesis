@@ -107,7 +107,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection2.send.called)
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
-        self.assertEqual(self.connection_private.send.call_args[0][1].inv, [inv.hash])
+        self.assertEqual(self.connection_private.send.call_args[0][1].inv, [inv])
 
     def test_inv_message_msg_two_tx(self):
         inv1 = net.CInv()
