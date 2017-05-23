@@ -33,7 +33,7 @@ class Networking(object):
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
         client.register_handler('getdata', self.getdata_message)
-        # tx missing
+        client.register_handler('tx', self.tx_message)
 
         network.ClientBehavior(client)
 
@@ -200,6 +200,24 @@ class Networking(object):
         finally:
             self.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
+
+    def tx_message(self, connection, message):
+        self.lock.acquire()
+        try:
+            logging.debug('received tx message with hash={} from {}'
+                          .format(message.tx.GetHash(), self.repr_connection(connection)))
+
+            self.transactions[message.tx.GetHash()] = message.tx
+
+            tx_hash = message.tx.GetHash()
+            if tx_hash in self.deferred_requests:
+                for connection in self.deferred_requests[tx_hash]:
+                    connection.send('tx', message)
+
+                self.deferred_requests[tx_hash] = []
+        finally:
+            self.lock.release()
+            logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []

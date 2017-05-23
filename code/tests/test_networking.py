@@ -7,6 +7,7 @@ from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
+from bitcoin.core import CTransaction
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
@@ -141,6 +142,7 @@ class NetworkingTest(unittest.TestCase):
         block.type = networking.inv_typemap['Block']
         tx = net.CInv()
         tx.type = networking.inv_typemap['TX']
+        tx.hash = 'hash2'
         msg = messages.msg_inv
         msg.inv = [block, tx]
 
@@ -150,8 +152,8 @@ class NetworkingTest(unittest.TestCase):
         self.chain.blocks = {block.hash(): block}
         self.networking.process_inv(self.public_connection1, msg)
 
+        self.assertTrue(self.public_connection1.send.called)
         self.assertFalse(self.connection_private.send.called)
-        self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
     def test_process_inv_msg_unknown(self):
@@ -438,3 +440,49 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_count, 2)
+
+    def test_tx_message_one_tx(self):
+        msg = messages.msg_tx()
+        msg.tx = CTransaction(nLockTime=1)
+        self.networking.transactions = {}
+
+        self.networking.tx_message(self.connection_private, msg)
+
+        self.assertEqual(len(self.networking.transactions), 1)
+        self.assertTrue(msg.tx.GetHash() in self.networking.transactions)
+
+    def test_tx_message_two_tx(self):
+        msg1 = messages.msg_tx()
+        msg1.tx = CTransaction(nLockTime=1)
+        msg2 = messages.msg_tx()
+        msg2.tx = CTransaction(nLockTime=2)
+        self.networking.transactions = {}
+
+        self.networking.tx_message(self.connection_private, msg1)
+        self.networking.tx_message(self.connection_private, msg2)
+
+        self.assertEqual(len(self.networking.transactions), 2)
+
+    def test_tx_message_process_tx_twice(self):
+        msg = messages.msg_tx()
+        msg.tx = CTransaction()
+        self.networking.transactions = {}
+
+        self.networking.tx_message(self.connection_private, msg)
+        self.networking.tx_message(self.connection_private, msg)
+
+        self.assertEqual(len(self.networking.transactions), 1)
+
+    def test_tx_message_process_fulfill_deferred_requests(self):
+        msg = messages.msg_tx()
+        msg.tx = CTransaction()
+        self.networking.transactions = {}
+        self.networking.deferred_requests = {msg.tx.GetHash(): [self.public_connection1, self.public_connection2]}
+
+        self.networking.tx_message(self.connection_private, msg)
+
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertTrue(self.public_connection2.send.called)
+        self.assertEqual(self.public_connection1.send.call_args[0][0], 'tx')
+        self.assertEqual(self.public_connection1.send.call_args[0][1].tx, msg.tx)
+        self.assertEqual(len(self.networking.deferred_requests[msg.tx.GetHash()]), 0)
