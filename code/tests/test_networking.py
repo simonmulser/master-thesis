@@ -333,6 +333,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection2.send.called)
         self.assertEqual(self.public_connection2.send.call_args[0][0], 'block')
         self.assertEqual(self.public_connection2.send.call_args[0][1], message)
+        self.assertEqual(len(self.networking.deferred_requests[block.hash()]), 0)
 
     def test_process_block_two_times(self):
         message = messages.msg_block()
