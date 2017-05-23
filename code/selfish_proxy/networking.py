@@ -220,7 +220,7 @@ class Networking(object):
                           .format(self.repr_connection(connection)))
 
             self.transactions[message.tx.GetHash()] = message.tx
-            logging.debug('set tx={} in transaction map'.format(message.tx))
+            logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(message.tx.GetHash())))
 
             tx_hash = message.tx.GetHash()
             if tx_hash in self.deferred_requests:
