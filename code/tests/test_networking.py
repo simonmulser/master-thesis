@@ -103,8 +103,14 @@ class NetworkingTest(unittest.TestCase):
         msg.inv = [inv]
         self.networking.inv_message(self.connection_private, msg)
 
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
+        self.assertTrue(self.public_connection1.send.called)
+        self.assertTrue(self.public_connection2.send.called)
+        self.assertEqual(self.public_connection1.send.call_args[0][0], 'inv')
+        self.assertEqual(len(self.public_connection1.send.call_args[0][1].inv), 1)
+        self.assertEqual(self.public_connection1.send.call_args[0][1].inv[0], inv)
+
+        self.assertEqual(len(self.networking.public_connections), 2)
+
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
         self.assertEqual(self.connection_private.send.call_args[0][1].inv, [inv])
@@ -119,6 +125,9 @@ class NetworkingTest(unittest.TestCase):
         msg = messages.msg_inv()
         msg.inv = [inv1, inv2]
         self.networking.inv_message(self.connection_private, msg)
+
+        self.assertTrue(self.public_connection2.send.called)
+        self.assertEqual(len(self.public_connection1.send.call_args[0][1].inv), 2)
 
         self.assertTrue(self.connection_private.send.called)
         self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
@@ -135,6 +144,8 @@ class NetworkingTest(unittest.TestCase):
         self.networking.inv_message(self.connection_private, msg)
 
         self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.public_connection1.send.called)
+        self.assertFalse(self.public_connection2.send.called)
 
     def test_inv_message_msg_allowed_block_and_tx(self):
         block = net.CInv()
@@ -153,8 +164,8 @@ class NetworkingTest(unittest.TestCase):
         self.networking.inv_message(self.public_connection1, msg)
 
         self.assertTrue(self.public_connection1.send.called)
-        self.assertFalse(self.connection_private.send.called)
-        self.assertFalse(self.public_connection2.send.called)
+        self.assertTrue(self.connection_private.send.called)
+        self.assertTrue(self.public_connection2.send.called)
 
     def test_inv_message_msg_unknown(self):
         inv = net.CInv()

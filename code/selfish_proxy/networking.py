@@ -83,6 +83,17 @@ class Networking(object):
                 msg = messages.msg_getdata()
                 msg.inv = missing_inv
                 connection.send('getdata', msg)
+                logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
+
+                all_connections = self.public_connections
+                all_connections.append(self.connection_private)
+                all_connections.remove(connection)
+
+                msg = messages.msg_inv()
+                msg.inv = missing_inv
+                for relay_connection in self.public_connections:
+                    relay_connection.send('inv', msg)
+                    logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
 
         finally:
             self.lock.release()
