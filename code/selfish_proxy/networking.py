@@ -180,9 +180,9 @@ class Networking(object):
                     if net.CInv.typemap[inv.type] == 'Block':
                         if inv.hash in self.chain.blocks:
                             if self.chain.blocks[inv.hash].cblock:
-                                message = messages.msg_block()
-                                message.block = self.chain.blocks[inv.hash].cblock
-                                connection.send('block', message)
+                                msg = messages.msg_block()
+                                msg.block = self.chain.blocks[inv.hash].cblock
+                                connection.send('block', msg)
                                 logging.info('send CBlock(hash={}) to {}'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                             else:
