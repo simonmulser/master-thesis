@@ -7,7 +7,7 @@ docker run --detach=true --net=isolated_network --ip=240.0.0.2 --name=alice node
 
 docker run -v $PWD/selfish_proxy:/code --net=isolated_network --ip=240.0.0.10 --rm --name=proxy proxy python main.py -v --ips-public 240.0.0.4 240.0.0.5
 docker run -v $PWD/selfish_proxy:/code --net=isolated_network --ip=240.0.0.10 --rm --name=proxy proxy python main.py -v
-docker run --net=isolated_network --ip=240.0.0.10 --rm --name=proxy proxy
+docker run --net=isolated_network --ip=240.0.0.10 --rm --name=proxy proxy --ips-public 240.0.0.4 240.0.0.5
 
 docker exec bob1 /bin/sh -c 'bitcoin-cli -regtest -datadir=/data generate 1'
 docker exec bob1 /bin/sh -c 'bitcoin-cli -regtest -datadir=/data sendtoaddress $(bitcoin-cli -regtest -datadir=/data getnewaddress) 10.0'
