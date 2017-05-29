@@ -15,14 +15,14 @@ def check_positive(value):
 
 parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
-parser.add_argument('-v', '--verbose', help='increase output verbosity', action='store_true')
+parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
 
-parser.add_argument('--ip-private', help='set the ip of the private node', default='240.0.0.2')
-parser.add_argument('--ips-public', help='set the ips of the public nodes', nargs='+', default=[])
+parser.add_argument('--ip-private', help='Set the ip of the private node', default='240.0.0.2')
+parser.add_argument('--ips-public', help='Set the ips of the public nodes', nargs='+', default=[])
 
-parser.add_argument('--lead-stubborn', help='use lead-stubbornness in strategy', action='store_true')
-parser.add_argument('--equal-fork-stubborn', help='use equal-fork-stubbornness in strategy', action='store_true')
-parser.add_argument('--trail-stubborn', help='use N-trail-stubbornness in strategy', type=check_positive, default=0)
+parser.add_argument('--lead-stubborn', help='Use lead-stubbornness in strategy', action='store_true')
+parser.add_argument('--equal-fork-stubborn', help='Use equal-fork-stubbornness in strategy', action='store_true')
+parser.add_argument('--trail-stubborn', help='Use N-trail-stubbornness in strategy', type=check_positive, default=0)
 
 args = parser.parse_args()
 
