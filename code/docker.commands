@@ -1,3 +1,5 @@
+docker build -t proxy .
+
 docker network create --subnet=240.0.0.0/4 --driver bridge isolated_network
 
 recommended starting order:
