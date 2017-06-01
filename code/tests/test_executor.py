@@ -1,7 +1,7 @@
 import unittest
 from mock import MagicMock
 from chain import Block
-import chain
+import test_util
 from strategy import BlockOrigin, Action, ActionException
 from strategy.executor import Executor
 
@@ -25,7 +25,7 @@ class ExecutorTest(unittest.TestCase):
 
         self.first_block_chain_b = Block(None, BlockOrigin.public)
         self.first_block_chain_b.height = 1
-        self.first_block_chain_b.prevBlock = chain.genesis_block
+        self.first_block_chain_b.prevBlock = test_util.genesis_block
         self.first_block_chain_b.cached_hash = '1b'
 
         self.second_block_chain_b = Block(None, BlockOrigin.public)
@@ -35,7 +35,7 @@ class ExecutorTest(unittest.TestCase):
 
         self.first_block_chain_a = Block(None, BlockOrigin.private)
         self.first_block_chain_a.height = 1
-        self.first_block_chain_a.prevBlock = chain.genesis_block
+        self.first_block_chain_a.prevBlock = test_util.genesis_block
         self.first_block_chain_a.cached_hash = '1a'
 
         self.second_block_chain_a = Block(None, BlockOrigin.private)
