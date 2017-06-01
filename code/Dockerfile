@@ -15,4 +15,4 @@ COPY selfish_proxy /code
 
 WORKDIR /code
 
-ENTRYPOINT ["python", "main.py"]
+CMD ["python", "main.py"]
