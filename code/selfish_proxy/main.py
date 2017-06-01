@@ -45,6 +45,9 @@ if args.verbose:
 else:
     rootLogger.setLevel(logging.INFO)
 
+logging.info("arguments called with: {}".format(sys.argv))
+logging.info("parsed arguments: {}".format(args))
+
 networking = Networking()
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
