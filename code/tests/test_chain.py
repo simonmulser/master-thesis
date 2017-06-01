@@ -2,12 +2,12 @@ import test_abstractchain
 from chain import Chain
 from chain import Block
 from chainutil import Fork
-import chain
 from mock import MagicMock
 from mock import patch
 from bitcoin import core
 from strategy import BlockOrigin
 from strategy import ActionException
+import test_util
 
 
 class ChainTest(test_abstractchain.AbstractChainTest):
@@ -22,7 +22,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         super(ChainTest, self).setUp()
         self.executor = MagicMock()
         self.strategy = MagicMock()
-        self.chain = Chain(self.executor, self.strategy)
+        self.chain = Chain(self.executor, self.strategy, test_util.genesis_hash)
         self.chain.strategy = MagicMock()
 
     def test_try_to_insert_block_without_prev_hash(self):
@@ -39,14 +39,14 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(len(self.chain.blocks), 2)
 
     def test_try_to_insert_block(self):
-        block = core.CBlock(hashPrevBlock=chain.genesis_hash)
+        block = core.CBlock(hashPrevBlock=test_util.genesis_hash)
         self.chain.try_to_insert_block(block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 1)
         self.assertEqual(self.chain.tips[0].height, 1)
 
     def test_try_to_insert_two_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
+        first_block = core.CBlock(hashPrevBlock=test_util.genesis_hash)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
@@ -56,10 +56,10 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(self.chain.tips[0].height, 2)
 
     def test_try_to_insert_fork(self):
-        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash, nNonce=1)
+        first_block = core.CBlock(hashPrevBlock=test_util.genesis_hash, nNonce=1)
         self.chain.try_to_insert_block(first_block, BlockOrigin.public)
 
-        second_block = core.CBlock(hashPrevBlock=chain.genesis_hash, nNonce=2)
+        second_block = core.CBlock(hashPrevBlock=test_util.genesis_hash, nNonce=2)
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
 
         self.assertEqual(len(self.chain.tips), 2)
@@ -67,7 +67,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(self.chain.tips[1].height, 1)
 
     def test_try_to_insert_orphan_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
+        first_block = core.CBlock(hashPrevBlock=test_util.genesis_hash)
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
 
         self.chain.try_to_insert_block(second_block, BlockOrigin.public)
@@ -79,7 +79,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(len(self.chain.orphan_blocks), 0)
 
     def test_try_to_insert_two_orphan_blocks(self):
-        first_block = core.CBlock(hashPrevBlock=chain.genesis_hash)
+        first_block = core.CBlock(hashPrevBlock=test_util.genesis_hash)
         second_block = core.CBlock(hashPrevBlock=first_block.GetHash())
         third_block = core.CBlock(hashPrevBlock=second_block.GetHash())
 

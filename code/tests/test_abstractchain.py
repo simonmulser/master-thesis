@@ -1,8 +1,8 @@
 import unittest
 from chain import Block
-import chain
 from strategy import BlockOrigin
 from bitcoin.core import CBlockHeader
+import test_util
 
 
 class AbstractChainTest(unittest.TestCase):
@@ -24,7 +24,7 @@ class AbstractChainTest(unittest.TestCase):
     def setUp(self):
         self.first_block_chain_a = Block(None, BlockOrigin.private)
         self.first_block_chain_a.height = 1
-        self.first_block_chain_a.prevBlock = chain.genesis_block
+        self.first_block_chain_a.prevBlock = test_util.genesis_block
         self.first_block_chain_a.cached_hash = '1a'
         self.first_block_chain_a.cblock_header = CBlockHeader(nNonce=11)
 
@@ -54,7 +54,7 @@ class AbstractChainTest(unittest.TestCase):
 
         self.first_block_chain_b = Block(None, BlockOrigin.public)
         self.first_block_chain_b.height = 1
-        self.first_block_chain_b.prevBlock = chain.genesis_block
+        self.first_block_chain_b.prevBlock = test_util.genesis_block
         self.first_block_chain_b.cached_hash = '1b'
         self.first_block_chain_b.cblock_header = CBlockHeader(nNonce=12)
 

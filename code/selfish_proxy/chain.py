@@ -6,12 +6,17 @@ import chainutil
 
 
 class Chain:
-    def __init__(self, executor, strategy):
+    def __init__(self, executor, strategy, first_block_hash):
         self.executor = executor
         self.strategy = strategy
 
-        self.tips = [genesis_block]
-        self.blocks = {genesis_hash: genesis_block}
+        block = Block(None, BlockOrigin.public)
+        block.transfer_allowed = True
+        block.height = 0
+        block.cached_hash = first_block_hash
+
+        self.blocks = {first_block_hash: block}
+        self.tips = [block]
         self.orphan_blocks = []
 
     def process_block(self, block, block_origin):
@@ -123,8 +128,3 @@ class Block:
 
     def __hash__(self):
         return hash(self.hash())
-
-genesis_hash = core.CoreRegTestParams.GENESIS_BLOCK.GetHash()
-genesis_block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
-genesis_block.transfer_allowed = True
-genesis_block.height = 0

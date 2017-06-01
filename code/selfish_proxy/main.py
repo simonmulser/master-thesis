@@ -5,6 +5,7 @@ from networking import Networking
 from strategy.executor import Executor
 from strategy.code import Strategy
 from chain import Chain
+from bitcoin import core
 
 
 def check_positive(value):
@@ -16,6 +17,7 @@ def check_positive(value):
 parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
 parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
+parser.add_argument('--hash-first-block', help='Set the starting point')
 
 parser.add_argument('--ip-private', help='Set the ip of the private node', default='240.0.0.2')
 parser.add_argument('--ips-public', help='Set the ips of the public nodes', nargs='+', default=[])
@@ -46,7 +48,10 @@ else:
 networking = Networking()
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
-chain = Chain(executor, strategy)
+if args.hash_first_block:
+    chain = Chain(executor, strategy, args.hash_first_block)
+else:
+    chain = Chain(executor, strategy, core.CoreRegTestParams.GENESIS_BLOCK.GetHash())
 networking.chain = chain
 
 networking.start(args.ips_public, args.ip_private)

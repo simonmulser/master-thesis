@@ -1,8 +1,8 @@
 import test_abstractchain
-import chain
 import chainutil
 from strategy import BlockOrigin
 from mock import patch
+import test_util
 
 
 class ChainUtilTest(test_abstractchain.AbstractChainTest):
@@ -13,7 +13,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_private_public_fork_no_private_tip(self):
         fork = chainutil.get_private_public_fork([self.second_block_chain_b])
         self.assertEqual(fork.private_height, 0)
-        self.assertEqual(fork.private_tip.hash(), chain.genesis_hash)
+        self.assertEqual(fork.private_tip.hash(), test_util.genesis_hash)
 
         self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash(), '2b')
@@ -21,7 +21,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_private_public_fork_no_public_tip(self):
         fork = chainutil.get_private_public_fork([self.second_block_chain_a])
         self.assertEqual(fork.public_height, 0)
-        self.assertEqual(fork.public_tip.hash(), chain.genesis_hash)
+        self.assertEqual(fork.public_tip.hash(), test_util.genesis_hash)
 
         self.assertEqual(fork.private_height, 2)
         self.assertEqual(fork.private_tip.hash(), '2a')
@@ -129,9 +129,9 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(self.second_block_chain_b in tips)
 
     def test_get_highest_block_genesis_block(self):
-        tip = chainutil.get_highest_block([chain.genesis_block], BlockOrigin.private)
+        tip = chainutil.get_highest_block([test_util.genesis_block], BlockOrigin.private)
 
-        self.assertEqual(tip, chain.genesis_block)
+        self.assertEqual(tip, test_util.genesis_block)
 
     def test_get_highest_block_same_origin(self):
         tip = chainutil.get_highest_block([self.first_block_chain_a], BlockOrigin.private)
@@ -141,7 +141,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_highest_block_different_origin(self):
         tip = chainutil.get_highest_block([self.first_block_chain_a], BlockOrigin.public)
 
-        self.assertEqual(tip, chain.genesis_block)
+        self.assertEqual(tip, test_util.genesis_block)
 
     def test_get_highest_block_different_origin_transfer_allowed(self):
         self.first_block_chain_a.transfer_allowed = True
@@ -254,12 +254,12 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
     @patch('chainutil.get_highest_block')
     def test_get_longest_chain_with_genesis_block(self, mock):
-        mock.return_value = chain.genesis_block
+        mock.return_value = test_util.genesis_block
 
         blocks = chainutil.get_longest_chain([], None, [])
 
         self.assertEqual(len(blocks), 1)
-        self.assertTrue(chain.genesis_block in blocks)
+        self.assertTrue(test_util.genesis_block in blocks)
 
     @patch('chainutil.get_highest_block')
     def test_get_longest_chain_empty_until(self, mock):
@@ -268,7 +268,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         blocks = chainutil.get_longest_chain([], None, [])
 
         self.assertEqual(len(blocks), 3)
-        self.assertTrue(chain.genesis_block in blocks)
+        self.assertTrue(test_util.genesis_block in blocks)
         self.assertTrue(self.first_block_chain_b in blocks)
         self.assertTrue(self.second_block_chain_b in blocks)
 
@@ -276,7 +276,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_get_longest_chain_with_until(self, mock):
         mock.return_value = self.second_block_chain_a
 
-        blocks = chainutil.get_longest_chain([], None, [chain.genesis_block.hash()])
+        blocks = chainutil.get_longest_chain([], None, [test_util.genesis_block.hash()])
 
         self.assertEqual(len(blocks), 2)
         self.assertTrue(self.first_block_chain_a in blocks)

@@ -25,7 +25,9 @@ def get_private_public_fork(tips):
 def get_highest_block(tips, block_origin, override_block_origin=None):
     if not override_block_origin:
         override_block_origin = block_origin
-    highest_block = chain.genesis_block
+
+    highest_block = chain.Block('start', block_origin)
+    highest_block.height = -1
 
     for tip in get_tips_for_block_origin(tips, block_origin):
         if tip.block_origin is override_block_origin:
