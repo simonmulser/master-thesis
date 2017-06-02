@@ -39,6 +39,15 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
     return highest_block
 
 
+def get_highest_block_with_cblock(tips, block_origin):
+    block = get_highest_block(tips, block_origin)
+
+    while block.cblock is None:
+        block = block.prevBlock
+
+    return block
+
+
 def get_longest_chain(tips, block_origin, until):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 

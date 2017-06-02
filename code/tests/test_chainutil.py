@@ -290,3 +290,20 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         blocks = chainutil.get_longest_chain([], None, [self.third_a_block_chain_b.hash()])
 
         self.assertEqual(len(blocks), 0)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_highest_block_with_cblock_cblock_not_present(self, mock):
+        mock.return_value = self.first_block_chain_a
+        self.first_block_chain_a.cblock = None
+
+        block = chainutil.get_highest_block_with_cblock([], None)
+
+        self.assertEqual(block, test_util.genesis_block)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_highest_block_with_cblock(self, mock):
+        mock.return_value = self.second_block_chain_a
+
+        block = chainutil.get_highest_block_with_cblock([], None)
+
+        self.assertEqual(block, self.second_block_chain_a)
