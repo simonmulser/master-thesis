@@ -28,7 +28,7 @@ class NetworkingTest(unittest.TestCase):
         self.block_relay = None
 
     def setUp(self):
-        self.networking = Networking()
+        self.networking = Networking(MagicMock())
         self.connection_private = self.networking.connection_private = MagicMock()
         public_conn1 = self.public_connection1 = MagicMock()
         public_conn2 = self.public_connection2 = MagicMock()
