@@ -15,6 +15,7 @@ class Chain:
         block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
         block.transfer_allowed = True
         block.height = 0
+        block.cblock = core.CoreRegTestParams.GENESIS_BLOCK
 
         self.blocks = {core.CoreRegTestParams.GENESIS_BLOCK.GetHash(): block}
         self.tips = [block]
