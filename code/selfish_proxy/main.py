@@ -6,6 +6,8 @@ from strategy.executor import Executor
 from strategy.code import Strategy
 from chain import Chain
 from bitcoin import core
+import threading
+from threading import Lock
 
 
 def check_positive(value):
@@ -48,7 +50,14 @@ else:
 logging.info("arguments called with: {}".format(sys.argv))
 logging.info("parsed arguments: {}".format(args))
 
-networking = Networking()
+
+class Sync(object):
+    def __init__(self):
+        self.lock = Lock()
+
+sync = Sync()
+
+networking = Networking(sync)
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 if args.start_hash:

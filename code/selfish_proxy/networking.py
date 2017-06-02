@@ -4,16 +4,15 @@ from bitcoin import core
 from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
-from threading import Lock
 import chainutil
 
 
 class Networking(object):
-    def __init__(self):
+    def __init__(self, sync):
         self.public_connections = []
         self.connection_private = None
         self.chain = None
-        self.lock = Lock()
+        self.sync = sync
         self.deferred_requests = {}
         self.transactions = {}
 
@@ -45,7 +44,7 @@ class Networking(object):
         client.run_forever()
 
     def inv_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
@@ -96,11 +95,11 @@ class Networking(object):
                     logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
 
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def block_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received block message from {}'
                           .format(self.repr_connection(connection)))
@@ -124,11 +123,11 @@ class Networking(object):
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
 
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
     def headers_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received headers message with {} headers message from {}'
                           .format(len(message.headers), self.repr_connection(connection)))
@@ -156,11 +155,11 @@ class Networking(object):
                 logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
 
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
 
     def getheaders_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received getheaders message with {} headers from {}'
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
@@ -177,11 +176,11 @@ class Networking(object):
                           .format(len(message.headers), self.repr_connection(connection)))
 
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed getheaders message from {}'.format(self.repr_connection(connection)))
 
     def getdata_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received getdata message with {} inv from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
@@ -225,11 +224,11 @@ class Networking(object):
                     logging.warn("unknown inv type={}")
 
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
 
     def tx_message(self, connection, message):
-        self.lock.acquire()
+        self.sync.lock.acquire()
         try:
             logging.debug('received tx message from {}'
                           .format(self.repr_connection(connection)))
@@ -246,7 +245,7 @@ class Networking(object):
 
             self.deferred_requests[tx_hash] = []
         finally:
-            self.lock.release()
+            self.sync.lock.release()
             logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
