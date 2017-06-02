@@ -172,3 +172,50 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(retrieved_block, block)
         self.assertEqual(retrieved_block.prevBlock, prevBlock)
         self.assertEqual(retrieved_block.height, 46)
+
+    def test_insert_block_initializing_true(self):
+        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock.cached_hash = 'hash2'
+        prevBlock.height = 45
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = 'hash1'
+        self.chain.tips = [prevBlock]
+        self.chain.initializing = True
+
+        self.chain.insert_block(prevBlock, block)
+
+        retrieved_block = self.chain.tips[0]
+        self.assertEqual(retrieved_block, block)
+        self.assertEqual(retrieved_block.transfer_allowed, True)
+
+    def test_insert_block_initializing_false(self):
+        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock.cached_hash = 'hash2'
+        prevBlock.height = 45
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = 'hash1'
+        self.chain.tips = [prevBlock]
+        self.chain.initializing = False
+
+        self.chain.insert_block(prevBlock, block)
+
+        retrieved_block = self.chain.tips[0]
+        self.assertEqual(retrieved_block, block)
+        self.assertEqual(retrieved_block.transfer_allowed, False)
+
+    def test_insert_block_initializing_over(self):
+        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock.cached_hash = 'hash2'
+        prevBlock.height = 45
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = 'hash1'
+        self.chain.tips = [prevBlock]
+        self.chain.initializing = True
+        self.chain.start_hash = block.cached_hash
+
+        self.chain.insert_block(prevBlock, block)
+
+        retrieved_block = self.chain.tips[0]
+        self.assertEqual(retrieved_block, block)
+        self.assertEqual(retrieved_block.transfer_allowed, True)
+        self.assertEqual(self.chain.initializing, False)

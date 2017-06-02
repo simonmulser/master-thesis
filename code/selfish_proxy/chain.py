@@ -6,18 +6,21 @@ import chainutil
 
 
 class Chain:
-    def __init__(self, executor, strategy, first_block_hash):
+    def __init__(self, executor, strategy, start_hash):
         self.executor = executor
         self.strategy = strategy
+        self.start_hash = start_hash
+        self.initializing = True
 
-        block = Block(None, BlockOrigin.public)
+        block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
         block.transfer_allowed = True
         block.height = 0
-        block.cached_hash = first_block_hash
 
-        self.blocks = {first_block_hash: block}
+        self.blocks = {core.CoreRegTestParams.GENESIS_BLOCK.GetHash(): block}
         self.tips = [block]
         self.orphan_blocks = []
+
+        logging.info('created chain with start_hash={}'.format(core.b2lx(start_hash)))
 
     def process_block(self, block, block_origin):
         logging.info("process Block(hash={}) from {}".format(core.b2lx(block.GetHash()), block_origin))
@@ -87,6 +90,12 @@ class Chain:
         self.tips.append(block)
         block.height = prevBlock.height + 1
         block.prevBlock = prevBlock
+
+        if self.initializing:
+            if block.hash() == self.start_hash:
+                self.initializing = False
+                logging.info('Initializing over; now starting selfish mining')
+            block.transfer_allowed = True
 
         logging.info('{} inserted into chain'.format(block))
 
