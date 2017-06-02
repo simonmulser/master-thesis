@@ -23,7 +23,7 @@ class Chain:
         logging.info('created chain with start_hash={}'.format(core.b2lx(start_hash)))
 
     def process_block(self, block, block_origin):
-        logging.info("process Block(hash={}) from {}".format(core.b2lx(block.GetHash()), block_origin))
+        logging.info('process Block(hash={}) from {}'.format(core.b2lx(block.GetHash()), block_origin))
 
         fork_before = chainutil.get_private_public_fork(self.tips)
         logging.info('fork before {}'.format(fork_before))
