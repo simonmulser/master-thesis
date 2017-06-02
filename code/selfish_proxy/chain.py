@@ -34,7 +34,7 @@ class Chain:
         logging.info('fork after {}'.format(fork_after))
 
         if self.initializing:
-            if block.hash() == self.start_hash:
+            if block.GetHash() == self.start_hash:
                 self.initializing = False
                 logging.info('Initializing over; now starting selfish mining')
             else:

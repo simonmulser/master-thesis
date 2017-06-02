@@ -147,7 +147,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         fork = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
         mock.return_value(fork)
         block = MagicMock()
-        block.hash.return_value = 'hash1'
+        block.GetHash.return_value = 'hash1'
         self.chain.start_hash = 'hash1'
         self.chain.initializing = True
 
