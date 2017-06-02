@@ -32,19 +32,26 @@ class Chain:
 
         fork_after = chainutil.get_private_public_fork(self.tips)
         logging.info('fork after {}'.format(fork_after))
-        logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash())))
-        logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash())))
 
-        if not self.initializing and fork_before != fork_after:
-            try:
-                action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
-                logging.info('found action={}'.format(action))
-
-                self.executor.execute(action, fork_after.private_tip, fork_after.public_tip)
-            except ActionException as exception:
-                logging.warn(exception.message)
+        if self.initializing:
+            if block.hash() == self.start_hash:
+                self.initializing = False
+                logging.info('Initializing over; now starting selfish mining')
+            else:
+                logging.info('chain is initializing - no action needs to be taken')
         else:
-            logging.debug('the two forks are the same - no action needs to be taken')
+            if fork_before != fork_after:
+                logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash())))
+                logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash())))
+                try:
+                    action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
+                    logging.info('found action={}'.format(action))
+
+                    self.executor.execute(action, fork_after.private_tip, fork_after.public_tip)
+                except ActionException as exception:
+                    logging.warn(exception.message)
+            else:
+                logging.debug('the two forks are the same - no action needs to be taken')
 
     def try_to_insert_block(self, received_block, block_origin):
         prevBlock = None
@@ -92,9 +99,6 @@ class Chain:
         block.prevBlock = prevBlock
 
         if self.initializing:
-            if block.hash() == self.start_hash:
-                self.initializing = False
-                logging.info('Initializing over; now starting selfish mining')
             block.transfer_allowed = True
 
         logging.info('{} inserted into chain'.format(block))

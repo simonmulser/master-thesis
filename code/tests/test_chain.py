@@ -126,7 +126,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
 
     @patch('bitcoin.core.b2lx')
     @patch('chainutil.get_private_public_fork')
-    def test_process_block(self, mock, _):
+    def test_process_block_chain_initializing(self, mock, _):
         self.chain.try_to_insert_block = MagicMock()
         fork = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
         mock.return_value(fork)
@@ -139,6 +139,22 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(mock.called)
         self.assertFalse(self.chain.strategy.find_action.called)
         self.assertFalse(self.chain.executor.execute.called)
+
+    @patch('bitcoin.core.b2lx')
+    @patch('chainutil.get_private_public_fork')
+    def test_process_block_initializing_over(self, mock, _):
+        self.chain.try_to_insert_block = MagicMock()
+        fork = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
+        mock.return_value(fork)
+        block = MagicMock()
+        block.hash.return_value = 'hash1'
+        self.chain.start_hash = 'hash1'
+        self.chain.initializing = True
+
+        self.chain.process_block(block, BlockOrigin.public)
+
+        self.assertFalse(self.chain.initializing)
+        self.assertFalse(self.chain.strategy.find_action.called)
 
     @patch('bitcoin.core.b2lx')
     @patch('chainutil.get_private_public_fork')
@@ -221,20 +237,3 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         retrieved_block = self.chain.tips[0]
         self.assertEqual(retrieved_block, block)
         self.assertEqual(retrieved_block.transfer_allowed, False)
-
-    def test_insert_block_initializing_over(self):
-        prevBlock = Block(None, BlockOrigin.private)
-        prevBlock.cached_hash = 'hash2'
-        prevBlock.height = 45
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = 'hash1'
-        self.chain.tips = [prevBlock]
-        self.chain.initializing = True
-        self.chain.start_hash = block.cached_hash
-
-        self.chain.insert_block(prevBlock, block)
-
-        retrieved_block = self.chain.tips[0]
-        self.assertEqual(retrieved_block, block)
-        self.assertEqual(retrieved_block.transfer_allowed, True)
-        self.assertEqual(self.chain.initializing, False)
