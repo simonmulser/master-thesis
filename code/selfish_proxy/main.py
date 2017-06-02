@@ -7,6 +7,7 @@ from strategy.code import Strategy
 from chain import Chain
 from bitcoin import core
 import threading
+import cliserver
 from threading import Lock
 
 
@@ -65,5 +66,9 @@ if args.start_hash:
 else:
     chain = Chain(executor, strategy, core.CoreRegTestParams.GENESIS_BLOCK.GetHash())
 networking.chain = chain
+
+t = threading.Thread(target=cliserver.start, args=(chain, sync,))
+t.daemon = True
+t.start()
 
 networking.start(args.ips_public, args.ip_private)
