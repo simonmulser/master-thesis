@@ -115,6 +115,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         mock.side_effect = [fork_before, fork_after]
         self.chain.execute = MagicMock()
         block = MagicMock()
+        self.chain.initializing = False
 
         self.chain.process_block(block, BlockOrigin.public)
 
@@ -122,6 +123,22 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(mock.called)
         self.assertTrue(self.chain.strategy.find_action.called)
         self.assertTrue(self.chain.executor.execute.called)
+
+    @patch('bitcoin.core.b2lx')
+    @patch('chainutil.get_private_public_fork')
+    def test_process_block(self, mock, _):
+        self.chain.try_to_insert_block = MagicMock()
+        fork = Fork(self.first_block_chain_a, 2, self.first_block_chain_b, 2)
+        mock.return_value(fork)
+        block = MagicMock()
+        self.chain.initializing = True
+
+        self.chain.process_block(block, BlockOrigin.public)
+
+        self.assertTrue(self.chain.try_to_insert_block.called)
+        self.assertTrue(mock.called)
+        self.assertFalse(self.chain.strategy.find_action.called)
+        self.assertFalse(self.chain.executor.execute.called)
 
     @patch('bitcoin.core.b2lx')
     @patch('chainutil.get_private_public_fork')
@@ -133,6 +150,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.strategy.find_action = MagicMock(side_effect=ActionException('mock_exception'))
         self.chain.execute = MagicMock()
         block = MagicMock()
+        self.chain.initializing = False
 
         self.chain.process_block(block, BlockOrigin.public)
 
@@ -149,6 +167,7 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.chain.strategy.find_action = MagicMock()
         self.chain.executor.execute = MagicMock(side_effect=ActionException('mock_exception'))
         block = MagicMock()
+        self.chain.initializing = False
 
         self.chain.process_block(block, BlockOrigin.public)
 

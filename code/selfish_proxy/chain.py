@@ -35,7 +35,7 @@ class Chain:
         logging.debug('fork tip_private={}'.format(core.b2lx(fork_after.private_tip.hash())))
         logging.debug('fork tip_public={}'.format(core.b2lx(fork_after.public_tip.hash())))
 
-        if fork_before != fork_after:
+        if not self.initializing and fork_before != fork_after:
             try:
                 action = self.strategy.find_action(fork_after.private_height, fork_after.public_height, block_origin)
                 logging.info('found action={}'.format(action))
