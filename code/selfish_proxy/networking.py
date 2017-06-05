@@ -5,6 +5,7 @@ from bitcoin import net
 from bitcoin import messages
 from strategy import BlockOrigin
 import chainutil
+import behaviour
 
 
 class Networking(object):
@@ -34,7 +35,7 @@ class Networking(object):
         client.register_handler('getdata', self.getdata_message)
         client.register_handler('tx', self.tx_message)
 
-        network.ClientBehavior(client)
+        behaviour.ClientBehaviourWithCatchUp(client, ip_private)
 
         self.connection_private = client.connect((ip_private, 18444))
         for ip in ips_public:
