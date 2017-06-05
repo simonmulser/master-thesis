@@ -6,11 +6,15 @@ import chainutil
 
 
 class Chain:
-    def __init__(self, executor, strategy, start_hash):
+    def __init__(self, executor, strategy, start_hash=None):
         self.executor = executor
         self.strategy = strategy
-        self.start_hash = start_hash
-        self.initializing = True
+
+        if start_hash:
+            self.start_hash = start_hash
+            self.initializing = True
+        else:
+            self.initializing = False
 
         block = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
         block.transfer_allowed = True

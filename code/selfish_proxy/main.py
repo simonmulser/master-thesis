@@ -64,7 +64,7 @@ strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stu
 if args.start_hash:
     chain = Chain(executor, strategy, core.lx(args.start_hash))
 else:
-    chain = Chain(executor, strategy, core.CoreRegTestParams.GENESIS_BLOCK.GetHash())
+    chain = Chain(executor, strategy)
 networking.chain = chain
 
 t = threading.Thread(target=cliserver.start, args=(chain, sync,))
