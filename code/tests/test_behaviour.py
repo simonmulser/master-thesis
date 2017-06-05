@@ -1,13 +1,4 @@
-import test_abstractchain
-from chain import Chain
-from chain import Block
-from chainutil import Fork
 from mock import MagicMock
-from mock import patch
-from bitcoin import core
-from strategy import BlockOrigin
-from strategy import ActionException
-import test_util
 from behaviour import ClientBehaviourWithCatchUp
 import unittest
 
