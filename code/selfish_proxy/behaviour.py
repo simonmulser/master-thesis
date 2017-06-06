@@ -18,6 +18,8 @@ class ClientBehaviourWithCatchUp(network.ClientBehavior):
         else:
             self.send_verack(connection)
 
+        logging.info('check if connection={} is catch_up_connection={}'
+                     .format(connection.host[0], self.catch_up_connection))
         if connection.host[0] == self.catch_up_connection:
             get_headers = messages.msg_getheaders()
             get_headers.locator = messages.CBlockLocator()

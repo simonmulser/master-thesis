@@ -1,6 +1,7 @@
 from strategy import BlockOrigin
 import chain
 from sets import Set
+import logging
 
 
 def get_private_public_fork(tips):
@@ -43,8 +44,10 @@ def get_highest_block_with_cblock(tips, block_origin):
     block = get_highest_block(tips, block_origin)
 
     while block.cblock is None:
+        logging.debug('using prev block because cblock for {} is not available'.format(block.hash_repr()))
         block = block.prevBlock
 
+    logging.debug('current highest {} with cblock and block_origin={}'.format(block.hash_repr(), block_origin))
     return block
 
 

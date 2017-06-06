@@ -19,10 +19,12 @@ class Functions:
     def get_best_public_block_hash(self):
         self.sync.lock.acquire()
         try:
+            logging.debug('received get_best_public_block_hash over cli')
+
             return core.b2lx(chainutil.get_highest_block_with_cblock(self.chain.tips, BlockOrigin.public).hash())
         finally:
             self.sync.lock.release()
-            logging.info('send get_best_public_block_hash over cli')
+            logging.debug('send get_best_public_block_hash over cli')
 
 
 def start(chain, sync):
