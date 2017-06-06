@@ -26,6 +26,14 @@ class Functions:
             self.sync.lock.release()
             logging.debug('send get_best_public_block_hash over cli')
 
+    def get_start_hash(self):
+        try:
+            logging.debug('received get_start_hash over cli')
+
+            return core.b2lx(self.chain.start_hash)
+        finally:
+            logging.debug('send start_hash over cli')
+
 
 def start(chain, sync):
 
