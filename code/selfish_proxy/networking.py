@@ -85,8 +85,8 @@ class Networking(object):
                 connection.send('getdata', msg)
                 logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
 
-                all_connections = self.public_connections
-                all_connections.append(self.connection_private)
+                all_connections = list(self.public_connections)
+                all_connections.extend(self.connection_private)
                 all_connections.remove(connection)
 
                 msg = messages.msg_inv()
