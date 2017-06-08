@@ -97,6 +97,6 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * implementiereung der netzwertopologie (network.config)
       * in einer matrix werden die verbindungen zwischen den nodes mitsamt delay angegeben
  * beide files (tick. und network.config) werden von einem neuen python script erstellt
-* proposal
- * nach eigenem ermessen schreiben
- * vorlagen und beispiel proposals sind im www zu finden
+ * proposal
+      * nach eigenem ermessen schreiben
+      * vorlagen und beispiel proposals sind im www zu finden
