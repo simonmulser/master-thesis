@@ -86,12 +86,12 @@ class Networking(object):
                 logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
 
                 all_connections = list(self.public_connections)
-                all_connections.extend(self.connection_private)
+                all_connections.append(self.connection_private)
                 all_connections.remove(connection)
 
                 msg = messages.msg_inv()
                 msg.inv = missing_inv
-                for relay_connection in self.public_connections:
+                for relay_connection in all_connections:
                     relay_connection.send('inv', msg)
                     logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
 
