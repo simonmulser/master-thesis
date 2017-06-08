@@ -89,7 +89,7 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * delays mit tc. leider noch ein problem wenn eine verbindung delayed werden soll und alle anderen nicht, zB für den proxy node. simon schickt an aljosha ein beispiel code zum reproduzieren des problems.
 * next steps
  * implementierung von ticks (tick.config)
-    * pro zeile ein tick
+      * pro zeile ein tick
   * ein tick beschreibt einen zeitabschnitt
   * in einem tick kann ein node 0-1 events (tx oder block) ausführen
   * in einem tick können 0-n events sein
