@@ -72,3 +72,31 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * so generisch wie möglich dh. verschieden selfish mining strategien und der proxy soll auch als eclipse attack node verwendet werden können
  * aljosha schickt relevante selfish mining papers als ausgangslage
 * andreas refactored und implementiert simcoin für seine arbeit weiter
+
+# 08.06.17
+* mit aljosha, nicholas
+* AMS bestätigung des fortschrittes für bildungskarenz benötigt
+* erklärung/einführung proxy
+ * kein public bitcoind node mehr, da sonst die match aktion des selfish mining algorithmus nicht möglich wäre
+ * da kein public bitcoind node mehr vorhanden ist, musste viel vom netzwerk stack implementiert werden
+ * strategie programmatisch mit vielen if/else umgesetzt
+ * proxy hat eine eigene view der blockchain
+* erklärung/einführung simcoin
+ * viele bash commands die mit python erstellt werden
+ * leicht unübersichtlich, schlecht getestet und schlecht lesbar
+ * auswertung in CSV files (chain in nodes, blocks, consensus chain)
+ * start-up tricky. 100 + #nodes an blöcke erstellen damit jeder node geld hat
+ * delays mit tc. leider noch ein problem wenn eine verbindung delayed werden soll und alle anderen nicht, zB für den proxy node. simon schickt an aljosha ein beispiel code zum reproduzieren des problems.
+* next steps
+ * implementierung von ticks (tick.config)
+  * pro zeile ein tick
+  * ein tick beschreibt einen zeitabschnitt
+  * in einem tick kann ein node 0-1 events (tx oder block) ausführen
+  * in einem tick können 0-n events sein
+  * nachdem alle events ausgeführt wurden, wird bis zum nächsten tick gewartet
+ * implementiereung der netzwertopologie (network.config)
+  * in einer matrix werden die verbindungen zwischen den nodes mitsamt delay angegeben
+ * beide files (tick. und network.config) werden von einem neuen python script erstellt
+* proposal
+ * nach eigenem ermessen schreiben
+ * vorlagen und beispiel proposals sind im www zu finden
