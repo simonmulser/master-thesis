@@ -90,12 +90,12 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
 * next steps
  * implementierung von ticks (tick.config)
       * pro zeile ein tick
-  * ein tick beschreibt einen zeitabschnitt
-  * in einem tick kann ein node 0-1 events (tx oder block) ausführen
-  * in einem tick können 0-n events sein
-  * nachdem alle events ausgeführt wurden, wird bis zum nächsten tick gewartet
+      * ein tick beschreibt einen zeitabschnitt
+      * in einem tick kann ein node 0-1 events (tx oder block) ausführen
+      * in einem tick können 0-n events sein
+      * nachdem alle events ausgeführt wurden, wird bis zum nächsten tick gewartet
  * implementiereung der netzwertopologie (network.config)
-  * in einer matrix werden die verbindungen zwischen den nodes mitsamt delay angegeben
+      * in einer matrix werden die verbindungen zwischen den nodes mitsamt delay angegeben
  * beide files (tick. und network.config) werden von einem neuen python script erstellt
 * proposal
  * nach eigenem ermessen schreiben
