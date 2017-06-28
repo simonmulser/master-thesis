@@ -73,7 +73,7 @@ Further research showed that more generalised selfish mining strategies lead to 
 \begin{itemize}
 \item Lead stubborn mining strategy compromises the idea to cause as many block races as possible and to never overwrite the public chain with a longer chain. This strategy is especially promising when the probability to win the block race is very high.
 \item Equal-fork stubborn mining strategy changes the selfish mining strategy just by one transition. In case the selfish miner wins a block race, he does not publish his block to win the race but he also keeps this block undisclosed to have an advantage over the other miners.
-\item Trail stubborn mining strategies reflects the idea to even trail behind the public chain and to eventually catch up. The figure \ref{fig:stubborn_mining} depicts the trail stubborn mining strategy \textit{T1} with one maximum block which the selfish miner should trail behind.
+\item Trail stubborn mining strategies reflects the idea to even trail behind the public chain and to eventually catch up. The figure \ref{fig:stubborn_mining} depicts the trail stubborn mining strategy \textit{T1}. The number one denotes that the selfish miner is allowed to trail one block behind the public chain.
 \end{itemize}
 
 The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and rational. \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}
