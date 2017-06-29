@@ -109,7 +109,7 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * die beiden programme dienen zu erstellen der configurationsdateien network.config und ticks.csv
  * passen im großen und ganzem so, leichte anpassungen vl notwendig
 * vorstellen der ersten version des proposals
- * DES-simulation unpassend, vielleicht verwenden von emulation
+ * DES-simulation unpassend, nur simulation verwenden
  * vorteil von simulation besser hervorheben
 * förderung durch netidee interessant
  * vorerst aber proposal fertig schreiben
