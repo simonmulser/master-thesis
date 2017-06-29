@@ -122,3 +122,4 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
       * tracking des tx backlog
       * mehrmaliges simulieren (ohne selfish mining) und vergleichen mit https://allquantor.at/blockchainbib/pdf/decker2013information.pdf und https://allquantor.at/blockchainbib/pdf/gervais2016security.pdf
  * aljosha gibt feedback zum proposal
+ * danach fertigstellung des proposals durch simon
