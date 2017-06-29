@@ -98,7 +98,7 @@ Different settings for the connectivity and distribution of computation power ar
 \section{State-of-the-art}
 Already in the year 2010 the user \textit{ByteCoin} described the idea of selfish mining in the Bitcoin forum \textit{bitcointalk} \cite{ByteCoin2010}.
 He provided simulation results of the attack which at that time was called \textit{mining cartel attack}.
-Nevertheless, the discussions in the thread never caught fire and no further investigations or countermeasures were taken by the community \citep{BitcoinTalk2010, bahack2013theoretical}.
+Nevertheless, the discussions in the thread never caught fire and no further investigations or countermeasures were taken by the community \cite{BitcoinTalk2010, bahack2013theoretical}.
 
 Later in 2014 \citeauthor{eyal2014majority} released the paper \textit{"Majority is not enough: Bitcoin mining is vulnerable."} and coined the term selfish mining.
 The paper gives a formal description of selfish mining and proves how a miner can earn more than his fair share by conducting the attack.
@@ -151,7 +151,7 @@ To find the best strategy for a given mining power share $\alpha$ and connectivi
 \cite{gervais2015tampering, nayak2016stubborn} used numeric simulations of paths in the state machine to find optimal selfish mining strategies.
 \cite{sapirshtein2016optimal, gervais2016security} on the other hand used MDPs based on a state machine to find strategies with the most relative gain.
 The basic structure of the used state machines is for all publications the same.
-To further validate their results \citep{eyal2014majority, sapirshtein2016optimal} used a closed-source simulation.
+To further validate their results \cite{eyal2014majority, sapirshtein2016optimal} used a closed-source simulation.
 
 Besides using variations of the selfish mining strategies, the attack can also be combined with other attacks to achieve better results \cite{gervais2016security, sapirshtein2016optimal, nayak2016stubborn, gervais2015tampering}.
 If the eclipse attack is used in combination with selfish mining the victim contributes its mining power to the private chain and hence, strengthens the position of the selfish miner \cite{nayak2016stubborn, gervais2016security}.
@@ -165,15 +165,15 @@ The operational costs of unsuccessful double-spending can be seen as low because
 Last but not least also the prevention of selfish mining is part of the current work in selfish mining research \cite{eyal2014majority, billah2015one, solat2016zeroblock, zhang2017publish}.
 A backwards-compatible patch to mitigate selfish mining is uniform tie-breaking \cite{eyal2014majority}.
 This means whenever a node receives two blocks of the same height he randomly select on of the blocks to mine on.
-\citep{eyal2014majority} showed that this would raise the profit threshold to 25\% of the computational power and hence mitigating selfish mining.
+\cite{eyal2014majority} showed that this would raise the profit threshold to 25\% of the computational power and hence mitigating selfish mining.
 The drawback of this proposed change is that it would increase the connectivity of badly connected attackers to almost 50\% with no actual effort for them.
-Uniform tie breaking is currently not implemented in Bitcoin \cite{}Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \citep{billah2015one}.
+Uniform tie breaking is currently not implemented in Bitcoin \cite{}Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
 This countermeasure would make all pre-mined blocks of the selfish miner invalid after a certain amount of time.
-The implementation of this patch would require random beacons and hence introduce complexity and a new attack vector \citep{billah2015one}.
+The implementation of this patch would require random beacons and hence introduce complexity and a new attack vector \cite{billah2015one}.
 \cite{zhang2017publish} proposes backward-compatible countermeasure by neglecting blocks that are not published in time and allows incorporation of competing blocks in the chain similar to Ethereum's uncle blocks \cite{wood2014ethereum}.
 This enables a new fork-resolving policy where a block always contributes to neither or both branches of the fork \cite{zhang2017publish}.
 All of this mentioned countermeasures are not planned to be implemented or implemented in Bitcoin \cite{bitcoin, bitcoinbip}.
-Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \citep{gervais2016security, unifromtiebreakingethereum}.
+Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}.
 
 \section{Relation to "Software Engineering and Internet Computing" curriculum}
 Bitcoin, the overlying topic, is a relatively new technology.
