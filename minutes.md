@@ -101,7 +101,6 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
       * nach eigenem ermessen schreiben
       * vorlagen und beispiel proposals sind im www zu finden
 
-
 # 29.06.17
 * mit aljosha
 * AMS wurde verlängert
