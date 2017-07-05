@@ -25,21 +25,23 @@
 \maketitle
 
 \section{Problem statement}
-The cryptocurrency Bitcoin started back in the year 2008 with the release of the Bitcoin white paper \cite{nakamoto2008bitcoin} and reached as of today a market capitalization of over 20 billion dollars \cite{marketcap2017}.
-Internally the Bitcoin cryptocurrency records all transactions in a public ledger called the blockchain.
+The cryptocurrency Bitcoin started back in the year 2008 with the release of the Bitcoin white paper \cite{nakamoto2008bitcoin}.
+As of today, the cryptocurrency has reached a market capitalization of over 20 billion dollars \cite{marketcap2017}.
+Internally the Bitcoin cryptocurrency records all transactions in a public ledger called \emph{blockchain}.
 The blockchain is basically an immutable linked list of blocks where a block contains multiple transactions of the cryptocurrency.
 In Bitcoin, each block needs to contain a so-called proof of work (PoW) which is the solution to a costly and time-consuming cryptographic puzzle.
 Miners connected in a peer-to-peer network compete with their computation power to find solutions to the puzzle and hence to find the next block for the blockchain.
-Finding a block allows the miners to add a transaction to the block and gives them a certain amount of bitcoins out of thin air.
+Finding a block allows the miners to add a transaction to the block and gives them right to newly create a certain amount of bitcoins.
 Additionally, the grouping of the transactions in blocks creates a total order and hence makes it possible to prevent double-spending.
-After a block is found by a miner all other miners should adopt to this new tip of the chain and try to find a new block on top.
+After a block is found by a miner, all other miners should adopt to this new tip of the chain and try to find a new block on top.
 This mining process is considered as incentive compatible as long as no single miner has more than 50\% of the total computation power.
 
 \citeauthor{eyal2014majority} showed that also miners under 50\% have an incentive to not follow the protocol as described depending on their connectivity and share of computation power in the peer-to-peer network.
 By implementing a so-called selfish mining strategy a miner can obtain relatively more revenue than his actual proportion of computational power in the network.
-In general, the miner simply does not shares found blocks with the others and secretly mines on his own chain.
-At some point, the public miners will catch up with their public chain because they have over 50\% of the computation power.
-In this case, the selfish miner publishes his blocks.
+In general, the miner simply does not share found blocks with the others and secretly mines on his own chain.
+%At some point, the public miners will catch up with their public chain because they have over 50\% of the computation power.
+\todo{This sentence is somehow misleading. As fas as I remember the 50\% thing only becomes an issue when a miner invests is additional relative earnings (in relation to other miners) into new mining hardware and then at some point reach 50\% with this investment. So this is the big-picture long-term-attack scenario not the short term one. By leaving out two sentences this inconsitency resolves it self I guess ...}
+%In this case, the selfish miner publishes his blocks.
 If his chain is longer then the public chain, he is able to overwrite all blocks found by the honest miners.
 If the two chains have the same length the private miner also publishes his block and causes a block race.
 Now the network is split into two parts where one part is mining on the public tip and the other part is mining on the now public-private tip.
@@ -55,14 +57,29 @@ For example, it could make sense for the selfish miner to even trail behind the 
 
 To prove the existence and attributes of selfish mining different approaches were applied.
 The researchers used simple probabilistic arguments \cite{eyal2014majority, bahack2013theoretical}, numeric simulation of paths with state machines \cite{gervais2015tampering, nayak2016stubborn}, advanced Markov Decision Processes (MDP) \cite{sapirshtein2016optimal, gervais2016security} or gave results of closed-source simulations \cite{eyal2014majority, sapirshtein2016optimal}.
-Unfortunately, we cannot discuss the closed source simulations but all other methodologies do not use discrete event simulation (DES) \cite{fishman1978principles} to simulate selfish mining.
+Unfortunately, we cannot discuss the closed source simulations in detail.
+All other methodologies do not use discrete event simulation (DES)
+\todo{Doesnt gervais2016security provide ns3 code for a DES?}
+\cite{fishman1978principles} to simulate selfish mining.
 This type of simulation would allow reducing the abstraction used in the above-mentioned methodologies.
-One of the main abstraction introduced by the other researchers is that they model the block races with a simple probabilistic distribution.
-With a DES-simulation, it would be possible to model the whole network topology and simulate selfish mining under more realistic conditions.
+One of the main drawbacks of current simulation are:
+\begin{itemize}
+\item Available simulation code is an abstraction and a rewrite of the original   Bitcoin-core source code within the simulation framework e.g., \emph{ns3}.
+Since there is no official specification of the Bitcoin protocol it is hard to capture all details and at the same time keep the simulation software up-to-date.
+\item Available simulation approaches model the block races with a simple probabilistic distribution.
+\todo{You are referring to the simulation of classical mining behaviour here?}
+\end{itemize}
+
+In this thesis we
+\todo{It is common to use \emph{we} to refer to the authors even if there is just one ;)}
+propose a new simulation approach to more accurately capture the details of the Blockchain protocol under simulation, while allowing for a high degree of determinism.
+With our simulation, it would be possible to model the whole network topology and simulate selfish mining under more realistic conditions.
 Hence the simulation could capture network delays and natural forks of the chain.
+%for any \emph{Bitcoin-like} protocol (e.g., Bitcoin-core or Bitcoin Unlimited) by only adapting the log parsing and RPC logic.
+%% Maybe we should emphasise this last point as well somewhere? 
 
 \section{Expected result}
-The expected outcome of this thesis is a DES-simulation of different selfish mining strategies.
+The expected outcome of this thesis is a more accurate simulation of different selfish mining strategies and therefore a better understanding of the potential real world implications of such attacks.
 The selfish mining strategies include:
 \begin{itemize}
 \item selfish mining \cite{eyal2014majority}
@@ -73,6 +90,8 @@ The selfish mining strategies include:
 
 For the simulation, these strategies are combined with different distributions of computation power and different network topologies.
 The result of the simulations should show which strategy is the best strategy for a certain combination of a network topology and distribution of mining power.
+Thereby, also the influence of the network topology is studied in more detail.
+\todo{Since this was not yet the focus of previous simulation ... as far as I remember?}
 
 Furthermore, the simulations should emphasise the recent work in the area of selfish mining and show that the current implementation of Bitcoin protocol is vulnerable against different selfish mining strategies.
 
@@ -80,11 +99,12 @@ Furthermore, the simulations should emphasise the recent work in the area of sel
 First, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \citeauthor{nayak2016stubborn} and \citeauthor{eyal2014majority} need to be implemented.
 This is achieved by implementing a proxy which eclipses a normal Bitcoin client from the other nodes in the network.
 Now, if a block is found the proxy decides, depending on his selfish mining strategy, if a block should be transmitted from the eclipsed node to the rest of the network or vice versa.
-The design pattern proxy makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
+The proxy design pattern, makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
 
-In the next step, a DES-simulation program is implemented.
-To be able to control when a certain node finds a block all Bitcoin nodes should be executed in test mode.
-In test mode the real proof of work algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
+In the next step, a simulation program is implemented.
+To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in regtest mode.
+\todo{Guess its regtest mode or?}
+In this test mode the real proof of work algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
 With this functionality, it is possible to define a block discovery series which basically reflects the computation power of each node.
 The more blocks are found by a node the more simulated computation power the node has.
 Additionally to the block generation, the simulation program should also control the network topology and hence the connectivity of each node.
@@ -92,7 +112,7 @@ For the simulation run, it is important that the connectivity of the nodes stays
 This should be achieved by setting the connections from the nodes by the simulation program itself which is in contrast to normal behaviour.
 Normally Bitcoin nodes share their connections with other nodes over the Bitcoin protocol and try to improve the connectivity over time.
 
-After the implementation of the selfish mining strategies and the DES-simulation program, the mining strategies are simulated.
+After the implementation of the selfish mining strategies and the simulation program, the mining strategies are simulated.
 Different settings for the connectivity and distribution of computation power are used to compare the relative gain of the selfish mining strategies over the normal, honest mining.
 
 \section{State-of-the-art}
@@ -108,7 +128,7 @@ Whenever the public network finds a block and the selfish miner publishes a comp
 In the case of such a block race, the variable $\gamma$ expresses the probability of the selfish miner to win the block race.
 Hence $\gamma$ part of the miners are mining on the public-private block and respectively (1 − $\gamma$) are mining on the public block.
 The labels on the transitions are representing the transition probabilities between the states.
-The profitability of the simple strategy of \cite{eyal2014majority} was proved by using probability calculations based on the state machine of figure \ref{fig:selfish_mining}.
+The profitability of the simple strategy of \cite{eyal2014majority} was proven by using probability calculations based on the state machine of figure \ref{fig:selfish_mining}.
 Furthermore, results of an undisclosed Bitcoin protocol simulator were given.
 In the simulation, 1000 miners with the same mining power were simulated and a fraction of these miners formed a pool which applied the selfish mining algorithm.
 In the case of a block race they artificially split the network where one part is mining on the public block and one part is mining on the block of the selfish pool.
@@ -136,7 +156,7 @@ The figure \ref{fig:stubborn_mining} depicts the trail stubborn mining strategy 
 The number one denotes that the selfish miner is allowed to trail one block behind the public chain.
 \end{itemize}
 
-The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and are leading to even more relative gain \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
+The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and are leading to even more relative gain compared to honest miners\cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
 
 
 \begin{figure}[t]
@@ -167,16 +187,18 @@ A backwards-compatible patch to mitigate selfish mining is uniform tie-breaking 
 This means whenever a node receives two blocks of the same height he randomly select on of the blocks to mine on.
 \cite{eyal2014majority} showed that this would raise the profit threshold to 25\% of the computational power and hence mitigating selfish mining.
 The drawback of this proposed change is that it would increase the connectivity of badly connected attackers to almost 50\% with no actual effort for them.
-Uniform tie breaking is currently not implemented in Bitcoin \cite{}Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
+%Uniform tie breaking is currently not implemented in Bitcoin \cite{}Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
+Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}
+\todo{As from your conversation with Eyal - its better to find a reference where it is implemented than to find a reference where its not implemented :)}
+Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
 This countermeasure would make all pre-mined blocks of the selfish miner invalid after a certain amount of time.
 The implementation of this patch would require random beacons and hence introduce complexity and a new attack vector \cite{billah2015one}.
 \cite{zhang2017publish} proposes backward-compatible countermeasure by neglecting blocks that are not published in time and allows incorporation of competing blocks in the chain similar to Ethereum's uncle blocks \cite{wood2014ethereum}.
 This enables a new fork-resolving policy where a block always contributes to neither or both branches of the fork \cite{zhang2017publish}.
 All of this mentioned countermeasures are not planned to be implemented or implemented in Bitcoin \cite{bitcoin, bitcoinbip}.
-Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}.
 
 \section{Relation to "Software Engineering and Internet Computing" curriculum}
-Bitcoin, the overlying topic, is a relatively new technology.
+Cryptocurrency technologies are a relatively new topic.
 Hence there are no concrete subjects or modules teaching this technology in the current curriculum.
 But under the hood Bitcoin technically is just a composition of different technologies which can be related to modules of the curriculum.
 First of all, Bitcoin is a software acting as a distributed system and can, therefore, be linked to the modules \textit{Software Engineering} and \textit{Distributed Systems}.
@@ -184,7 +206,7 @@ Furthermore, Bitcoin uses cryptography to secure the system, which can be linked
 Hash functions are the main component of the PoW-algorithm in the mining process which helps to prevent double spending.
 Furthermore, digital signatures based on cryptography are used to secure the bitcoins held by the different users of the system.
 
-In the thesis, the implementation of a proxy enabling selfish mining strategies and a DES-simulation program are carried out.
+In the thesis, the implementation of a proxy enabling selfish mining strategies and a simulation program are carried out.
 Since both of them are an implementation effort they can be directly linked to the module \textit{Software Engineering}.
 Furthermore, both software programs are related to the module \textit{Distributed Systems}.
 The proxy needs to be suited between multiple nodes in a Bitcoin network which is a distributed system and the simulation program needs to start-up, manage and tear-down exactly this distributed system.
