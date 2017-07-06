@@ -44,11 +44,6 @@ If the two chains have the same length the private miner also publishes his bloc
 Now the network is split into two parts where one part is mining on the public tip and the other part is mining on the now public-private tip.
 In general, the selfish miner achieves that the other miners are wasting their computational power on blocks which will not end up in the longest chain.
 
-%Nevertheless, in the short run, the selfish mining is not always profitable.
-%Because of the waste of computational power caused by selfish mining fewer blocks are found.
-%The selfish miner can increase his relative share but since there are fewer blocks often the honest behaviour would be more profitable.
-%The selfish miner has to wait until the difficulty of the PoW-puzzle is adjusted to the now lower computational power of the network which happens in Bitcoin every two weeks \cite{gervais2016security, nayak2016stubborn}
-
 Further research \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical} explored different modifications of the original selfish mining algorithm by \citeauthor{eyal2014majority} and found slightly modifications of the algorithm which perform better under certain circumstances.
 For example, it could make sense for the selfish miner to even trail behind the public chain.
 
