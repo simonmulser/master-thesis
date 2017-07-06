@@ -88,8 +88,7 @@ Now, if a block is found the proxy decides, depending on his selfish mining stra
 The proxy design pattern, makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
 
 In the next step, a simulation program is implemented.
-To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in regtest mode.
-\todo{Guess its regtest mode or?}
+To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in \textit{regtest} mode.
 In this test mode the real proof of work algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
 With this functionality, it is possible to define a block discovery series which basically reflects the computation power of each node.
 The more blocks are found by a node the more simulated computation power the node has.
