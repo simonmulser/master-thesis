@@ -39,9 +39,6 @@ This mining process is considered as incentive compatible as long as no single m
 \citeauthor{eyal2014majority} showed that also miners under 50\% have an incentive to not follow the protocol as described depending on their connectivity and share of computation power in the peer-to-peer network.
 By implementing a so-called selfish mining strategy a miner can obtain relatively more revenue than his actual proportion of computational power in the network.
 In general, the miner simply does not share found blocks with the others and secretly mines on his own chain.
-%At some point, the public miners will catch up with their public chain because they have over 50\% of the computation power.
-\todo{This sentence is somehow misleading. As fas as I remember the 50\% thing only becomes an issue when a miner invests is additional relative earnings (in relation to other miners) into new mining hardware and then at some point reach 50\% with this investment. So this is the big-picture long-term-attack scenario not the short term one. By leaving out two sentences this inconsitency resolves it self I guess ...}
-%In this case, the selfish miner publishes his blocks.
 If his chain is longer then the public chain, he is able to overwrite all blocks found by the honest miners.
 If the two chains have the same length the private miner also publishes his block and causes a block race.
 Now the network is split into two parts where one part is mining on the public tip and the other part is mining on the now public-private tip.
