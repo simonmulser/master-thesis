@@ -172,9 +172,7 @@ A backwards-compatible patch to mitigate selfish mining is uniform tie-breaking 
 This means whenever a node receives two blocks of the same height he randomly select on of the blocks to mine on.
 \cite{eyal2014majority} showed that this would raise the profit threshold to 25\% of the computational power and hence mitigating selfish mining.
 The drawback of this proposed change is that it would increase the connectivity of badly connected attackers to almost 50\% with no actual effort for them.
-%Uniform tie breaking is currently not implemented in Bitcoin \cite{}Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
-Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}
-\todo{As from your conversation with Eyal - its better to find a reference where it is implemented than to find a reference where its not implemented :)}
+Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}.
 Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
 This countermeasure would make all pre-mined blocks of the selfish miner invalid after a certain amount of time.
 The implementation of this patch would require random beacons and hence introduce complexity and a new attack vector \cite{billah2015one}.
