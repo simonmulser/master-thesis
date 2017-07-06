@@ -89,7 +89,7 @@ The proxy design pattern, makes it possible to implement the selfish mining stra
 
 In the next step, a simulation program is implemented.
 To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in \textit{regtest} mode.
-In this test mode the real proof of work algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
+In this test mode the real PoW-algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
 With this functionality, it is possible to define a block discovery series which basically reflects the computation power of each node.
 The more blocks are found by a node the more simulated computation power the node has.
 Additionally to the block generation, the simulation program should also control the network topology and hence the connectivity of each node.
