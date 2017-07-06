@@ -52,15 +52,15 @@ The researchers used simple probabilistic arguments \cite{eyal2014majority, baha
 Unfortunately, we cannot discuss the closed source simulations in detail.
 All other above-mentioned methodologies have the following drawbacks:
 \begin{itemize}
-\item Abstraction of the Bitcoin source code which runs inside a single node.
+\item Abstraction of the Bitcoin source code which normally runs on a single node.
 Since there is no official specification of the Bitcoin protocol it is hard to capture all details.
-Furthermore it is hard to keep the simulation software up-to-date because of the ongoing development of the protocol.
+Furthermore, it is hard to keep the simulation software up-to-date because of the ongoing development of the protocol.
 \item Abstraction of the whole network layer of the peer-to-peer network.
 The available simulations abstract the network topology by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by using the block stale rate as input for the MDP \cite{gervais2016security}.
 Hence the highly abstract the presence of network delays and natural forks of the chain.
 \end{itemize}
 
-In this thesis we propose a new simulation approach to more accurately capture the details of the Blockchain protocol under simulation, while allowing for a high degree of determinism.
+In this thesis, we propose a new simulation approach to more accurately capture the details of the Blockchain protocol under simulation, while allowing for a high degree of determinism.
 With our simulation, it would be possible to model the selfish mining attack with different network topologies and to use the Bitcoin source code directly in the simulation.
 
 \section{Expected result}
@@ -80,17 +80,17 @@ Thereby, also the influence of the network topology is studied in more detail co
 An additional outcome of the thesis is the simulation software.
 The software should allow an accurate and deterministic simulation of the blockchain by using directly the reference implementation and a realistic network topology.
 Hence, the simulation software could not only be used to simulate selfish mining attacks but could for example also be used to simulate other attacks or new protocol versions of Bitcoin. 
-Since many other cryptocurrencies are derived from Bitcoin, they simulation software could be used also to simulate their behavior and properties.
+Since many other cryptocurrencies are derived from Bitcoin, they simulation software could be used also to simulate their behaviour and properties.
 
 \section{Methodology and approach}
 First, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \citeauthor{nayak2016stubborn} and \citeauthor{eyal2014majority} need to be implemented.
 This is achieved by implementing a proxy which eclipses a normal Bitcoin client from the other nodes in the network.
 Now, if a block is found the proxy decides, depending on his selfish mining strategy, if a block should be transmitted from the eclipsed node to the rest of the network or vice versa.
-The proxy design pattern, makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
+The proxy design pattern makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
 
 In the next step, a simulation program is implemented.
 To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in \textit{regtest} mode.
-In this test mode the real PoW-algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
+In this test mode, the real PoW-algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
 With this functionality, it is possible to define a block discovery series which basically reflects the computation power of each node.
 The more blocks are found by a node the more simulated computation power the node has.
 Additionally to the block generation, the simulation program should also control the network topology and hence the connectivity of each node.
