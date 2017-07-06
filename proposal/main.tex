@@ -50,16 +50,14 @@ For example, it could make sense for the selfish miner to even trail behind the 
 To prove the existence and attributes of selfish mining different approaches were applied.
 The researchers used simple probabilistic arguments \cite{eyal2014majority, bahack2013theoretical}, numeric simulation of paths with state machines \cite{gervais2015tampering, nayak2016stubborn}, advanced Markov Decision Processes (MDP) \cite{sapirshtein2016optimal, gervais2016security} or gave results of closed-source simulations \cite{eyal2014majority, sapirshtein2016optimal}.
 Unfortunately, we cannot discuss the closed source simulations in detail.
-All other methodologies do not use discrete event simulation (DES)
-\todo{Doesnt gervais2016security provide ns3 code for a DES?}
-\cite{fishman1978principles} to simulate selfish mining.
-This type of simulation would allow reducing the abstraction used in the above-mentioned methodologies.
-One of the main drawbacks of current simulation are:
+All other above-mentioned methodologies have the following drawbacks:
 \begin{itemize}
-\item Available simulation code is an abstraction and a rewrite of the original   Bitcoin-core source code within the simulation framework e.g., \emph{ns3}.
-Since there is no official specification of the Bitcoin protocol it is hard to capture all details and at the same time keep the simulation software up-to-date.
-\item Available simulation approaches model the block races with a simple probabilistic distribution.
-\todo{You are referring to the simulation of classical mining behaviour here?}
+\item Abstraction of the Bitcoin source code which runs inside a single node.
+Since there is no official specification of the Bitcoin protocol it is hard to capture all details.
+Furthermore it is hard to keep the simulation software up-to-date because of the ongoing development of the protocol.
+\item Abstraction of the whole network layer of the peer-to-peer network.
+The available simulations abstract the network layer by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by using the block stale rate as input for the MDP \cite{gervais2016security}.
+Hence the highly abstract the presence of network delays and natural forks of the chain.
 \end{itemize}
 
 In this thesis we
