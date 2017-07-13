@@ -24,8 +24,8 @@
 \usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
 
 % Define convenience functions to use the author name and the thesis title in the PDF document properties.
-\newcommand{\authorname}{Forename Surname} % The author name without titles.
-\newcommand{\thesistitle}{Title of the Thesis} % The title of the thesis. The English version should be used, if it exists.
+\newcommand{\authorname}{Simon Mulser} % The author name without titles.
+\newcommand{\thesistitle}{Simulation of different selfish mining strategies in Bitcoin} % The title of the thesis. The English version should be used, if it exists.
 
 % Set PDF document properties
 \hypersetup{
@@ -50,13 +50,11 @@
 % Set persons with 4 arguments:
 %  {title before name}{name}{title after name}{gender}
 %  where both titles are optional (i.e. can be given as empty brackets {}).
-\setauthor{Pretitle}{\authorname}{Posttitle}{female}
-\setadvisor{Pretitle}{Forename Surname}{Posttitle}{male}
+\setauthor{}{\authorname}{BSc}{male}
+\setadvisor{}{Edgar Weippl}{Privatdoz. Mag.rer.soc.oec. Dipl.-Ing. Dr.techn.}{male}
 
 % For bachelor and master theses:
-\setfirstassistant{Pretitle}{Forename Surname}{Posttitle}{male}
-\setsecondassistant{Pretitle}{Forename Surname}{Posttitle}{male}
-\setthirdassistant{Pretitle}{Forename Surname}{Posttitle}{male}
+\setfirstassistant{}{Aljosha Judmayer}{Univ.Lektor Dipl.-Ing.}{male}
 
 % For dissertations:
 \setfirstreviewer{Pretitle}{Forename Surname}{Posttitle}{male}
@@ -66,19 +64,19 @@
 \setsecondadvisor{Pretitle}{Forename Surname}{Posttitle}{male} % Comment to remove.
 
 % Required data.
-\setaddress{Address}
-\setregnumber{0123456}
-\setdate{01}{01}{2001} % Set date with 3 arguments: {day}{month}{year}.
-\settitle{\thesistitle}{Titel der Arbeit} % Sets English and German version of the title (both can be English or German).
-\setsubtitle{Optional Subtitle of the Thesis}{Optionaler Untertitel der Arbeit} % Sets English and German version of the subtitle (both can be English or German).
+\setaddress{Dadlergasse 18/1/7, 1150 Wien}
+\setregnumber{01027478}
+\setdate{13}{10}{2017} % Set date with 3 arguments: {day}{month}{year}.
+\settitle{\thesistitle}{Simulation of different selfish mining strategies in Bitcoin} % Sets English and German version of the title (both can be English or German).
+\setsubtitle{Simulation respecting network topology and reference implementation}{Simulation respecting network topology and reference implementation} % Sets English and German version of the subtitle (both can be English or German).
 
 % Select the thesis type: bachelor / master / doctor / phd-school.
 % Bachelor:
-\setthesis{bachelor}
+%\setthesis{bachelor}
 %
 % Master:
-%\setthesis{master}
-%\setmasterdegree{dipl.} % dipl. / rer.nat. / rer.soc.oec. / master
+\setthesis{master}
+\setmasterdegree{dipl.} % dipl. / rer.nat. / rer.soc.oec. / master
 %
 % Doctor:
 %\setthesis{doctor}
@@ -88,7 +86,7 @@
 %\setthesis{phd-school} % Deactivate non-English title pages (see below)
 
 % For bachelor and master:
-\setcurriculum{Media Informatics and Visual Computing}{Medieninformatik und Visual Computing} % Sets the English and German name of the curriculum.
+\setcurriculum{Software Engineering \& Internet Computing}{Software Engineering \& Internet Computing} % Sets the English and German name of the curriculum.
 
 % For dissertations at the PhD School:
 \setfirstreviewerdata{Affiliation, Country}
