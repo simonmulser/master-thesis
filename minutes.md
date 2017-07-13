@@ -100,3 +100,39 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * proposal
       * nach eigenem ermessen schreiben
       * vorlagen und beispiel proposals sind im www zu finden
+
+# 29.06.17
+* mit aljosha
+* AMS wurde verlängert
+* erklärung/einführung network.py und tick.py
+ * die beiden programme dienen zu erstellen der configurationsdateien network.config und ticks.csv
+ * passen im großen und ganzem so, leichte anpassungen vl notwendig
+* vorstellen der ersten version des proposals
+ * DES-simulation unpassend, nur simulation verwenden
+ * vorteil von simulation besser hervorheben
+* förderung durch netidee interessant
+ * vorerst aber proposal fertig schreiben
+ * deadline für netidee am 20. juli
+* falls netidee nicht klappt eventuell durch bitcoin community fördern lassen
+* next steps
+ * simon kümmert sich um die simulation
+      * berechnung der block stale rate
+      * berechnung der durchschnittlichen block propagation time
+      * berechnung der durchschnittlichen tx propagation time
+      * tracking des tx backlog
+      * mehrmaliges simulieren (ohne selfish mining) und vergleichen mit https://allquantor.at/blockchainbib/pdf/decker2013information.pdf und https://allquantor.at/blockchainbib/pdf/gervais2016security.pdf
+ * aljosha gibt feedback zum proposal
+ * danach fertigstellung des proposals durch simon
+
+# 12.07.17
+* mi aljosha
+* besprechung der netidee bewerbung
+* input für einzlene fragen
+* dreh von aljosha's video part
+* next steps
+ * bewerbung deadline 20. juli
+      * erstellen von empfehlungsschreiben von edgar
+      * fertigstellen aller fragen
+      * korrektur lesen aller fragen
+      * fertigstellen des videos
+ * beginnen mit simulation
