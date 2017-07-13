@@ -123,3 +123,16 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
       * mehrmaliges simulieren (ohne selfish mining) und vergleichen mit https://allquantor.at/blockchainbib/pdf/decker2013information.pdf und https://allquantor.at/blockchainbib/pdf/gervais2016security.pdf
  * aljosha gibt feedback zum proposal
  * danach fertigstellung des proposals durch simon
+
+# 12.07.17
+* mi aljosha
+* besprechung der netidee bewerbung
+* input für einzlene fragen
+* dreh von aljosha's video part
+* next steps
+ * bewerbung deadline 20. juli
+      * erstellen von empfehlungsschreiben von edgar
+      * fertigstellen aller fragen
+      * korrektur lesen aller fragen
+      * fertigstellen des videos
+ * beginnen mit simulation
