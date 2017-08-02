@@ -136,3 +136,22 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
       * korrektur lesen aller fragen
       * fertigstellen des videos
  * beginnen mit simulation
+
+ # 25.07.17
+* mit aljosha, nicholas und andreas
+* netidee eingereicht
+ * entscheidung september/august
+* performance
+ * tx und block generation muss schneller funktionieren
+ * problem identifizieren und verbesseren
+* andreas beteiligt sich wieder, ab jetzt mit dem feature issues im projekt arbeiten
+* ende september technical report für cryptofinancials
+* intervals in ticks umbennen
+* simulation
+ * mindestens 20 miner verwenden
+ * tick-duration immer weiter reduzieren
+ * latency immer weiter erhöhen
+ * simulieren, simulieren, simulieren und auf resultate hoffen
+* ausblick für die zukunft
+ * mehrere docker networks verwenden
+ * latency mit tc command besser konfigurieren
