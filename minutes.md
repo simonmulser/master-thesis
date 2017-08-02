@@ -125,7 +125,7 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
  * danach fertigstellung des proposals durch simon
 
 # 12.07.17
-* mi aljosha
+* mit aljosha
 * besprechung der netidee bewerbung
 * input für einzlene fragen
 * dreh von aljosha's video part
