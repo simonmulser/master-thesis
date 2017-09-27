@@ -1,4 +1,4 @@
-docker build -t proxy .
+docker build -t simcoin/proxy:v1 .
 
 docker network create --subnet=240.0.0.0/4 --driver bridge isolated_network
 
