@@ -8,7 +8,8 @@ RUN \
 	apt-get install git
 
 RUN git clone https://github.com/simonmulser/pycoin.git
-RUN cd pycoin && \
+RUN cd pycoin &&\
+    git checkout 944862ba44516b3923a67e841469585391467aea &&\
     python setup.py install
 
 COPY selfish_proxy /code
