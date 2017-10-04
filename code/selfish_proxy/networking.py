@@ -33,7 +33,6 @@ class Networking(object):
         client.register_handler('headers', self.headers_message)
         client.register_handler('getheaders', self.getheaders_message)
         client.register_handler('getdata', self.getdata_message)
-        client.register_handler('tx', self.tx_message)
 
         behaviour.ClientBehaviourWithCatchUp(client, ip_private)
 
@@ -52,11 +51,7 @@ class Networking(object):
             missing_inv = []
             for inv in message.inv:
                 try:
-                    if net.CInv.typemap[inv.type] == "TX":
-                        logging.debug("received {}".format(inv))
-                        if inv.hash not in self.transactions:
-                            missing_inv.append(inv)
-                    elif net.CInv.typemap[inv.type] == "Block":
+                    if net.CInv.typemap[inv.type] == "Block":
                         logging.debug("received {}".format(inv))
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
@@ -205,20 +200,6 @@ class Networking(object):
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
-                    elif net.CInv.typemap[inv.type] == 'TX':
-                        if inv.hash in self.transactions:
-                            msg = messages.msg_tx()
-                            msg.tx = self.transactions[inv.hash]
-                            connection.send('tx', msg)
-                            logging.info('send TX(hash={}) to {}'
-                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                        else:
-                            if inv.hash in self.deferred_requests:
-                                self.deferred_requests[inv.hash].append(connection)
-                            else:
-                                self.deferred_requests[inv.hash] = [connection]
-                            logging.info('TX(hash={}) not available, added to deferred_requests'
-                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.warn("we don't care about inv type={}".format(inv.type))
                 except KeyError:
@@ -227,27 +208,6 @@ class Networking(object):
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
-
-    def tx_message(self, connection, message):
-        self.sync.lock.acquire()
-        try:
-            logging.debug('received tx message from {}'
-                          .format(self.repr_connection(connection)))
-
-            self.transactions[message.tx.GetHash()] = message.tx
-            logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(message.tx.GetHash())))
-
-            tx_hash = message.tx.GetHash()
-            if tx_hash in self.deferred_requests:
-                for connection in self.deferred_requests[tx_hash]:
-                    connection.send('tx', message)
-                    logging.debug('fulfilled deferred request for tx with hash={} for connection={}'
-                                  .format(core.b2lx(tx_hash), self.repr_connection(connection)))
-
-            self.deferred_requests[tx_hash] = []
-        finally:
-            self.sync.lock.release()
-            logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
