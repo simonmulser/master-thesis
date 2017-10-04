@@ -1,4 +1,4 @@
-FROM python:2-wheezy
+FROM python:2.7.14-wheezy
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
