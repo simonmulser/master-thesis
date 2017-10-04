@@ -1,4 +1,4 @@
 six==1.8.0
 enum34
 mock
-python-bitcoinlib
+python-bitcoinlib==0.7.0
