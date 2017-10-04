@@ -263,13 +263,13 @@ class Networking(object):
                 logging.debug("{} to be send to public".format(block.hash_repr()))
             else:
                 private_block_invs.append(inv)
-                logging.debug("{} to be send to alice".format(block.hash_repr()))
+                logging.debug("{} to be send to private".format(block.hash_repr()))
 
         if len(private_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = private_block_invs
             self.connection_private.send('inv', msg)
-            logging.info('{} block invs send to alice'.format(len(private_block_invs)))
+            logging.info('{} block invs send to private'.format(len(private_block_invs)))
 
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()

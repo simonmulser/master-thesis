@@ -75,7 +75,7 @@ class Chain:
 
         if prevBlock is None:
             self.orphan_blocks.append(block)
-            logging.info('{} added to orphan blocks'.format(block))
+            logging.info('{} with prevBlock={} added to orphan blocks'.format(block, core.b2lx(block.hashPrevBlock())))
         else:
             self.insert_block(prevBlock, block)
 
