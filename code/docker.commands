@@ -3,9 +3,8 @@ docker build -t simcoin/proxy:v1 .
 docker network create --subnet=240.0.0.0/4 --driver bridge simcoin-network
 
 recommended starting order:
-docker run --detach=true --net=simcoin-network --ip=240.0.0.4 --name=bob1 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -datadir=/data -regtest -logtimemicros -debug
-docker run --detach=true --net=simcoin-network --ip=240.0.0.5 --name=bob2 node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -datadir=/data -regtest -logtimemicros -debug
-docker run --detach=true --net=simcoin-network --ip=240.0.0.2 --name=alice node bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -datadir=/data -regtest -logtimemicros -debug
+docker run --detach=true --net=simcoin-network --ip=240.0.0.4 --name=bob1 simcoin/patched:v2 bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -datadir=/data -regtest -logtimemicros -debug
+docker run --detach=true --net=simcoin-network --ip=240.0.0.5 --name=bob2 simcoin/patched:v2 bitcoind -dnsseed=0 -listen -logips -onlynet=ipv4 -listenonion=0 -datadir=/data -regtest -logtimemicros -debug
 
 docker run -v $PWD/selfish_proxy:/code --net=simcoin-network --ip=240.0.0.10 --rm --name=proxy proxy python main.py -v --ip-private 240.0.0.2 --ips-public 240.0.0.4 240.0.0.5 --start-hash
 
