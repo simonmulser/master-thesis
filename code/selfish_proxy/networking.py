@@ -250,4 +250,5 @@ class Networking(object):
         else:
             return 'public(ip={})'.format(connection.host[0])
 
+
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
