@@ -24,6 +24,7 @@ parser.add_argument('--start-hash', help='Set the start hash for selfish mining'
 
 parser.add_argument('--ip-private', help='Set the ip of the private node', default='240.0.0.2')
 parser.add_argument('--ips-public', help='Set the ips of the public nodes', nargs='+', default=[])
+parser.add_argument('--reconnect-time', help='Time to wait to trying to reconnect to host', default=3)
 
 parser.add_argument('--lead-stubborn', help='Use lead-stubbornness in strategy', action='store_true')
 parser.add_argument('--equal-fork-stubborn', help='Use equal-fork-stubbornness in strategy', action='store_true')
@@ -58,7 +59,7 @@ class Sync(object):
 
 sync = Sync()
 
-networking = Networking(sync)
+networking = Networking(sync, args.reconnect_time)
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 if args.start_hash:

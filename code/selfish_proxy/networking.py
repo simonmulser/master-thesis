@@ -1,4 +1,6 @@
 from bitcoinnetwork import network
+from bitcoinnetwork.network import ConnectionLostEvent
+from bitcoinnetwork.network import ConnectionFailedEvent
 import logging
 from bitcoin import core
 from bitcoin import net
@@ -6,42 +8,59 @@ from bitcoin import messages
 from strategy import BlockOrigin
 import chainutil
 import behaviour
+import gevent
 
 
 class Networking(object):
-    def __init__(self, sync):
+    def __init__(self, sync, reconnect_time):
+        self.sync = sync
+        self.reconnect_time = reconnect_time
+
+        self.client = None
         self.public_connections = []
         self.connection_private = None
         self.chain = None
-        self.sync = sync
         self.deferred_requests = {}
         self.transactions = {}
 
     def start(self, ips_public, ip_private):
         logging.debug('starting client')
 
-        client = network.GeventNetworkClient()
+        self.client = network.GeventNetworkClient()
 
         for message in ['getaddr', 'addr', 'notfound', 'reject', 'getblocks', 'mempool']:
-            client.register_handler(message, self.ignore_message)
+            self.client.register_handler(message, self.ignore_message)
         # also all the other messages are ignored (but not logged)
 
-        client.register_handler('ping', self.ping_message)
+        self.client.register_handler(ConnectionLostEvent.command, self.reconnect)
+        self.client.register_handler(ConnectionFailedEvent.command, self.connection_failed)
+        self.client.register_handler('ping', self.ping_message)
 
-        client.register_handler('inv', self.inv_message)
-        client.register_handler('block', self.block_message)
-        client.register_handler('headers', self.headers_message)
-        client.register_handler('getheaders', self.getheaders_message)
-        client.register_handler('getdata', self.getdata_message)
+        self.client.register_handler('inv', self.inv_message)
+        self.client.register_handler('block', self.block_message)
+        self.client.register_handler('headers', self.headers_message)
+        self.client.register_handler('getheaders', self.getheaders_message)
+        self.client.register_handler('getdata', self.getdata_message)
 
-        behaviour.ClientBehaviourWithCatchUp(client, ip_private)
+        behaviour.ClientBehaviourWithCatchUp(self.client, ip_private)
 
-        self.connection_private = client.connect((ip_private, 18444))
+        self.connection_private = self.client.connect((ip_private, 18444))
         for ip in ips_public:
-            connection = client.connect((ip, 18444))
+            connection = self.client.connect((ip, 18444))
             self.public_connections.append(connection)
 
-        client.run_forever()
+        self.client.run_forever()
+
+    def reconnect(self, connection, message=None):
+        logging.info('Lost connection from host={}, trying to reconnect...'.format(connection.host))
+        if connection.socket:
+            connection.disconnect()
+        self.client.connect(connection.host)
+
+    def connection_failed(self, connection, message=None):
+        logging.info('Connecting to host={} failed. Trying to reconnect in {} seconds...'
+                     .format(connection.host, self.reconnect_time))
+        gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
