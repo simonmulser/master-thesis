@@ -155,3 +155,19 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
 * ausblick für die zukunft
  * mehrere docker networks verwenden
  * latency mit tc command besser konfigurieren
+
+# 06.10.17
+* mit aljosha und andreas
+* ZFS performance
+ * simulation die im ordner /blockchain gestartet wird, bricht nach einiger zeit ab
+ * ZFS bringt speicher effizienz, jedoch bremst die performance
+ * in der zukunft wird ZFS deaktiviert
+* RPC-performance
+ * peter todd python-bitcoinlib verwendet normale python TCP connections
+ * umstellen auf UNIX domain sockets nicht möglich da diese noch nicht implementiert sind
+      * https://github.com/bitcoin/bitcoin/pull/9919
+      * https://github.com/bitcoin/bitcoin/pull/9979
+* determinismus der simulation zeigen - nicht genauer besprochen
+* simulation spiegelt bitcoin wieder - wird sehr schwierig zu argumentieren
+* selfish mining - nicht besprochen
+* einreichen bitcoin workshop vorerst auf eis
