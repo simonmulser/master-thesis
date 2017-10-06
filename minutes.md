@@ -137,7 +137,7 @@ im proxy wird das selfish mining implementiert somit müsste man die referenz im
       * fertigstellen des videos
  * beginnen mit simulation
 
- # 25.07.17
+# 25.07.17
 * mit aljosha, nicholas und andreas
 * netidee eingereicht
  * entscheidung september/august
