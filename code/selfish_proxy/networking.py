@@ -73,7 +73,7 @@ class Networking(object):
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
-                        logging.debug("received {}".format(inv))
+                        logging.info("received block inv {} from {}".format(inv, self.repr_connection(connection)))
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
@@ -91,7 +91,7 @@ class Networking(object):
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
-                        logging.warn("we don't care about inv type={}".format(inv.type))
+                        logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
                     logging.warn("unknown inv type={}")
 
@@ -222,7 +222,7 @@ class Networking(object):
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     else:
-                        logging.warn("we don't care about inv type={}".format(inv.type))
+                        logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
                     logging.warn("unknown inv type={}")
 
