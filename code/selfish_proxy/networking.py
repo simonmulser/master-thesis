@@ -78,7 +78,7 @@ class Networking(object):
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
 
-                            if connection is self.connection_private:
+                            if connection.host[0] is self.connection_private.host[0]:
                                 relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.private)
                             else:
                                 relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.public)
@@ -181,7 +181,7 @@ class Networking(object):
             logging.debug('received getheaders message with {} headers from {}'
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
-            if connection is self.connection_private:
+            if connection.host[0] is self.connection_private.host[0]:
                 blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.private, message.locator.vHave)
             else:
                 blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.public, message.locator.vHave)
@@ -266,7 +266,7 @@ class Networking(object):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
     def repr_connection(self, connection):
-        if connection is self.connection_private:
+        if connection.host[0] is self.connection_private.host[0]:
             return 'private'
         else:
             return 'public(ip={})'.format(connection.host[0])
