@@ -12,7 +12,7 @@ class Strategy:
         logging.warn('this strategy is not used. may contain bugs.')
 
     def find_action(self, length_private, length_public, last_block_origin):
-        if length_private is 0 and length_public is 0:
+        if length_private == 0 and length_public == 0:
             raise ActionException('both lengths can\'t be zero')
 
         if self.fork_state is ForkState.active:
