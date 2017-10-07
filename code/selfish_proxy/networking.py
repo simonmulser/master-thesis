@@ -154,6 +154,8 @@ class Networking(object):
                 if header.GetHash() in self.chain.blocks:
                     logging.debug('already received header with hash={}'.format(core.b2lx(header.GetHash())))
                 else:
+                    logging.debug('received header with hash={} from {}'
+                                  .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
                     getdata_inv.append(header.GetHash())
 
                     if connection.host[0] is self.connection_private.host[0]:
