@@ -49,6 +49,8 @@ class Networking(object):
             connection = self.client.connect((ip, 18444))
             self.public_connections.append(connection)
 
+        self.client.listen(port=18444)
+
         self.client.run_forever()
 
     def reconnect(self, connection, message=None):
