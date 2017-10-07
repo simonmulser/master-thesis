@@ -156,7 +156,7 @@ class Networking(object):
                 else:
                     getdata_inv.append(header.GetHash())
 
-                    if connection == self.connection_private:
+                    if connection.host[0] is self.connection_private.host[0]:
                         self.chain.process_block(header, BlockOrigin.private)
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
