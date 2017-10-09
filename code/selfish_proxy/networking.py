@@ -18,6 +18,7 @@ class Networking(object):
 
         self.client = None
         self.public_connections = []
+        self.all_connections = []
         self.connection_private = None
         self.chain = None
         self.deferred_requests = {}
@@ -48,6 +49,9 @@ class Networking(object):
         for ip in ips_public:
             connection = self.client.connect((ip, 18444))
             self.public_connections.append(connection)
+
+        self.all_connections = [self.connection_private]
+        self.all_connections.extend(self.public_connections)
 
         self.client.listen(port=18444)
 
@@ -109,15 +113,12 @@ class Networking(object):
                 connection.send('getdata', msg)
                 logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
 
-                all_connections = list(self.public_connections)
-                all_connections.append(self.connection_private)
-                all_connections.remove(connection)
-
                 msg = messages.msg_inv()
                 msg.inv = missing_inv
-                for relay_connection in all_connections:
-                    relay_connection.send('inv', msg)
-                    logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
+                for relay_connection in self.all_connections:
+                    if relay_connection.host[0] != connection.host[0]:
+                        relay_connection.send('inv', msg)
+                        logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
 
         finally:
             self.sync.lock.release()
