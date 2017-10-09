@@ -32,7 +32,7 @@ class Networking(object):
             self.client.register_handler(message, self.ignore_message)
         # also all the other messages are ignored (but not logged)
 
-        self.client.register_handler(ConnectionLostEvent.command, self.reconnect)
+        self.client.register_handler(ConnectionLostEvent.command, self.connection_lost)
         self.client.register_handler(ConnectionFailedEvent.command, self.connection_failed)
         self.client.register_handler('ping', self.ping_message)
 
@@ -61,6 +61,11 @@ class Networking(object):
 
     def connection_failed(self, connection, message=None):
         logging.info('Connecting to host={} failed. Trying to reconnect in {} seconds...'
+                     .format(connection.host, self.reconnect_time))
+        gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
+
+    def connection_lost(self, connection, message=None):
+        logging.info('Connecting to host={} lost. Trying to reconnect in {} seconds...'
                      .format(connection.host, self.reconnect_time))
         gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
 
