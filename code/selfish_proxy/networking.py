@@ -17,15 +17,14 @@ class Networking(object):
         self.reconnect_time = reconnect_time
 
         self.client = None
-        self.public_connections = []
-        self.all_connections = []
-        self.connection_private = None
         self.chain = None
         self.deferred_requests = {}
         self.transactions = {}
+        self.private_ip = None
 
-    def start(self, ips_public, ip_private):
+    def start(self, private_ip):
         logging.debug('starting client')
+        self.private_ip = private_ip
 
         self.client = network.GeventNetworkClient()
 
@@ -43,45 +42,23 @@ class Networking(object):
         self.client.register_handler('getheaders', self.getheaders_message)
         self.client.register_handler('getdata', self.getdata_message)
 
-        behaviour.ClientBehaviourWithCatchUp(self.client, ip_private)
-
-        self.connection_private = self.client.connect((ip_private, 18444))
-        for ip in ips_public:
-            connection = self.client.connect((ip, 18444))
-            self.public_connections.append(connection)
-
-        self.all_connections = [self.connection_private]
-        self.all_connections.extend(self.public_connections)
+        behaviour.ClientBehaviourWithCatchUp(self.client, private_ip)
 
         self.client.listen(port=18444)
 
         self.client.run_forever()
 
-    def reconnect(self, connection, message=None):
-        logging.info('Lost connection from host={}, trying to reconnect...'.format(connection.host))
-        if connection.socket:
-            connection.disconnect()
-        self.client.connect(connection.host)
-
     def connection_failed(self, connection, message=None):
-        logging.info('Connecting to host={} failed'.format(connection.host, self.reconnect_time))
-        self.try_reconnect_if_outgoing(connection)
+        logging.warn('Connecting to host={} failed'.format(connection.host, self.reconnect_time))
 
     def connection_lost(self, connection, message=None):
-        logging.info('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
-        self.try_reconnect_if_outgoing(connection)
-
-    def try_reconnect_if_outgoing(self, connection):
-        if connection.host[1] != 18444:
-            logging.info('Trying to reconnect to {} in {} seconds...', connection.host, self.reconnect_time)
-            gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
+        logging.warn('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
         try:
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
-            missing_inv = []
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
@@ -90,10 +67,12 @@ class Networking(object):
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
 
-                            if connection.host[0] == self.connection_private.host[0]:
+                            if connection.host[0] == self.private_ip:
                                 relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.private)
                             else:
                                 relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.public)
+
+                            relevant_tips = chainutil.get_relevant_tips(relevant_tips)
 
                             for tip in relevant_tips:
                                 get_headers.locator.vHave = [tip.hash()]
@@ -169,7 +148,7 @@ class Networking(object):
                                   .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
                     getdata_inv.append(header.GetHash())
 
-                    if connection.host[0] == self.connection_private.host[0]:
+                    if connection.host[0] == self.private_ip:
                         self.chain.process_block(header, BlockOrigin.private)
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
@@ -194,7 +173,7 @@ class Networking(object):
             logging.debug('received getheaders message with {} headers from {}'
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
-            if connection.host[0] == self.connection_private.host[0]:
+            if connection.host[0] == self.private_ip:
                 blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.private, message.locator.vHave)
             else:
                 blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.public, message.locator.vHave)
@@ -259,18 +238,33 @@ class Networking(object):
                 private_block_invs.append(inv)
                 logging.debug("{} to be send to private".format(block.hash_repr()))
 
+        public_connections = []
+        private_connection = None
+        for connection in self.client.connections.values():
+            if connection.host[0] == self.private_ip:
+                if private_connection is None:
+                    private_connection = connection
+                else:
+                    logging.error('there are more than one private connections to ip={}'.format(self.private_ip))
+            else:
+                public_connections.append(connection)
+
         if len(private_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = private_block_invs
-            self.connection_private.send('inv', msg)
-            logging.info('{} block invs send to private'.format(len(private_block_invs)))
+            if private_connection is not None:
+                private_connection.send('inv', msg)
+                logging.info('{} block invs send to private'.format(len(private_block_invs)))
+            else:
+                logging.error('there is no connection to private (ip={})'.format(self.private_ip))
 
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = public_block_invs
-            for connection in self.public_connections:
+            for connection in public_connections:
                 connection.send('inv', msg)
-            logging.info('{} block invs send to public'.format(len(public_block_invs)))
+            logging.info('{} block invs send to {} public connections'
+                         .format(len(public_block_invs), len(public_connections)))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
@@ -279,10 +273,10 @@ class Networking(object):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
     def repr_connection(self, connection):
-        if connection.host[0] == self.connection_private.host[0]:
-            return 'private'
+        if connection.host[0] == self.private_ip:
+            return 'private{}'.format(connection.host)
         else:
-            return 'public(ip={})'.format(connection.host[0])
+            return 'public{}'.format(connection.host)
 
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}

@@ -23,7 +23,6 @@ parser.add_argument('-v', '--verbose', help='Increase output verbosity', action=
 parser.add_argument('--start-hash', help='Set the start hash for selfish mining')
 
 parser.add_argument('--ip-private', help='Set the ip of the private node', default='240.0.0.2')
-parser.add_argument('--ips-public', help='Set the ips of the public nodes', nargs='+', default=[])
 parser.add_argument('--reconnect-time', help='Time to wait to trying to reconnect to host', default=3)
 
 parser.add_argument('--lead-stubborn', help='Use lead-stubbornness in strategy', action='store_true')
@@ -72,4 +71,4 @@ t = threading.Thread(target=cliserver.start, args=(chain, sync,))
 t.daemon = True
 t.start()
 
-networking.start(args.ips_public, args.ip_private)
+networking.start(args.ip_private)
