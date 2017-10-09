@@ -88,19 +88,6 @@ class Networking(object):
                 except KeyError:
                     logging.warn("unknown inv type={}")
 
-            if len(missing_inv) > 0:
-                msg = messages.msg_getdata()
-                msg.inv = missing_inv
-                connection.send('getdata', msg)
-                logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
-
-                msg = messages.msg_inv()
-                msg.inv = missing_inv
-                for relay_connection in self.all_connections:
-                    if relay_connection.host[0] != connection.host[0]:
-                        relay_connection.send('inv', msg)
-                        logging.debug('relaying inv to {}'.format(self.repr_connection(relay_connection)))
-
         finally:
             self.sync.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
