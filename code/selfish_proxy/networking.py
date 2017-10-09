@@ -65,7 +65,7 @@ class Networking(object):
 
     def connection_failed(self, connection, message=None):
         logging.info('Connecting to host={} failed'.format(connection.host, self.reconnect_time))
-        self.try_reconnect_if_outgoing()
+        self.try_reconnect_if_outgoing(connection)
 
     def connection_lost(self, connection, message=None):
         logging.info('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
