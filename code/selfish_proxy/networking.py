@@ -85,7 +85,7 @@ class Networking(object):
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
-                        logging.info("received block inv {} from {}".format(inv, self.repr_connection(connection)))
+                        logging.info("received block inv {} from {}".format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
@@ -100,6 +100,8 @@ class Networking(object):
                                 connection.send('getheaders', get_headers)
                                 logging.info('requested new headers {} from {}'
                                              .format(core.b2lx(tip.hash()), self.repr_connection(connection)))
+                        else:
+                            logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
