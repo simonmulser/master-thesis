@@ -60,14 +60,17 @@ class Networking(object):
         self.client.connect(connection.host)
 
     def connection_failed(self, connection, message=None):
-        logging.info('Connecting to host={} failed. Trying to reconnect in {} seconds...'
-                     .format(connection.host, self.reconnect_time))
-        gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
+        logging.info('Connecting to host={} failed'.format(connection.host, self.reconnect_time))
+        self.try_reconnect_if_outgoing()
 
     def connection_lost(self, connection, message=None):
-        logging.info('Connecting to host={} lost. Trying to reconnect in {} seconds...'
-                     .format(connection.host, self.reconnect_time))
-        gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
+        logging.info('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
+        self.try_reconnect_if_outgoing(connection)
+
+    def try_reconnect_if_outgoing(self, connection):
+        if connection.host[1] != 18444:
+            logging.info('Trying to reconnect to {} in {} seconds...', connection.host, self.reconnect_time)
+            gevent.spawn_later(self.reconnect_time, self.reconnect, connection)
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
