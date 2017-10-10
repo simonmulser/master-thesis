@@ -18,11 +18,11 @@ class ClientBehaviourWithCatchUp(network.ClientBehavior):
         else:
             self.send_verack(connection)
 
-        logging.info('check if connection={} is catch_up_connection={}'
-                     .format(connection.host[0], self.catch_up_connection))
+        logging.debug('check if connection={} is catch_up_connection={}'
+                      .format(connection.host[0], self.catch_up_connection))
         if connection.host[0] == self.catch_up_connection:
             get_headers = messages.msg_getheaders()
             get_headers.locator = messages.CBlockLocator()
             get_headers.locator.vHave = [core.CoreRegTestParams.GENESIS_BLOCK.GetHash()]
             connection.send('getheaders', get_headers)
-            logging.info('sent getheaders with genesis block to={}'.format(connection.host[0]))
+            logging.info('sent getheaders with genesis block to={} to catch up with chain'.format(connection.host[0]))
