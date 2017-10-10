@@ -22,7 +22,7 @@ parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
 parser.add_argument('--start-hash', help='Set the start hash for selfish mining')
 
-parser.add_argument('--ip-private', help='Set the ip of the private node', default='240.0.0.2')
+parser.add_argument('--private-ip', help='Set the ip of the private node', default='240.0.0.2')
 parser.add_argument('--reconnect-time', help='Time to wait to trying to reconnect to host', default=3)
 
 parser.add_argument('--lead-stubborn', help='Use lead-stubbornness in strategy', action='store_true')
@@ -59,7 +59,7 @@ class Sync(object):
 
 sync = Sync()
 
-networking = Networking(args.ip_private, sync, args.reconnect_time)
+networking = Networking(args.private_ip, sync, args.reconnect_time)
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 if args.start_hash:
