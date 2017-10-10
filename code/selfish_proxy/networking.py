@@ -72,8 +72,6 @@ class Networking(object):
                             else:
                                 relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.public)
 
-                            relevant_tips = chainutil.get_relevant_tips(relevant_tips)
-
                             for tip in relevant_tips:
                                 get_headers.locator.vHave = [tip.hash()]
                                 connection.send('getheaders', get_headers)

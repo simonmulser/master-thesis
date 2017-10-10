@@ -71,11 +71,6 @@ def get_tips_for_block_origin(tips, block_origin):
     return list(tips_for_block_origin)
 
 
-def get_relevant_tips(tips):
-    highest_tip = max(tips, key=lambda t: t.height)
-    return [tip for tip in tips if tip.height > highest_tip.height - 10]
-
-
 class Fork:
     def __init__(self, private_tip, private_height, public_tip, public_height):
         self.private_tip = private_tip

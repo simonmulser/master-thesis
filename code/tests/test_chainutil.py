@@ -121,13 +121,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(fork.public_height, 2)
         self.assertEqual(fork.public_tip.hash(), '2b')
 
-    def test_get_relevant_public_tips_two_tips(self):
-        tips = chainutil.get_relevant_tips([self.first_block_chain_b, self.second_block_chain_b])
-
-        self.assertEqual(len(tips), 2)
-        self.assertTrue(self.first_block_chain_b in tips)
-        self.assertTrue(self.second_block_chain_b in tips)
-
     def test_get_highest_block_genesis_block(self):
         tip = chainutil.get_highest_block([test_util.genesis_block], BlockOrigin.private)
 
