@@ -9,6 +9,8 @@ from strategy import BlockOrigin
 import chainutil
 import behaviour
 
+TXS_SEND_BATCH_SIZE = 10
+
 
 class Networking(object):
     def __init__(self, private_ip, sync, reconnect_time):
@@ -20,6 +22,8 @@ class Networking(object):
         self.chain = None
         self.deferred_requests = {}
         self.transactions = {}
+        self.tx_invs_to_send_to_public = []
+        self.tx_invs_to_send_to_private = []
 
     def start(self):
         logging.debug('starting client')
@@ -39,6 +43,7 @@ class Networking(object):
         self.client.register_handler('headers', self.headers_message)
         self.client.register_handler('getheaders', self.getheaders_message)
         self.client.register_handler('getdata', self.getdata_message)
+        self.client.register_handler('tx', self.tx_message)
 
         behaviour.ClientBehaviourWithCatchUp(self.client, self.private_ip)
 
@@ -57,6 +62,8 @@ class Networking(object):
         try:
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
+
+            missing_inv = []
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
@@ -76,12 +83,22 @@ class Networking(object):
                                          .format(core.b2lx(headers[0]), self.repr_connection(connection)))
                         else:
                             logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
+                    elif net.CInv.typemap[inv.type] == "TX":
+                        logging.debug("received {}".format(inv))
+                        if inv.hash not in self.transactions:
+                            missing_inv.append(inv)
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
                     logging.warn("unknown inv type={}")
+
+            if len(missing_inv) > 0:
+                msg = messages.msg_getdata()
+                msg.inv = missing_inv
+                connection.send('getdata', msg)
+                logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
 
         finally:
             self.sync.lock.release()
@@ -195,6 +212,16 @@ class Networking(object):
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
+                    elif net.CInv.typemap[inv.type] == 'TX':
+                        if inv.hash in self.transactions:
+                            msg = messages.msg_tx()
+                            msg.tx = self.transactions[inv.hash]
+                            connection.send('tx', msg)
+                            logging.info('send TX(hash={}) to {}'
+                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                        else:
+                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request'
+                                         .format(core.b2lx(inv.hash)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
@@ -203,6 +230,52 @@ class Networking(object):
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
+
+    def tx_message(self, connection, message):
+        self.sync.lock.acquire()
+        try:
+            logging.debug('received tx message from {}'
+                          .format(self.repr_connection(connection)))
+
+            tx = message.tx
+            tx_hash = tx.GetHash()
+
+            if tx_hash not in self.transactions:
+                self.transactions[message.tx.GetHash()] = message.tx
+                logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(tx_hash)))
+
+                if connection.host[0] == self.private_ip:
+                    self.tx_invs_to_send_to_public.append(tx_hash)
+
+                    if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
+                        msg = messages.msg_inv()
+                        msg.inv = self.tx_invs_to_send_to_public
+
+                        for connection in self.get_current_public_connection():
+                            connection.send('inv', msg)
+                            logging.info('send {} tx invs to connection={}'
+                                         .format(len(self.tx_invs_to_send_to_public), self.repr_connection(connection)))
+                        self.tx_invs_to_send_to_public = []
+                else:
+                    self.tx_invs_to_send_to_private.append(tx_hash)
+                    if len(self.tx_invs_to_send_to_private) >= TXS_SEND_BATCH_SIZE:
+
+                        private_connection = self.get_private_connection()
+
+                        if private_connection is not None:
+                            msg = messages.msg_inv()
+                            msg.inv = self.tx_invs_to_send_to_private
+                            private_connection.send('inv', msg)
+                            logging.info('send {} tx invs to connection={}'
+                                         .format(len(self.tx_invs_to_send_to_private),
+                                                 self.repr_connection(private_connection)))
+
+                            self.tx_invs_to_send_to_private = []
+            else:
+                logging.debug('already received tx with hash={}'.format(core.b2lx(tx_hash)))
+        finally:
+            self.sync.lock.release()
+            logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
