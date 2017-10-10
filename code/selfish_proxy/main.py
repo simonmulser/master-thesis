@@ -23,21 +23,50 @@ class Sync(object):
         self.lock = Lock()
 
 
-def main():
+def parse_args():
     parser = argparse.ArgumentParser(description='Running Selfish Mining Proxy.')
 
-    parser.add_argument('-v', '--verbose', help='Increase output verbosity', action='store_true')
-    parser.add_argument('--start-hash', help='Set the start hash for selfish mining')
+    # general settings #
+    parser.add_argument('-v', '--verbose'
+                        , help='Increase output verbosity'
+                        , action='store_true'
+                        )
 
-    parser.add_argument('--private-ip', help='Set the ip of the private node', default='240.0.0.2')
-    parser.add_argument('--reconnect-time', help='Time to wait to trying to reconnect to host', default=3)
+    parser.add_argument('--start-hash'
+                        , help='Set the start hash for selfish mining'
+                        )
 
-    parser.add_argument('--lead-stubborn', help='Use lead-stubbornness in strategy', action='store_true')
-    parser.add_argument('--equal-fork-stubborn', help='Use equal-fork-stubbornness in strategy', action='store_true')
-    parser.add_argument('--trail-stubborn', help='Use N-trail-stubbornness in strategy', type=check_positive, default=0)
+    parser.add_argument('--private-ip'
+                        , help='Set the ip of the private node'
+                        , default='240.0.0.2'
+                        )
 
-    args = parser.parse_args()
+    parser.add_argument('--reconnect-time'
+                        , help='Time to wait to trying to reconnect to host'
+                        , default=3
+                        )
 
+    # strategies #
+    parser.add_argument('--lead-stubborn'
+                        , help='Use lead-stubbornness in strategy'
+                        , action='store_true'
+                        )
+
+    parser.add_argument('--equal-fork-stubborn'
+                        , help='Use equal-fork-stubbornness in strategy'
+                        , action='store_true'
+                        )
+
+    parser.add_argument('--trail-stubborn'
+                        , help='Use N-trail-stubbornness in strategy'
+                        , type=check_positive
+                        , default=0
+                        )
+
+    return parser.parse_args()
+
+
+def config_logger(verbose):
     logFormatter = logging.Formatter("%(asctime)s.%(msecs)03d000 [%(threadName)-12.12s] "
                                      "[%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
     rootLogger = logging.getLogger()
@@ -50,10 +79,16 @@ def main():
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
 
-    if args.verbose:
+    if verbose:
         rootLogger.setLevel(logging.DEBUG)
     else:
         rootLogger.setLevel(logging.INFO)
+
+
+def main():
+    args = parse_args()
+
+    config_logger(args.verbose)
 
     logging.info("arguments called with: {}".format(sys.argv))
     logging.info("parsed arguments: {}".format(args))
