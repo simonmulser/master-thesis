@@ -28,7 +28,7 @@ class Networking(object):
 
         for message in ['getaddr', 'addr', 'notfound', 'reject', 'getblocks', 'mempool']:
             self.client.register_handler(message, self.ignore_message)
-        # also all the other messages are ignored (but not logged)
+        # all the other messages are ignored (but not logged)
 
         self.client.register_handler(ConnectionLostEvent.command, self.connection_lost)
         self.client.register_handler(ConnectionFailedEvent.command, self.connection_failed)
