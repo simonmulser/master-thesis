@@ -56,6 +56,7 @@ class Sync(object):
     def __init__(self):
         self.lock = Lock()
 
+
 sync = Sync()
 
 networking = Networking(args.ip_private, sync, args.reconnect_time)
