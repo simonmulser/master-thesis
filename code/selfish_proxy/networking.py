@@ -249,7 +249,13 @@ class Networking(object):
 
                     if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
                         msg = messages.msg_inv()
-                        msg.inv = self.tx_invs_to_send_to_public
+                        msg.inv = []
+                        for tx_hash in self.tx_invs_to_send_to_public:
+                            inv = net.CInv()
+                            inv.type = inv_typemap['TX']
+                            inv.hash = tx_hash
+
+                            msg.inv.append(inv)
 
                         for connection in self.get_current_public_connection():
                             connection.send('inv', msg)
@@ -264,7 +270,14 @@ class Networking(object):
 
                         if private_connection is not None:
                             msg = messages.msg_inv()
-                            msg.inv = self.tx_invs_to_send_to_private
+                            msg.inv = []
+                            for tx_hash in self.tx_invs_to_send_to_private:
+                                inv = net.CInv()
+                                inv.type = inv_typemap['TX']
+                                inv.hash = tx_hash
+
+                                msg.inv.append(inv)
+
                             private_connection.send('inv', msg)
                             logging.info('send {} tx invs to connection={}'
                                          .format(len(self.tx_invs_to_send_to_private),
