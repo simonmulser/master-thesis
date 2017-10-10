@@ -220,21 +220,11 @@ class Networking(object):
                 private_block_invs.append(inv)
                 logging.debug("{} to be send to private".format(block.hash_repr()))
 
-        public_connections = []
-        private_connection = None
-        for connection in self.client.connections.values():
-            if connection.host[0] == self.private_ip:
-                if private_connection is None:
-                    private_connection = connection
-                else:
-                    logging.error('there are more than one private connections to ip={}'.format(self.private_ip))
-            else:
-                public_connections.append(connection)
-
         if len(private_block_invs) > 0:
-            msg = messages.msg_inv()
-            msg.inv = private_block_invs
+            private_connection = self.get_private_connection()
             if private_connection is not None:
+                msg = messages.msg_inv()
+                msg.inv = private_block_invs
                 private_connection.send('inv', msg)
                 logging.info('{} block invs send to private'.format(len(private_block_invs)))
             else:
@@ -243,16 +233,31 @@ class Networking(object):
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()
             msg.inv = public_block_invs
-            for connection in public_connections:
+
+            i = 0
+            for connection in self.get_current_public_connection():
                 connection.send('inv', msg)
+                i += 1
             logging.info('{} block invs send to {} public connections'
-                         .format(len(public_block_invs), len(public_connections)))
+                         .format(len(public_block_invs), i))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
 
     def ignore_message(self, connection, message):
         logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
+
+    def get_current_public_connection(self):
+        for connection in self.client.connections.values():
+            if connection.host[0] != self.private_ip:
+                yield connection
+
+    def get_private_connection(self):
+        for connection in self.client.connections.values():
+            if connection.host[0] == self.private_ip:
+                return connection
+        logging.error('could not find a connection matching private_ip={}'.format(self.private_ip))
+        return None
 
     def repr_connection(self, connection):
         if connection.host[0] == self.private_ip:

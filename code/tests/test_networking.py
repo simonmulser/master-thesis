@@ -400,3 +400,20 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_count, 2)
+
+    def test_get_private_connection(self):
+        connection = self.networking.get_private_connection()
+
+        self.assertEqual(connection, self.private_connection)
+
+    def test_get_private_connection_no_pirvate_connection(self):
+        del self.client.connections['127.0.0.1']
+
+        connection = self.networking.get_private_connection()
+
+        self.assertEqual(connection, None)
+
+    def test_get_current_public_connection(self):
+        connections = list(self.networking.get_current_public_connection())
+
+        self.assertEqual(len(connections), 2)
