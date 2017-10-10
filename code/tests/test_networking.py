@@ -19,42 +19,48 @@ class NetworkingTest(unittest.TestCase):
         super(NetworkingTest, self).__init__(*args, **kwargs)
 
         self.networking = None
-        self.connection_private = None
+        self.client = None
+
+        self.private_connection = None
         self.public_connections = None
         self.public_connection1 = None
         self.public_connection2 = None
 
         self.chain = None
-        self.block_relay = None
 
     def setUp(self):
-        self.networking = Networking(MagicMock(), 0)
-        self.connection_private = self.networking.connection_private = MagicMock()
-        public_conn1 = self.public_connection1 = MagicMock()
-        public_conn2 = self.public_connection2 = MagicMock()
-        self.public_connections = self.networking.public_connections = [public_conn1, public_conn2]
-        self.connection_private.host = ('127.0.0.1', '4444')
+        self.networking = Networking('127.0.0.1', MagicMock(), 0)
+        self.client = MagicMock()
+        self.networking.client = self.client
+
+        self.private_connection = MagicMock()
+        self.private_connection.host = ('127.0.0.1', '4444')
+        self.public_connection1 = MagicMock()
+        self.public_connection2 = MagicMock()
+
+        self.client.connections = {
+            '127.0.0.1': self.private_connection,
+            'public_conn1': self.public_connection1,
+            'public_conn2': self.public_connection2,
+
+        }
 
         self.chain = self.networking.chain = MagicMock()
-        self.block_relay = self.networking.block_relay = MagicMock()
 
-    @patch('chainutil.get_tips_for_block_origin')
+    @patch('chainutil.calc_get_headers')
     def test_inv_message_msg_block_private_unknown_with_tips(self, mock):
-        block = Block(None, "public")
-        block.cached_hash = 'a1'
-        mock.return_value = [block, block]
+        mock.return_value = ['hash20', 'hash19']
 
         inv = net.CInv()
         inv.hash = 'hash1'
         inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
-        self.networking.inv_message(self.connection_private, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertEqual(self.connection_private.send.call_count, 2)
+        self.assertEqual(self.private_connection.send.call_count, 1)
         self.assertTrue(mock.called)
-        self.assertEqual(self.connection_private.send.call_args_list[0][0][0], 'getheaders')
-        self.assertEqual(self.connection_private.send.call_args_list[1][0][0], 'getheaders')
+        self.assertEqual(self.private_connection.send.call_args_list[0][0][0], 'getheaders')
 
     def test_inv_message_msg_block_known_transfer_unallowed(self):
         inv = net.CInv()
@@ -68,7 +74,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain.blocks = {inv.hash: block}
         self.networking.inv_message(self.public_connection1, msg)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
         self.assertFalse(self.chain.inv_message.called)
@@ -78,9 +84,9 @@ class NetworkingTest(unittest.TestCase):
         inv.type = networking.inv_typemap['FilteredBlock']
         msg = messages.msg_inv
         msg.inv = [inv]
-        self.networking.inv_message(self.connection_private, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
@@ -89,9 +95,9 @@ class NetworkingTest(unittest.TestCase):
         inv.type = networking.inv_typemap['Error']
         msg = messages.msg_inv
         msg.inv = [inv]
-        self.networking.inv_message(self.connection_private, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
@@ -103,9 +109,9 @@ class NetworkingTest(unittest.TestCase):
         msg.inv = [inv]
         self.networking.transactions = {inv.hash: 'saved_transaction'}
 
-        self.networking.inv_message(self.connection_private, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
@@ -114,9 +120,9 @@ class NetworkingTest(unittest.TestCase):
         inv.type = "Unknown"
         msg = messages.msg_inv
         msg.inv = [inv]
-        self.networking.inv_message(self.connection_private, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
@@ -131,7 +137,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection2.send.called)
         self.assertEqual(len(self.public_connection2.send.call_args[0][1].inv), 2)
 
-        self.assertFalse(self.networking.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
 
     def test_send_inv_public_blocks(self):
         block1 = Block(None, BlockOrigin.public)
@@ -143,8 +149,8 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
-        self.assertTrue(self.connection_private.send.called)
-        inv = self.networking.connection_private.send.call_args[0][1].inv
+        self.assertTrue(self.private_connection.send.called)
+        inv = self.private_connection.send.call_args[0][1].inv
         self.assertEqual(len(inv), 2)
 
     def test_send_inv_blocks(self):
@@ -161,8 +167,8 @@ class NetworkingTest(unittest.TestCase):
 
         self.networking.send_inv([block1, block2, block3, block4, block5])
 
-        self.assertTrue(self.connection_private.send.called)
-        inv = self.networking.connection_private.send.call_args[0][1].inv
+        self.assertTrue(self.private_connection.send.called)
+        inv = self.private_connection.send.call_args[0][1].inv
         self.assertEqual(len(inv), 3)
 
         self.assertTrue(self.public_connection1.send.called)
@@ -170,9 +176,9 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(len(self.public_connection2.send.call_args[0][1].inv), 2)
 
     def test_ignore_message(self):
-        self.networking.ignore_message(self.connection_private, None)
+        self.networking.ignore_message(self.private_connection, None)
 
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
@@ -191,7 +197,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.chain.process_block.called)
-        self.assertFalse(self.connection_private.send.called)
+        self.assertFalse(self.private_connection.send.called)
 
     def test_headers_message_two_unknown_blocks(self):
         header1 = CBlockHeader(nNonce=1)
@@ -199,13 +205,13 @@ class NetworkingTest(unittest.TestCase):
 
         message = messages.msg_headers()
         message.headers = [header1, header2]
-        self.networking.headers_message(self.connection_private, message)
+        self.networking.headers_message(self.private_connection, message)
 
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'getdata')
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].inv), 2)
+        self.assertTrue(self.private_connection.send.called)
+        self.assertEqual(self.private_connection.send.call_args[0][0], 'getdata')
+        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 2)
         self.assertEqual(self.chain.process_block.call_count, 2)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)
 
@@ -230,15 +236,15 @@ class NetworkingTest(unittest.TestCase):
         self.chain.tips = {'some_hash': 'some_block'}
         mock.return_value = []
 
-        self.networking.getheaders_message(self.connection_private, message)
+        self.networking.getheaders_message(self.private_connection, message)
 
         self.assertTrue(mock.called)
         self.assertEqual(mock.call_args[0][0], self.chain.tips)
         self.assertEqual(mock.call_args[0][1], BlockOrigin.private)
         self.assertEqual(mock.call_args[0][2], message.locator.vHave)
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(self.connection_private.send.call_args[0][0], 'headers')
-        self.assertEqual(self.connection_private.send.call_args[0][1].headers, [])
+        self.assertTrue(self.private_connection.send.called)
+        self.assertEqual(self.private_connection.send.call_args[0][0], 'headers')
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers, [])
 
     @patch('chainutil.get_longest_chain')
     def test_getheaders_message_no_block_found(self, mock):
@@ -247,12 +253,12 @@ class NetworkingTest(unittest.TestCase):
         block2 = Block('cblock_header2', BlockOrigin.private)
         mock.return_value = [block1, block2]
 
-        self.networking.getheaders_message(self.connection_private, message)
+        self.networking.getheaders_message(self.private_connection, message)
 
-        self.assertTrue(self.connection_private.send.called)
-        self.assertEqual(len(self.connection_private.send.call_args[0][1].headers), 2)
-        self.assertEqual(self.connection_private.send.call_args[0][1].headers[0], block2.cblock_header)
-        self.assertEqual(self.connection_private.send.call_args[0][1].headers[1], block1.cblock_header)
+        self.assertTrue(self.private_connection.send.called)
+        self.assertEqual(len(self.private_connection.send.call_args[0][1].headers), 2)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block2.cblock_header)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block1.cblock_header)
 
     def test_block_message(self):
         message = messages.msg_block()
@@ -265,7 +271,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain.blocks = {block.hash():  block}
         self.networking.deferred_requests = {}
 
-        self.networking.block_message(self.connection_private, message)
+        self.networking.block_message(self.private_connection, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock)
 
@@ -280,7 +286,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain.blocks = {block.hash():  block}
         self.networking.deferred_requests = {block.hash(): [self.public_connection1, self.public_connection2]}
 
-        self.networking.block_message(self.connection_private, message)
+        self.networking.block_message(self.private_connection, message)
 
         self.assertTrue(self.public_connection1.send.called)
         self.assertTrue(self.public_connection2.send.called)
@@ -299,9 +305,9 @@ class NetworkingTest(unittest.TestCase):
 
         self.chain.blocks = {block.hash():  block}
 
-        self.networking.block_message(self.connection_private, message)
+        self.networking.block_message(self.private_connection, message)
         message.block = cblock2
-        self.networking.block_message(self.connection_private, message)
+        self.networking.block_message(self.private_connection, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)
 

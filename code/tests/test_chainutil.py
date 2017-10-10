@@ -2,7 +2,9 @@ import test_abstractchain
 import chainutil
 from strategy import BlockOrigin
 from mock import patch
+from mock import MagicMock
 import test_util
+from chain import Block
 
 
 class ChainUtilTest(test_abstractchain.AbstractChainTest):
@@ -300,3 +302,49 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         block = chainutil.get_highest_block_with_cblock([], None)
 
         self.assertEqual(block, self.second_block_chain_a)
+
+    @patch('chainutil.get_highest_block')
+    def test_calc_get_headers_with_3_headers(self, mock):
+        mock.return_value = self.fourth_block_chain_b
+
+        headers = chainutil.calc_get_headers([MagicMock()], BlockOrigin.public)
+
+        self.assertEqual(len(headers), 3)
+        self.assertEqual(headers[0], self.fourth_block_chain_b.hash())
+        self.assertEqual(headers[1], self.third_a_block_chain_b.hash())
+        self.assertEqual(headers[2], self.first_block_chain_b.hash())
+
+    @patch('chainutil.get_highest_block')
+    def test_calc_get_headers_including_genesis_block(self, mock):
+        mock.return_value = self.first_block_chain_b
+
+        headers = chainutil.calc_get_headers([MagicMock()], BlockOrigin.public)
+
+        self.assertEqual(len(headers), 2)
+        self.assertEqual(headers[0], self.first_block_chain_b.hash())
+        self.assertEqual(headers[1], test_util.genesis_hash)
+
+    @patch('chainutil.get_highest_block')
+    def test_calc_get_headers_very_long_chain(self, mock):
+        first_block = Block(None, BlockOrigin.public)
+        first_block.prevBlock = None
+        first_block.cached_hash = '1'
+
+        tmp = first_block
+        for i in range(2, 17):
+            block = Block(None, BlockOrigin.public)
+            block.prevBlock = tmp
+            block.cached_hash = str(i)
+
+            tmp = block
+
+        mock.return_value = tmp
+
+        headers = chainutil.calc_get_headers([MagicMock()], BlockOrigin.public)
+
+        self.assertEqual(len(headers), 5)
+        self.assertEqual(headers[0], '16')
+        self.assertEqual(headers[1], '15')
+        self.assertEqual(headers[2], '13')
+        self.assertEqual(headers[3], '9')
+        self.assertEqual(headers[4], '1')

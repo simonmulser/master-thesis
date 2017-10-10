@@ -71,6 +71,22 @@ def get_tips_for_block_origin(tips, block_origin):
     return list(tips_for_block_origin)
 
 
+def calc_get_headers(tips, block_origin):
+    tip = get_highest_block(tips, block_origin, block_origin)
+
+    headers = [tip.hash()]
+
+    i = 1
+    tmp = tip
+    while tmp.prevBlock is not None:
+        tmp = tmp.prevBlock
+        i += 1
+
+        if i in [2, 4, 8, 16]:
+            headers.append(tmp.hash())
+    return headers
+
+
 class Fork:
     def __init__(self, private_tip, private_height, public_tip, public_height):
         self.private_tip = private_tip

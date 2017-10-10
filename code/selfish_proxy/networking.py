@@ -8,11 +8,11 @@ from bitcoin import messages
 from strategy import BlockOrigin
 import chainutil
 import behaviour
-import gevent
 
 
 class Networking(object):
-    def __init__(self, sync, reconnect_time):
+    def __init__(self, private_ip, sync, reconnect_time):
+        self.private_ip = private_ip
         self.sync = sync
         self.reconnect_time = reconnect_time
 
@@ -20,11 +20,9 @@ class Networking(object):
         self.chain = None
         self.deferred_requests = {}
         self.transactions = {}
-        self.private_ip = None
 
-    def start(self, private_ip):
+    def start(self):
         logging.debug('starting client')
-        self.private_ip = private_ip
 
         self.client = network.GeventNetworkClient()
 
@@ -42,7 +40,7 @@ class Networking(object):
         self.client.register_handler('getheaders', self.getheaders_message)
         self.client.register_handler('getdata', self.getdata_message)
 
-        behaviour.ClientBehaviourWithCatchUp(self.client, private_ip)
+        behaviour.ClientBehaviourWithCatchUp(self.client, self.private_ip)
 
         self.client.listen(port=18444)
 
@@ -68,15 +66,14 @@ class Networking(object):
                             get_headers.locator = messages.CBlockLocator()
 
                             if connection.host[0] == self.private_ip:
-                                relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.private)
+                                headers = chainutil.calc_get_headers(self.chain.tips, BlockOrigin.private)
                             else:
-                                relevant_tips = chainutil.get_tips_for_block_origin(self.chain.tips, BlockOrigin.public)
+                                headers = chainutil.calc_get_headers(self.chain.tips, BlockOrigin.public)
 
-                            for tip in relevant_tips:
-                                get_headers.locator.vHave = [tip.hash()]
-                                connection.send('getheaders', get_headers)
-                                logging.info('requested new headers {} from {}'
-                                             .format(core.b2lx(tip.hash()), self.repr_connection(connection)))
+                            get_headers.locator.vHave = headers
+                            connection.send('getheaders', get_headers)
+                            logging.info('requested new headers with starting hash={} from {}'
+                                         .format(core.b2lx(headers[0]), self.repr_connection(connection)))
                         else:
                             logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
                     elif net.CInv.typemap[inv.type] == "Error":

@@ -58,7 +58,7 @@ class Sync(object):
 
 sync = Sync()
 
-networking = Networking(sync, args.reconnect_time)
+networking = Networking(args.ip_private, sync, args.reconnect_time)
 executor = Executor(networking)
 strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
 if args.start_hash:
@@ -71,4 +71,4 @@ t = threading.Thread(target=cliserver.start, args=(chain, sync,))
 t.daemon = True
 t.start()
 
-networking.start(args.ip_private)
+networking.start()
