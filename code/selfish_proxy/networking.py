@@ -314,7 +314,7 @@ class Networking(object):
                 private_connection.send('inv', msg)
                 logging.info('{} block invs send to private'.format(len(private_block_invs)))
             else:
-                logging.error('there is no connection to private (ip={})'.format(self.private_ip))
+                logging.warning('there is no connection to private (ip={})'.format(self.private_ip))
 
         if len(public_block_invs) > 0:
             msg = messages.msg_inv()
@@ -342,7 +342,7 @@ class Networking(object):
         for connection in self.client.connections.values():
             if connection.host[0] == self.private_ip:
                 return connection
-        logging.error('could not find a connection matching private_ip={}'.format(self.private_ip))
+        logging.warning('could not find a connection matching private_ip={}'.format(self.private_ip))
         return None
 
     def repr_connection(self, connection):
