@@ -20,8 +20,8 @@ class Networking(object):
 
         self.client = None
         self.chain = None
-        self.deferred_requests = {}
         self.transactions = {}
+        self.blocks_to_send = []
         self.tx_invs_to_send_to_public = []
         self.tx_invs_to_send_to_private = []
 
@@ -117,13 +117,9 @@ class Networking(object):
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
 
-                if block_hash in self.deferred_requests:
-                    for ip in self.deferred_requests[block_hash]:
-                        if ip in self.client.connections:
-                            self.client.connections[ip].send('block', message)
-                            logging.info('full-filled deferred block request for CBlock(hash={}) to {}'
-                                         .format(core.b2lx(block_hash), ip))
-                    del self.deferred_requests[block_hash]
+                if block_hash in self.blocks_to_send:
+                    self.send_inv([block])
+                    self.blocks_to_send.remove(block_hash)
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
@@ -204,12 +200,8 @@ class Networking(object):
                                 logging.info('send CBlock(hash={}) to {}'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                             else:
-                                if inv.hash in self.deferred_requests:
-                                    self.deferred_requests[inv.hash].append(connection.host[0])
-                                else:
-                                    self.deferred_requests[inv.hash] = [connection.host[0]]
-                                logging.info('CBlock(hash={}) not available, added to deferred_requests'
-                                             .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                logging.error('CBlock(hash={}) requested from {} not available'
+                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
@@ -290,6 +282,16 @@ class Networking(object):
             self.sync.lock.release()
             logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
+    def try_to_send_inv(self, blocks):
+        relay_blocks = []
+        for block in blocks:
+            if block.cblock is None:
+                self.blocks_to_send.append(block.hash())
+            else:
+                relay_blocks.append(block)
+
+        self.send_inv(relay_blocks)
+
     def send_inv(self, blocks):
         private_block_invs = []
         public_block_invs = []
@@ -297,8 +299,7 @@ class Networking(object):
         for block in blocks:
             inv = net.CInv()
             inv.type = inv_typemap['Block']
-            inv.hash = block.hash
-
+            inv.hash = block.hash()
             if block.block_origin is BlockOrigin.private:
                 public_block_invs.append(inv)
                 logging.debug("{} to be send to public".format(block.hash_repr()))
