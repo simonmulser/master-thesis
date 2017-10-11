@@ -494,7 +494,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.networking.tx_invs_to_send_to_private[0], 'hash1')
 
     def test_tx_message_from_private_batch_full(self):
-        for i in range(1, 10):
+        for i in range(1, networking.TXS_SEND_BATCH_SIZE):
             self.networking.tx_invs_to_send_to_public.append('hash' + str(i))
         message = messages.msg_tx()
         tx = MagicMock()
@@ -506,12 +506,12 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.public_connection1.send.call_count, 1)
         self.assertEqual(self.public_connection2.send.call_count, 1)
 
-        self.assertEqual(len(self.public_connection1.send.call_args[0][1].inv), 10)
+        self.assertEqual(len(self.public_connection1.send.call_args[0][1].inv), networking.TXS_SEND_BATCH_SIZE)
 
         self.assertFalse(self.private_connection.send.called)
 
     def test_tx_message_from_public_batch_full(self):
-        for i in range(1, 10):
+        for i in range(1, networking.TXS_SEND_BATCH_SIZE):
             self.networking.tx_invs_to_send_to_private.append('hash' + str(i))
         message = messages.msg_tx()
         tx = MagicMock()
@@ -521,7 +521,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.tx_message(self.public_connection1, message)
 
         self.assertEqual(self.private_connection.send.call_count, 1)
-        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 10)
+        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), networking.TXS_SEND_BATCH_SIZE)
 
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)

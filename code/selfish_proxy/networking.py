@@ -9,7 +9,7 @@ from strategy import BlockOrigin
 import chainutil
 import behaviour
 
-TXS_SEND_BATCH_SIZE = 10
+TXS_SEND_BATCH_SIZE = 25
 
 
 class Networking(object):
@@ -45,7 +45,7 @@ class Networking(object):
         self.client.register_handler('getdata', self.getdata_message)
         self.client.register_handler('tx', self.tx_message)
 
-        behaviour.ClientBehaviourWithCatchUp(self.client, self.private_ip)
+        behaviour.CatchUpBehaviour(self.client, self.private_ip, self.chain)
 
         self.client.listen(port=18444)
 
