@@ -36,7 +36,9 @@ class NetworkingTest(unittest.TestCase):
         self.private_connection = MagicMock()
         self.private_connection.host = ('127.0.0.1', '4444')
         self.public_connection1 = MagicMock()
+        self.public_connection1.host = ('public_conn1', '1')
         self.public_connection2 = MagicMock()
+        self.public_connection2.host = ('public_conn2', '2')
 
         self.client.connections = {
             '127.0.0.1': self.private_connection,
@@ -315,7 +317,7 @@ class NetworkingTest(unittest.TestCase):
         block.cached_hash = message.block.GetHash()
 
         self.chain.blocks = {block.hash():  block}
-        self.networking.deferred_requests = {block.hash(): [self.public_connection1, self.public_connection2]}
+        self.networking.deferred_requests = {block.hash(): ['public_conn1', 'public_conn2']}
 
         self.networking.block_message(self.private_connection, message)
 
@@ -323,7 +325,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection2.send.called)
         self.assertEqual(self.public_connection2.send.call_args[0][0], 'block')
         self.assertEqual(self.public_connection2.send.call_args[0][1], message)
-        self.assertEqual(len(self.networking.deferred_requests[block.hash()]), 0)
+        self.assertTrue(block.hash() not in self.networking.deferred_requests)
 
     def test_block_message_two_times(self):
         message = messages.msg_block()
@@ -374,7 +376,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.getdata_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.send.called)
-        self.assertEqual(self.networking.deferred_requests[cblock.GetHash()], [self.public_connection1])
+        self.assertEqual(self.networking.deferred_requests[cblock.GetHash()], ['public_conn1'])
 
     def test_getdata_message_second_deferred_request(self):
         cblock = CBlock()
@@ -390,8 +392,8 @@ class NetworkingTest(unittest.TestCase):
         self.networking.getdata_message(self.public_connection1, message)
         self.networking.getdata_message(self.public_connection2, message)
 
-        self.assertTrue(self.public_connection1 in self.networking.deferred_requests[cblock.GetHash()])
-        self.assertTrue(self.public_connection2 in self.networking.deferred_requests[cblock.GetHash()])
+        self.assertIn('public_conn1', self.networking.deferred_requests[cblock.GetHash()])
+        self.assertIn('public_conn2', self.networking.deferred_requests[cblock.GetHash()])
 
     def test_getdata_message_with_unknown_hashes(self):
         message = messages.msg_getdata()

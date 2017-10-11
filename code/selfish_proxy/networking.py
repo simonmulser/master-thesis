@@ -118,12 +118,12 @@ class Networking(object):
                     logging.info('set cblock in {}'.format(block.hash_repr()))
 
                 if block_hash in self.deferred_requests:
-                    for saved_connection in self.deferred_requests[block_hash]:
-                        saved_connection.send('block', message)
-                        logging.info('full-filled deferred block request for CBlock(hash={}) to {}'
-                                     .format(core.b2lx(block_hash), self.repr_connection(saved_connection)))
-
-                    self.deferred_requests[block_hash] = []
+                    for ip in self.deferred_requests[block_hash]:
+                        if ip in self.client.connections:
+                            self.client.connections[ip].send('block', message)
+                            logging.info('full-filled deferred block request for CBlock(hash={}) to {}'
+                                         .format(core.b2lx(block_hash), ip))
+                    del self.deferred_requests[block_hash]
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
@@ -205,9 +205,9 @@ class Networking(object):
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                             else:
                                 if inv.hash in self.deferred_requests:
-                                    self.deferred_requests[inv.hash].append(connection)
+                                    self.deferred_requests[inv.hash].append(connection.host[0])
                                 else:
-                                    self.deferred_requests[inv.hash] = [connection]
+                                    self.deferred_requests[inv.hash] = [connection.host[0]]
                                 logging.info('CBlock(hash={}) not available, added to deferred_requests'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
