@@ -86,7 +86,7 @@ def calc_get_headers(tips, block_origin):
 
     i = 1
     tmp = tip
-    while tmp.prevBlock is not None:
+    while i <= 16 and tmp.prevBlock is not None:
         tmp = tmp.prevBlock
         i += 1
 

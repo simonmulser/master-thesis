@@ -355,10 +355,10 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
     def test_calc_get_headers_very_long_chain(self, mock):
         first_block = Block(None, BlockOrigin.public)
         first_block.prevBlock = None
-        first_block.cached_hash = '1'
+        first_block.cached_hash = '0'
 
         tmp = first_block
-        for i in range(2, 17):
+        for i in range(1, 17):
             block = Block(None, BlockOrigin.public)
             block.prevBlock = tmp
             block.cached_hash = str(i)
