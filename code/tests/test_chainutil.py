@@ -253,8 +253,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         blocks = chainutil.get_longest_chain([], None, [])
 
-        self.assertEqual(len(blocks), 1)
-        self.assertTrue(test_util.genesis_block in blocks)
+        self.assertEqual(len(blocks), 0)
 
     @patch('chainutil.get_highest_block')
     def test_get_longest_chain_empty_until(self, mock):
@@ -262,8 +261,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         blocks = chainutil.get_longest_chain([], None, [])
 
-        self.assertEqual(len(blocks), 3)
-        self.assertIn(test_util.genesis_block, blocks)
+        self.assertEqual(len(blocks), 2)
         self.assertIn(self.first_block_chain_b, blocks)
         self.assertIn(self.second_block_chain_b, blocks)
 

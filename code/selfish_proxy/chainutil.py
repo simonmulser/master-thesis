@@ -2,6 +2,7 @@ from strategy import BlockOrigin
 import chain
 from sets import Set
 import logging
+from bitcoin import core
 
 
 def get_private_public_fork(tips):
@@ -55,7 +56,7 @@ def get_longest_chain(tips, block_origin, until):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 
     blocks = []
-    while block and block.hash() not in until:
+    while block.hash() != core.CoreRegTestParams.GENESIS_BLOCK.GetHash() and block.hash() not in until:
         if block.cblock is not None:
             blocks.append(block)
         block = block.prevBlock
