@@ -56,7 +56,8 @@ def get_longest_chain(tips, block_origin, until):
 
     blocks = []
     while block and block.hash() not in until:
-        blocks.append(block)
+        if block.cblock is not None:
+            blocks.append(block)
         block = block.prevBlock
     return blocks
 
