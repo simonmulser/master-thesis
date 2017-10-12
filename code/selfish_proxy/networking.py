@@ -79,8 +79,8 @@ class Networking(object):
 
                             get_headers.locator.vHave = headers
                             connection.send('getheaders', get_headers)
-                            logging.info('requested new headers with starting hash={} from {}'
-                                         .format(core.b2lx(headers[0]), self.repr_connection(connection)))
+                            logging.info('requested new headers with {} headers and starting hash={} from {}'
+                                         .format(len(headers), core.b2lx(headers[0]), self.repr_connection(connection)))
                         else:
                             logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
                     elif net.CInv.typemap[inv.type] == "TX":
