@@ -266,6 +266,26 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertIn(self.second_block_chain_b, blocks)
 
     @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_with_cblock_missing(self, mock):
+        self.second_block_chain_b.cblock = None
+        mock.return_value = self.second_block_chain_b
+
+        blocks = chainutil.get_longest_chain([], None, [])
+
+        self.assertEqual(len(blocks), 1)
+        self.assertIn(self.first_block_chain_b, blocks)
+
+    @patch('chainutil.get_highest_block')
+    def test_get_longest_chain_with_cblock_missing_in_the_middle(self, mock):
+        self.second_block_chain_b.cblock = None
+        mock.return_value = self.third_a_block_chain_b
+
+        blocks = chainutil.get_longest_chain([], None, [])
+
+        self.assertEqual(len(blocks), 1)
+        self.assertIn(self.first_block_chain_b, blocks)
+
+    @patch('chainutil.get_highest_block')
     def test_get_longest_chain_with_until(self, mock):
         mock.return_value = self.second_block_chain_a
 

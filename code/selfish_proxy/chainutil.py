@@ -55,11 +55,17 @@ def get_highest_block_with_cblock(tips, block_origin):
 def get_longest_chain(tips, block_origin, until):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 
-    blocks = []
+    candidate_blocks = []
     while block.hash() != core.CoreRegTestParams.GENESIS_BLOCK.GetHash() and block.hash() not in until:
+        candidate_blocks.append(block)
+        block = block.prevBlock
+
+    blocks = []
+    for block in reversed(candidate_blocks):
         if block.cblock is not None:
             blocks.append(block)
-        block = block.prevBlock
+        else:
+            break
     return blocks
 
 
