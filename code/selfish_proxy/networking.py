@@ -179,7 +179,7 @@ class Networking(object):
                                            block.cblock.hashMerkleRoot,
                                            block.cblock.nTime,
                                            block.cblock.nBits,
-                                           block.cblock.nNonce) for block in blocks][::-1]
+                                           block.cblock.nNonce) for block in blocks]
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
                           .format(len(message.headers), self.repr_connection(connection)))
