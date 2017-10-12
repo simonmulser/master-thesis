@@ -7,7 +7,6 @@ from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
-from bitcoin.core import CTransaction
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
@@ -109,7 +108,7 @@ class NetworkingTest(unittest.TestCase):
         inv.hash = 'hash1'
         msg = messages.msg_inv()
         msg.inv = [inv]
-        self.networking.transactions = {inv.hash: 'saved_transaction'}
+        self.networking.txs = {inv.hash: 'saved_transaction'}
 
         self.networking.inv_message(self.private_connection, msg)
 
@@ -450,7 +449,7 @@ class NetworkingTest(unittest.TestCase):
         inv.hash = 'hash1'
         message.inv = [inv]
 
-        self.networking.transactions = {'hash1': 'TX1'}
+        self.networking.txs = {'hash1': 'TX1'}
 
         self.networking.getdata_message(self.public_connection1, message)
 
@@ -543,7 +542,7 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash'
         message.tx = tx
 
-        self.networking.transactions = {'hash': 'void'}
+        self.networking.txs = {'hash': 'void'}
 
         self.networking.tx_message(self.public_connection1, message)
 

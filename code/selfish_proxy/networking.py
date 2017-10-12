@@ -20,7 +20,7 @@ class Networking(object):
 
         self.client = None
         self.chain = None
-        self.transactions = {}
+        self.txs = {}
         self.blocks_to_send = []
         self.tx_invs_to_send_to_public = []
         self.tx_invs_to_send_to_private = []
@@ -85,7 +85,7 @@ class Networking(object):
                             logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
                     elif net.CInv.typemap[inv.type] == "TX":
                         logging.debug("received {}".format(inv))
-                        if inv.hash not in self.transactions:
+                        if inv.hash not in self.txs:
                             missing_inv.append(inv)
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
@@ -205,9 +205,9 @@ class Networking(object):
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
-                        if inv.hash in self.transactions:
+                        if inv.hash in self.txs:
                             msg = messages.msg_tx()
-                            msg.tx = self.transactions[inv.hash]
+                            msg.tx = self.txs[inv.hash]
                             connection.send('tx', msg)
                             logging.info('send TX(hash={}) to {}'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
@@ -232,8 +232,8 @@ class Networking(object):
             tx = message.tx
             tx_hash = tx.GetHash()
 
-            if tx_hash not in self.transactions:
-                self.transactions[message.tx.GetHash()] = message.tx
+            if tx_hash not in self.txs:
+                self.txs[message.tx.GetHash()] = message.tx
                 logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(tx_hash)))
 
                 if connection.host[0] == self.private_ip:
