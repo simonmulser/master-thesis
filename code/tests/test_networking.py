@@ -311,15 +311,17 @@ class NetworkingTest(unittest.TestCase):
     def test_getheaders_message_no_block_found(self, mock):
         message = messages.msg_getheaders()
         block1 = Block('cblock_header1', BlockOrigin.private)
+        block1.cblock = CBlock(nNonce=1)
         block2 = Block('cblock_header2', BlockOrigin.private)
+        block2.cblock = CBlock(nNonce=2)
         mock.return_value = [block1, block2]
 
         self.networking.getheaders_message(self.private_connection, message)
 
         self.assertTrue(self.private_connection.send.called)
         self.assertEqual(len(self.private_connection.send.call_args[0][1].headers), 2)
-        self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block2.cblock_header)
-        self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block1.cblock_header)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block2.cblock)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block1.cblock)
 
     def test_block_message(self):
         message = messages.msg_block()

@@ -2,6 +2,7 @@ FROM python:2.7.14-wheezy
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN pip install git+https://github.com/simonmulser/python-bitcoinlib@fix2
 
 RUN \
 	apt-get update &&\

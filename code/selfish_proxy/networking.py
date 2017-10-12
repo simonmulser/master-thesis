@@ -174,7 +174,12 @@ class Networking(object):
                 blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.public, message.locator.vHave)
 
             message = messages.msg_headers()
-            message.headers = [block.cblock_header for block in blocks][::-1]
+            message.headers = [core.CBlock(block.cblock.nVersion,
+                                           block.cblock.hashPrevBlock,
+                                           block.cblock.hashMerkleRoot,
+                                           block.cblock.nTime,
+                                           block.cblock.nBits,
+                                           block.cblock.nNonce) for block in blocks][::-1]
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
                           .format(len(message.headers), self.repr_connection(connection)))
