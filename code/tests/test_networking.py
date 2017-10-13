@@ -629,6 +629,32 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)
         self.assertEqual(len(self.networking.tx_invs_to_send_to_public), 2)
 
+    def test_get_tx_with_tx_in_block(self):
+        block1 = Block(None, None)
+        tx11 = CTransaction(nLockTime=11)
+        tx12 = CTransaction(nLockTime=12)
+        block1.cblock = CBlock(vtx=(tx11, tx12))
+
+        block2 = Block(None, None)
+        tx21 = CTransaction(nLockTime=21)
+        block1.cblock = CBlock(vtx=tuple([tx21]))
+
+        self.chain.blocks = [block1, block2]
+
+        tx = self.networking.get_tx(tx21.GetHash())
+        self.assertEqual(tx, tx21)
+
+    def test_get_tx_with_tx_in_mempool(self):
+        self.networking.txs = {'hash1': 'TX1'}
+
+        tx = self.networking.get_tx('hash1')
+        self.assertEqual(tx, 'TX1')
+
+    def test_get_tx__with_tx_not_available(self):
+        tx = self.networking.get_tx('hash1')
+
+        self.assertEqual(tx, None)
+
     def test_get_private_connection(self):
         connection = self.networking.get_private_connection()
 

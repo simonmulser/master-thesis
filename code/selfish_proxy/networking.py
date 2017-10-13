@@ -376,6 +376,20 @@ class Networking(object):
             logging.info('{} block invs send to {} public connections'
                          .format(len(public_block_invs), i))
 
+    def get_tx(self, tx_hash):
+        if tx_hash in self.txs:
+            logging.debug('found TX(hash={}) in mempool'.format(core.b2lx(tx_hash)))
+            return self.txs[tx_hash]
+
+        for block in self.chain.blocks:
+            if block.cblock is not None:
+                for tx in block.cblock.vtx:
+                    if tx.GetHash() == tx_hash:
+                        logging.debug('send TX(hash={}) in block with hash={}'
+                                      .format(core.b2lx(tx_hash), core.b2lx(block.cblock.GetHash())))
+                        return tx
+        logging.debug('did not found TX(hash={})'.format(tx_hash))
+
     def ping_message(self, connection, message):
         connection.send('pong', message)
 
