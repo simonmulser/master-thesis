@@ -157,11 +157,7 @@ class Networking(object):
 
             if len(getdata_inv) > 0:
                 message = messages.msg_getdata()
-                for inv in getdata_inv:
-                    cInv = net.CInv()
-                    cInv.type = inv_typemap['Block']
-                    cInv.hash = inv
-                    message.inv.append(cInv)
+                message.inv = [hash_to_inv('Block', inv_hash) for inv_hash in getdata_inv]
                 connection.send('getdata', message)
                 logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
 
@@ -248,10 +244,7 @@ class Networking(object):
                 missing_tx = []
                 for tx_in in message.tx.vin:
                     if self.get_tx(tx_in.prevout.hash) is None:
-                        inv = net.CInv()
-                        inv.type = inv_typemap['TX']
-                        inv.hash = tx_in.prevout.hash
-                        missing_tx.append(inv)
+                        missing_tx.append(hash_to_inv('TX', tx_in.prevout.hash))
 
                 if len(missing_tx) > 0:
                     msg = messages.msg_inv()
@@ -279,13 +272,7 @@ class Networking(object):
 
                             if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
                                 msg = messages.msg_inv()
-                                msg.inv = []
-                                for tx_hash in self.tx_invs_to_send_to_public:
-                                    inv = net.CInv()
-                                    inv.type = inv_typemap['TX']
-                                    inv.hash = tx_hash
-
-                                    msg.inv.append(inv)
+                                msg.inv = [hash_to_inv('TX', inv_hash) for inv_hash in self.tx_invs_to_send_to_public]
 
                                 for connection in self.get_current_public_connection():
                                     connection.send('inv', msg)
@@ -300,13 +287,7 @@ class Networking(object):
 
                                 if private_connection is not None:
                                     msg = messages.msg_inv()
-                                    msg.inv = []
-                                    for tx_hash in self.tx_invs_to_send_to_private:
-                                        inv = net.CInv()
-                                        inv.type = inv_typemap['TX']
-                                        inv.hash = tx_hash
-
-                                        msg.inv.append(inv)
+                                    msg.inv = [hash_to_inv('TX', inv_hash) for inv_hash in self.tx_invs_to_send_to_private]
 
                                     private_connection.send('inv', msg)
                                     logging.info('send {} tx invs to connection={}'
@@ -335,9 +316,7 @@ class Networking(object):
         public_block_invs = []
 
         for block in blocks:
-            inv = net.CInv()
-            inv.type = inv_typemap['Block']
-            inv.hash = block.hash()
+            inv = hash_to_inv('Block', block.hash())
             if block.block_origin is BlockOrigin.private:
                 public_block_invs.append(inv)
                 logging.debug("{} to be send to public".format(block.hash_repr()))
@@ -403,6 +382,13 @@ class Networking(object):
             return 'private{}'.format(connection.host)
         else:
             return 'public{}'.format(connection.host)
+
+
+def hash_to_inv(inv_type, inv_hash):
+    inv = net.CInv()
+    inv.type = inv_typemap[inv_type]
+    inv.hash = inv_hash
+    return inv
 
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
