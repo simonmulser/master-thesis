@@ -208,8 +208,9 @@ class Networking(object):
                                 logging.info('send CBlock(hash={}) to {}'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                             else:
-                                logging.error('CBlock(hash={}) requested from {} not available'
-                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                logging.warn(
+                                    'Block(hash={}) requested from {} not available'
+                                    .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
@@ -220,7 +221,7 @@ class Networking(object):
                             connection.send('tx', msg)
                             logging.info('send TX(hash={}) to {}'.format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
-                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
+                            logging.warn('TX(hash={}) requested from {} not available'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
@@ -251,7 +252,7 @@ class Networking(object):
                     msg.inv = missing_tx
                     connection.send('inv', msg)
                     self.txs_with_missing_prevout.append(message.tx)
-                    logging.debug('requested {} txs which are input of tx with hash={}'
+                    logging.debug('requested {} txs which are inputs of tx with hash={}'
                                   .format(len(missing_tx), core.b2lx(tx_hash)))
 
                 else:
@@ -354,10 +355,10 @@ class Networking(object):
             if block.cblock is not None:
                 for tx in block.cblock.vtx:
                     if tx.GetHash() == tx_hash:
-                        logging.debug('send TX(hash={}) in block with hash={}'
+                        logging.debug('found TX(hash={}) in block with hash={}'
                                       .format(core.b2lx(tx_hash), core.b2lx(block.cblock.GetHash())))
                         return tx
-        logging.debug('did not found TX(hash={})'.format(tx_hash))
+        return None
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
