@@ -21,6 +21,7 @@ class Networking(object):
         self.client = None
         self.chain = None
         self.txs = {}
+        self.txs_with_missing_prevout = []
         self.blocks_to_send = []
         self.tx_invs_to_send_to_public = []
         self.tx_invs_to_send_to_private = []
@@ -244,49 +245,75 @@ class Networking(object):
             tx_hash = tx.GetHash()
 
             if tx_hash not in self.txs:
-                self.txs[message.tx.GetHash()] = message.tx
-                logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(tx_hash)))
+                missing_tx = []
+                for tx_in in message.tx.vin:
+                    if tx_in.prevout.hash not in self.txs:
+                        inv = net.CInv()
+                        inv.type = inv_typemap['TX']
+                        inv.hash = tx_in.prevout.hash
+                        missing_tx.append(inv)
 
-                if connection.host[0] == self.private_ip:
-                    self.tx_invs_to_send_to_public.append(tx_hash)
+                if len(missing_tx) > 0:
+                    msg = messages.msg_inv()
+                    msg.inv = missing_tx
+                    connection.send('inv', msg)
+                    self.txs_with_missing_prevout.append(message.tx)
+                    logging.debug('requested {} txs which are input of tx with hash={}'
+                                  .format(len(missing_tx), core.b2lx(tx_hash)))
 
-                    if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
-                        msg = messages.msg_inv()
-                        msg.inv = []
-                        for tx_hash in self.tx_invs_to_send_to_public:
-                            inv = net.CInv()
-                            inv.type = inv_typemap['TX']
-                            inv.hash = tx_hash
-
-                            msg.inv.append(inv)
-
-                        for connection in self.get_current_public_connection():
-                            connection.send('inv', msg)
-                            logging.info('send {} tx invs to connection={}'
-                                         .format(len(self.tx_invs_to_send_to_public), self.repr_connection(connection)))
-                        self.tx_invs_to_send_to_public = []
                 else:
-                    self.tx_invs_to_send_to_private.append(tx_hash)
-                    if len(self.tx_invs_to_send_to_private) >= TXS_SEND_BATCH_SIZE:
+                    self.txs[message.tx.GetHash()] = message.tx
+                    logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(tx_hash)))
 
-                        private_connection = self.get_private_connection()
+                    txs = [message.tx]
+                    for tx_with_missing_prevout in self.txs_with_missing_prevout:
+                        if all(tx_in.prevout.hash in self.txs for tx_in in tx_with_missing_prevout.vin):
+                            txs.append(tx_with_missing_prevout)
+                            self.txs_with_missing_prevout.remove(tx_with_missing_prevout)
+                            logging.debug('all tx inputs of tx with hash={} are available, relaying tx with next batch'
+                                          .format(core.b2lx(tx_with_missing_prevout.GetHash())))
 
-                        if private_connection is not None:
-                            msg = messages.msg_inv()
-                            msg.inv = []
-                            for tx_hash in self.tx_invs_to_send_to_private:
-                                inv = net.CInv()
-                                inv.type = inv_typemap['TX']
-                                inv.hash = tx_hash
+                    for tx in txs:
+                        if connection.host[0] == self.private_ip:
+                            self.tx_invs_to_send_to_public.append(tx.GetHash())
 
-                                msg.inv.append(inv)
+                            if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
+                                msg = messages.msg_inv()
+                                msg.inv = []
+                                for tx_hash in self.tx_invs_to_send_to_public:
+                                    inv = net.CInv()
+                                    inv.type = inv_typemap['TX']
+                                    inv.hash = tx_hash
 
-                            private_connection.send('inv', msg)
-                            logging.info('send {} tx invs to connection={}'
-                                         .format(len(self.tx_invs_to_send_to_private),
-                                                 self.repr_connection(private_connection)))
+                                    msg.inv.append(inv)
 
-                            self.tx_invs_to_send_to_private = []
+                                for connection in self.get_current_public_connection():
+                                    connection.send('inv', msg)
+                                    logging.info('send {} tx invs to connection={}'
+                                                 .format(len(self.tx_invs_to_send_to_public), self.repr_connection(connection)))
+                                self.tx_invs_to_send_to_public = []
+                        else:
+                            self.tx_invs_to_send_to_private.append(tx.GetHash())
+                            if len(self.tx_invs_to_send_to_private) >= TXS_SEND_BATCH_SIZE:
+
+                                private_connection = self.get_private_connection()
+
+                                if private_connection is not None:
+                                    msg = messages.msg_inv()
+                                    msg.inv = []
+                                    for tx_hash in self.tx_invs_to_send_to_private:
+                                        inv = net.CInv()
+                                        inv.type = inv_typemap['TX']
+                                        inv.hash = tx_hash
+
+                                        msg.inv.append(inv)
+
+                                    private_connection.send('inv', msg)
+                                    logging.info('send {} tx invs to connection={}'
+                                                 .format(len(self.tx_invs_to_send_to_private),
+                                                         self.repr_connection(private_connection)))
+
+                                    self.tx_invs_to_send_to_private = []
             else:
                 logging.debug('already received tx with hash={}'.format(core.b2lx(tx_hash)))
         finally:

@@ -8,6 +8,8 @@ from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
 from bitcoin.core import CTransaction
+from bitcoin.core import CTxIn
+from bitcoin.core import COutPoint
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
@@ -321,8 +323,8 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertTrue(self.private_connection.send.called)
         self.assertEqual(len(self.private_connection.send.call_args[0][1].headers), 2)
-        self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block2.cblock)
-        self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block1.cblock)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block1.cblock)
+        self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block2.cblock)
 
     def test_block_message(self):
         message = messages.msg_block()
@@ -546,10 +548,11 @@ class NetworkingTest(unittest.TestCase):
         for i in range(1, networking.TXS_SEND_BATCH_SIZE):
             self.networking.tx_invs_to_send_to_private.append('hash' + str(i))
         message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash10'
+        tx_in = CTxIn(prevout=COutPoint(hash=b'\x01'*32))
+        tx = CTransaction(vin=tuple([tx_in]))
         message.tx = tx
 
+        self.networking.txs[b'\x01'*32] = 'some_tx'
         self.networking.tx_message(self.public_connection1, message)
 
         self.assertEqual(self.private_connection.send.call_count, 1)
@@ -571,6 +574,38 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection2.send.called)
+
+    def test_tx_message_missing_vin_txs(self):
+        message = messages.msg_tx()
+        tx = MagicMock()
+        tx.GetHash.return_value = 'hash0'
+        message.tx = tx
+
+        tx_with_missing_prevout = MagicMock()
+        tx_with_missing_prevout.GetHash.return_value = 'hash1'
+
+        self.networking.txs_with_missing_prevout = [tx_with_missing_prevout]
+        self.networking.tx_message(self.private_connection, message)
+
+        self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)
+        self.assertIn('hash1', self.networking.tx_invs_to_send_to_public)
+
+    def test_tx_message_missing_vin_txs_added_to_txs_afterwards(self):
+        message = messages.msg_tx()
+        tx = MagicMock()
+        tx.GetHash.return_value = b'\x03'*32
+        message.tx = tx
+
+        in1 = CTxIn(prevout=COutPoint(hash=b'\x03'*32))
+        in2 = CTxIn(prevout=COutPoint(hash=b'\x01'*32))
+        tx_with_missing_prevout = CTransaction(vin=tuple([in1, in2]))
+
+        self.networking.txs_with_missing_prevout = [tx_with_missing_prevout]
+        self.networking.txs[b'\x01'*32] = 'some_tx'
+        self.networking.tx_message(self.private_connection, message)
+
+        self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)
+        self.assertEqual(len(self.networking.tx_invs_to_send_to_public), 2)
 
     def test_get_private_connection(self):
         connection = self.networking.get_private_connection()
