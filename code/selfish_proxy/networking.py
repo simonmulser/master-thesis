@@ -217,25 +217,15 @@ class Networking(object):
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
-                        if inv.hash in self.txs:
+                        tx = self.get_tx(inv.hash)
+                        if tx is not None:
                             msg = messages.msg_tx()
-                            msg.tx = self.txs[inv.hash]
+                            msg.tx = tx
                             connection.send('tx', msg)
-                            logging.info('send TX(hash={}) from mempool to {}'
+                            logging.info('send TX(hash={}) to {}'.format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                        else:
+                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                            return
-                        for block in self.chain.blocks:
-                            if block.cblock is not None:
-                                for tx in block.cblock.vtx:
-                                    if tx.GetHash() == inv.hash:
-                                        msg = messages.msg_tx()
-                                        msg.tx = tx
-                                        connection.send('tx', msg)
-                                        logging.info('send TX(hash={}) from mempool to {}'
-                                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                                        return
-                        logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
-                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
