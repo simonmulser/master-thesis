@@ -347,6 +347,8 @@ class Networking(object):
                          .format(len(public_block_invs), i))
 
     def get_tx(self, tx_hash):
+        # TODO use bloom filter to know if tx is available or not
+
         if tx_hash in self.txs:
             logging.debug('found TX(hash={}) in mempool'.format(core.b2lx(tx_hash)))
             return self.txs[tx_hash]
