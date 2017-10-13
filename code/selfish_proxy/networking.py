@@ -216,10 +216,13 @@ class Networking(object):
                     elif net.CInv.typemap[inv.type] == 'TX':
                         tx = self.get_tx(inv.hash)
                         if tx is not None:
-                            msg = messages.msg_tx()
-                            msg.tx = tx
-                            connection.send('tx', msg)
-                            logging.info('send TX(hash={}) to {}'.format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                            if tx.is_coinbase():
+                                logging.debug('Will not relay TX(hash={}) requested from {} because it is a coinbase tx')
+                            else:
+                                msg = messages.msg_tx()
+                                msg.tx = tx
+                                connection.send('tx', msg)
+                                logging.info('send TX(hash={}) to {}'.format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.warn('TX(hash={}) requested from {} not available'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
