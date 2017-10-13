@@ -217,8 +217,8 @@ class Networking(object):
                             logging.info('send TX(hash={}) to {}'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
-                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request'
-                                         .format(core.b2lx(inv.hash)))
+                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
+                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:
