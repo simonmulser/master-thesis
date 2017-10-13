@@ -7,6 +7,7 @@ from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
+from bitcoin.core import CTransaction
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
@@ -371,6 +372,25 @@ class NetworkingTest(unittest.TestCase):
         self.networking.block_message(self.private_connection, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)
+
+    def test_block_message_add_tx(self):
+        message = messages.msg_block()
+        tx1 = CTransaction(nLockTime=1)
+        tx2 = CTransaction(nLockTime=2)
+        tx3 = CTransaction(nLockTime=3)
+        cblock = CBlock(vtx=[tx1, tx2, tx3])
+        message.block = cblock
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = message.block.GetHash()
+        self.chain.blocks = {block.hash():  block}
+
+        self.networking.txs[tx3.GetHash()] = tx3
+        self.networking.block_message(self.private_connection, message)
+
+        self.assertEqual(len(self.networking.txs), 3)
+        self.assertIn(tx1.GetHash(), self.networking.txs)
+        self.assertIn(tx2.GetHash(), self.networking.txs)
 
     def test_getdata_message_with_block(self):
         cblock = CBlock()

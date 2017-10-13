@@ -120,6 +120,12 @@ class Networking(object):
                 if block_hash in self.blocks_to_send:
                     self.send_inv([block])
                     self.blocks_to_send.remove(block_hash)
+
+                for tx in message.block.vtx:
+                    if tx.GetHash() not in self.txs:
+                        self.txs[tx.GetHash()] = tx
+                        logging.debug('added tx received through block and with hash={} to txs'
+                                      .format(core.b2lx(tx.GetHash()), core.b2lx(block_hash)))
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
