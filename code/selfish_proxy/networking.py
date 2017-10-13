@@ -123,9 +123,9 @@ class Networking(object):
                     self.blocks_to_send.remove(block_hash)
 
                 for tx in message.block.vtx:
-                    if tx.GetHash() not in self.txs:
-                        self.txs[tx.GetHash()] = tx
-                        logging.debug('added tx received through block and with hash={} to txs'
+                    if tx.GetHash() in self.txs:
+                        del self.txs[tx.GetHash()]
+                        logging.debug('remove tx received through block and with hash={} from txs'
                                       .format(core.b2lx(tx.GetHash()), core.b2lx(block_hash)))
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
@@ -221,11 +221,21 @@ class Networking(object):
                             msg = messages.msg_tx()
                             msg.tx = self.txs[inv.hash]
                             connection.send('tx', msg)
-                            logging.info('send TX(hash={}) to {}'
+                            logging.info('send TX(hash={}) from mempool to {}'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                        else:
-                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
-                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                            return
+                        for block in self.chain.blocks:
+                            if block.cblock is not None:
+                                for tx in block.cblock.vtx:
+                                    if tx.GetHash() == inv.hash:
+                                        msg = messages.msg_tx()
+                                        msg.tx = tx
+                                        connection.send('tx', msg)
+                                        logging.info('send TX(hash={}) from mempool to {}'
+                                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                        return
+                        logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
+                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
                 except KeyError:

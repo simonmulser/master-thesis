@@ -375,7 +375,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)
 
-    def test_block_message_add_tx(self):
+    def test_block_gemessage_remove_tx(self):
         message = messages.msg_block()
         tx1 = CTransaction(nLockTime=1)
         tx2 = CTransaction(nLockTime=2)
@@ -387,12 +387,11 @@ class NetworkingTest(unittest.TestCase):
         block.cached_hash = message.block.GetHash()
         self.chain.blocks = {block.hash():  block}
 
-        self.networking.txs[tx3.GetHash()] = tx3
+        self.networking.txs[tx1.GetHash()] = tx1
+        self.networking.txs[tx2.GetHash()] = tx2
         self.networking.block_message(self.private_connection, message)
 
-        self.assertEqual(len(self.networking.txs), 3)
-        self.assertIn(tx1.GetHash(), self.networking.txs)
-        self.assertIn(tx2.GetHash(), self.networking.txs)
+        self.assertEqual(len(self.networking.txs), 0)
 
     def test_getdata_message_with_block(self):
         cblock = CBlock()
@@ -466,7 +465,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_count, 2)
 
-    def test_getdata_message_with_tx(self):
+    def test_getdata_message_with_tx_in_mempool(self):
         message = messages.msg_getdata()
         inv = CInv()
         inv.type = networking.inv_typemap['TX']
@@ -483,6 +482,29 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection2.send.called)
+
+    def test_getdata_message_with_tx_in_block(self):
+        block1 = Block(None, None)
+        tx11 = CTransaction(nLockTime=11)
+        tx12 = CTransaction(nLockTime=12)
+        block1.cblock = CBlock(vtx=(tx11, tx12))
+
+        block2 = Block(None, None)
+        tx21 = CTransaction(nLockTime=21)
+        block1.cblock = CBlock(vtx=tuple([tx21]))
+
+        self.chain.blocks = [block1, block2]
+
+        message = messages.msg_getdata()
+        inv = CInv()
+        inv.type = networking.inv_typemap['TX']
+        inv.hash = tx21.GetHash()
+        message.inv = [inv]
+        self.networking.getdata_message(self.private_connection, message)
+
+        self.assertTrue(self.private_connection.send.called)
+        self.assertEqual(self.private_connection.send.call_args[0][0], 'tx')
+        self.assertEqual(self.private_connection.send.call_args[0][1].tx, tx21)
 
     def test_getdata_message_with_tx_not_available(self):
         message = messages.msg_getdata()
