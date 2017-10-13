@@ -631,7 +631,7 @@ class NetworkingTest(unittest.TestCase):
         tx21 = CTransaction(nLockTime=21)
         block1.cblock = CBlock(vtx=tuple([tx21]))
 
-        self.chain.blocks = [block1, block2]
+        self.chain.blocks = {'block1': block1, 'block2': block2}
 
         tx = self.networking.get_tx(tx21.GetHash())
         self.assertEqual(tx, tx21)

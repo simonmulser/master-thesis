@@ -350,7 +350,7 @@ class Networking(object):
             logging.debug('found TX(hash={}) in mempool'.format(core.b2lx(tx_hash)))
             return self.txs[tx_hash]
 
-        for block in self.chain.blocks:
+        for block in self.chain.blocks.values():
             if block.cblock is not None:
                 for tx in block.cblock.vtx:
                     if tx.GetHash() == tx_hash:
