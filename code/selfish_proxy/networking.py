@@ -208,8 +208,9 @@ class Networking(object):
                                 logging.info('send CBlock(hash={}) to {}'
                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                             else:
-                                logging.error('CBlock(hash={}) requested from {} not available'
-                                              .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                logging.warn(
+                                    'CBlock(hash={}) requested from {} not available, cannot fulfill getdata request'
+                                    .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     elif net.CInv.typemap[inv.type] == 'TX':
@@ -220,7 +221,7 @@ class Networking(object):
                             connection.send('tx', msg)
                             logging.info('send TX(hash={}) to {}'.format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
-                            logging.warn('TX(hash={}) not available, cannot fulfill getdata request from {}'
+                            logging.warn('TX(hash={}) request from {} not available, cannot fulfill getdata request'
                                          .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
                         logging.debug("we don't care about inv type={}".format(inv.type))
@@ -357,7 +358,7 @@ class Networking(object):
                         logging.debug('send TX(hash={}) in block with hash={}'
                                       .format(core.b2lx(tx_hash), core.b2lx(block.cblock.GetHash())))
                         return tx
-        logging.debug('did not found TX(hash={})'.format(tx_hash))
+        logging.debug('did not found TX(hash={})'.format(core.b2lx(tx_hash)))
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
