@@ -506,6 +506,8 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash1'
         message.tx = tx
 
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.return_value = None
         self.networking.tx_message(self.private_connection, message)
 
         self.assertFalse(self.private_connection.send.called)
@@ -521,6 +523,8 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash1'
         message.tx = tx
 
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.return_value = None
         self.networking.tx_message(self.public_connection1, message)
 
         self.assertFalse(self.private_connection.send.called)
@@ -538,6 +542,8 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash10'
         message.tx = tx
 
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.return_value = None
         self.networking.tx_message(self.private_connection, message)
 
         self.assertEqual(self.public_connection1.send.call_count, 1)
@@ -555,7 +561,8 @@ class NetworkingTest(unittest.TestCase):
         tx = CTransaction(vin=tuple([tx_in]))
         message.tx = tx
 
-        self.networking.txs[b'\x01'*32] = 'some_tx'
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.side_effect = [None, 'some_tx']
         self.networking.tx_message(self.public_connection1, message)
 
         self.assertEqual(self.private_connection.send.call_count, 1)
@@ -570,8 +577,8 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash'
         message.tx = tx
 
-        self.networking.txs = {'hash': 'void'}
-
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.return_value = 'some_tx'
         self.networking.tx_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.send.called)
@@ -584,6 +591,8 @@ class NetworkingTest(unittest.TestCase):
         tx.GetHash.return_value = 'hash0'
         message.tx = tx
 
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.return_value = None
         tx_with_missing_prevout = MagicMock()
         tx_with_missing_prevout.GetHash.return_value = 'hash1'
 
@@ -604,7 +613,9 @@ class NetworkingTest(unittest.TestCase):
         tx_with_missing_prevout = CTransaction(vin=tuple([in1, in2]))
 
         self.networking.txs_with_missing_prevout = [tx_with_missing_prevout]
-        self.networking.txs[b'\x01'*32] = 'some_tx'
+        self.networking.get_tx = MagicMock()
+        self.networking.get_tx.side_effect = [None, 'some_tx']
+
         self.networking.tx_message(self.private_connection, message)
 
         self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)

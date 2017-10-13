@@ -244,10 +244,10 @@ class Networking(object):
             tx = message.tx
             tx_hash = tx.GetHash()
 
-            if tx_hash not in self.txs:
+            if self.get_tx(tx_hash) is None:
                 missing_tx = []
                 for tx_in in message.tx.vin:
-                    if tx_in.prevout.hash not in self.txs:
+                    if self.get_tx(tx_in.prevout.hash) is None:
                         inv = net.CInv()
                         inv.type = inv_typemap['TX']
                         inv.hash = tx_in.prevout.hash
@@ -267,7 +267,7 @@ class Networking(object):
 
                     txs = [message.tx]
                     for tx_with_missing_prevout in self.txs_with_missing_prevout:
-                        if all(tx_in.prevout.hash in self.txs for tx_in in tx_with_missing_prevout.vin):
+                        if all(self.get_tx(tx_in.prevout.hash) is not None for tx_in in tx_with_missing_prevout.vin):
                             txs.append(tx_with_missing_prevout)
                             self.txs_with_missing_prevout.remove(tx_with_missing_prevout)
                             logging.debug('all tx inputs of tx with hash={} are available, relaying tx with next batch'
