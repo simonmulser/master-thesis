@@ -473,13 +473,14 @@ class NetworkingTest(unittest.TestCase):
         message.inv = [inv]
 
         self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = 'TX'
+        tx = CTransaction()
+        self.networking.get_tx.return_value = tx
 
         self.networking.getdata_message(self.public_connection1, message)
 
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_args[0][0], 'tx')
-        self.assertEqual(self.public_connection1.send.call_args[0][1].tx, 'TX')
+        self.assertEqual(self.public_connection1.send.call_args[0][1].tx, tx)
 
         self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection2.send.called)
