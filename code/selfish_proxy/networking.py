@@ -172,9 +172,9 @@ class Networking(object):
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
             if connection.host[0] == self.private_ip:
-                blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.private, message.locator.vHave)
+                blocks = chainutil.get_headers(self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
             else:
-                blocks = chainutil.get_longest_chain(self.chain.tips, BlockOrigin.public, message.locator.vHave)
+                blocks = chainutil.get_headers(self.chain.tips, BlockOrigin.public, message.locator.vHave, message.hashstop)
 
             message = messages.msg_headers()
             message.headers = [core.CBlock(block.cblock.nVersion,
@@ -186,6 +186,8 @@ class Networking(object):
             connection.send('headers', message)
             logging.debug('sent headers message with {} headers to {}'
                           .format(len(message.headers), self.repr_connection(connection)))
+            if len(message.headers) > 0:
+                logging.debug('sent headers with starting hash={}'.format(core.b2lx(message.headers[0].GetHash())))
 
         finally:
             self.sync.lock.release()

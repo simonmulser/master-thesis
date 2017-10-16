@@ -293,7 +293,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.chain.process_block.called)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.public)
 
-    @patch('chainutil.get_longest_chain')
+    @patch('chainutil.get_headers')
     def test_getheaders_message_no_blocks_to_return(self, mock):
         message = messages.msg_getheaders()
         message.locator.vHave = ['hash1']
@@ -310,7 +310,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.private_connection.send.call_args[0][0], 'headers')
         self.assertEqual(self.private_connection.send.call_args[0][1].headers, [])
 
-    @patch('chainutil.get_longest_chain')
+    @patch('chainutil.get_headers')
     def test_getheaders_message_no_block_found(self, mock):
         message = messages.msg_getheaders()
         block1 = Block('cblock_header1', BlockOrigin.private)
