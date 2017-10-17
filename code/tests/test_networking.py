@@ -119,37 +119,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
-    def test_inv_message_msg_tx_not_known(self):
-        inv = net.CInv()
-        inv.type = networking.inv_typemap['TX']
-        inv.hash = 'hash1'
-        msg = messages.msg_inv()
-        msg.inv = [inv]
-
-        self.networking.inv_message(self.private_connection, msg)
-
-        self.assertEqual(self.private_connection.send.call_count, 1)
-        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 1)
-
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
-    def test_inv_message_msg_two_tx_not_known(self):
-        inv1 = net.CInv()
-        inv1.type = networking.inv_typemap['TX']
-        inv1.hash = 'hash1'
-        inv2 = net.CInv()
-        inv2.type = networking.inv_typemap['TX']
-        inv2.hash = 'hash2'
-
-        msg = messages.msg_inv()
-        msg.inv = [inv1, inv2]
-
-        self.networking.inv_message(self.private_connection, msg)
-
-        self.assertEqual(self.private_connection.send.call_count, 1)
-        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 2)
-
     def test_inv_message_msg_unknown(self):
         inv = net.CInv()
         inv.type = "Unknown"
@@ -375,24 +344,6 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock1)
 
-    def test_block_gemessage_remove_tx(self):
-        message = messages.msg_block()
-        tx1 = CTransaction(nLockTime=1)
-        tx2 = CTransaction(nLockTime=2)
-        tx3 = CTransaction(nLockTime=3)
-        cblock = CBlock(vtx=[tx1, tx2, tx3])
-        message.block = cblock
-
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = message.block.GetHash()
-        self.chain.blocks = {block.hash():  block}
-
-        self.networking.txs[tx1.GetHash()] = tx1
-        self.networking.txs[tx2.GetHash()] = tx2
-        self.networking.block_message(self.private_connection, message)
-
-        self.assertEqual(len(self.networking.txs), 0)
-
     def test_getdata_message_with_block(self):
         cblock = CBlock()
         block = Block(cblock, BlockOrigin.private)
@@ -465,26 +416,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.public_connection1.send.called)
         self.assertEqual(self.public_connection1.send.call_count, 2)
 
-    def test_getdata_message_with_tx(self):
-        message = messages.msg_getdata()
-        inv = CInv()
-        inv.type = networking.inv_typemap['TX']
-        inv.hash = 'hash1'
-        message.inv = [inv]
-
-        self.networking.get_tx = MagicMock()
-        tx = CTransaction()
-        self.networking.get_tx.return_value = tx
-
-        self.networking.getdata_message(self.public_connection1, message)
-
-        self.assertTrue(self.public_connection1.send.called)
-        self.assertEqual(self.public_connection1.send.call_args[0][0], 'tx')
-        self.assertEqual(self.public_connection1.send.call_args[0][1].tx, tx)
-
-        self.assertFalse(self.private_connection.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
     def test_getdata_message_without_tx(self):
         message = messages.msg_getdata()
         inv = CInv()
@@ -500,153 +431,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.private_connection.send.called)
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
-
-    def test_tx_message_first_tx_from_private(self):
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash1'
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = None
-        self.networking.tx_message(self.private_connection, message)
-
-        self.assertFalse(self.private_connection.send.called)
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
-        self.assertEqual(len(self.networking.tx_invs_to_send_to_public), 1)
-        self.assertEqual(self.networking.tx_invs_to_send_to_public[0], 'hash1')
-
-    def test_tx_message_first_tx_from_public(self):
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash1'
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = None
-        self.networking.tx_message(self.public_connection1, message)
-
-        self.assertFalse(self.private_connection.send.called)
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
-        self.assertEqual(len(self.networking.tx_invs_to_send_to_private), 1)
-        self.assertEqual(self.networking.tx_invs_to_send_to_private[0], 'hash1')
-
-    def test_tx_message_from_private_batch_full(self):
-        for i in range(1, networking.TXS_SEND_BATCH_SIZE):
-            self.networking.tx_invs_to_send_to_public.append('hash' + str(i))
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash10'
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = None
-        self.networking.tx_message(self.private_connection, message)
-
-        self.assertEqual(self.public_connection1.send.call_count, 1)
-        self.assertEqual(self.public_connection2.send.call_count, 1)
-
-        self.assertEqual(len(self.public_connection1.send.call_args[0][1].inv), networking.TXS_SEND_BATCH_SIZE)
-
-        self.assertFalse(self.private_connection.send.called)
-
-    def test_tx_message_from_public_batch_full(self):
-        for i in range(1, networking.TXS_SEND_BATCH_SIZE):
-            self.networking.tx_invs_to_send_to_private.append('hash' + str(i))
-        message = messages.msg_tx()
-        tx_in = CTxIn(prevout=COutPoint(hash=b'\x01'*32))
-        tx = CTransaction(vin=tuple([tx_in]))
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.side_effect = [None, 'some_tx']
-        self.networking.tx_message(self.public_connection1, message)
-
-        self.assertEqual(self.private_connection.send.call_count, 1)
-        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), networking.TXS_SEND_BATCH_SIZE)
-
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
-    def test_tx_message_tx_already_received(self):
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash'
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = 'some_tx'
-        self.networking.tx_message(self.public_connection1, message)
-
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.private_connection.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-
-    def test_tx_message_missing_vin_txs(self):
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = 'hash0'
-        message.tx = tx
-
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.return_value = None
-        tx_with_missing_prevout = MagicMock()
-        tx_with_missing_prevout.GetHash.return_value = 'hash1'
-
-        self.networking.txs_with_missing_prevout = [tx_with_missing_prevout]
-        self.networking.tx_message(self.private_connection, message)
-
-        self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)
-        self.assertIn('hash1', self.networking.tx_invs_to_send_to_public)
-
-    def test_tx_message_missing_vin_txs_added_to_txs_afterwards(self):
-        message = messages.msg_tx()
-        tx = MagicMock()
-        tx.GetHash.return_value = b'\x03'*32
-        message.tx = tx
-
-        in1 = CTxIn(prevout=COutPoint(hash=b'\x03'*32))
-        in2 = CTxIn(prevout=COutPoint(hash=b'\x01'*32))
-        tx_with_missing_prevout = CTransaction(vin=tuple([in1, in2]))
-
-        self.networking.txs_with_missing_prevout = [tx_with_missing_prevout]
-        self.networking.get_tx = MagicMock()
-        self.networking.get_tx.side_effect = [None, 'some_tx']
-
-        self.networking.tx_message(self.private_connection, message)
-
-        self.assertEqual(len(self.networking.txs_with_missing_prevout), 0)
-        self.assertEqual(len(self.networking.tx_invs_to_send_to_public), 2)
-
-    def test_get_tx_with_tx_in_block(self):
-        block1 = Block(None, None)
-        tx11 = CTransaction(nLockTime=11)
-        tx12 = CTransaction(nLockTime=12)
-        block1.cblock = CBlock(vtx=(tx11, tx12))
-
-        block2 = Block(None, None)
-        tx21 = CTransaction(nLockTime=21)
-        block1.cblock = CBlock(vtx=tuple([tx21]))
-
-        self.chain.blocks = {'block1': block1, 'block2': block2}
-
-        tx = self.networking.get_tx(tx21.GetHash())
-        self.assertEqual(tx, tx21)
-
-    def test_get_tx_with_tx_in_mempool(self):
-        self.networking.txs = {'hash1': 'TX1'}
-
-        tx = self.networking.get_tx('hash1')
-        self.assertEqual(tx, 'TX1')
-
-    def test_get_tx__with_tx_not_available(self):
-        tx = self.networking.get_tx('hash1')
-
-        self.assertEqual(tx, None)
 
     def test_get_private_connection(self):
         connection = self.networking.get_private_connection()

@@ -9,8 +9,6 @@ from strategy import BlockOrigin
 import chainutil
 import behaviour
 
-TXS_SEND_BATCH_SIZE = 25
-
 
 class Networking(object):
     def __init__(self, private_ip, sync, reconnect_time):
@@ -20,11 +18,7 @@ class Networking(object):
 
         self.client = None
         self.chain = None
-        self.txs = {}
-        self.txs_with_missing_prevout = []
         self.blocks_to_send = []
-        self.tx_invs_to_send_to_public = []
-        self.tx_invs_to_send_to_private = []
 
     def start(self):
         logging.debug('starting client')
@@ -44,7 +38,6 @@ class Networking(object):
         self.client.register_handler('headers', self.headers_message)
         self.client.register_handler('getheaders', self.getheaders_message)
         self.client.register_handler('getdata', self.getdata_message)
-        self.client.register_handler('tx', self.tx_message)
 
         behaviour.CatchUpBehaviour(self.client, self.private_ip, self.chain)
 
@@ -64,7 +57,6 @@ class Networking(object):
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
 
-            missing_inv = []
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
@@ -84,23 +76,12 @@ class Networking(object):
                                          .format(len(headers), core.b2lx(headers[0]), self.repr_connection(connection)))
                         else:
                             logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
-                    elif net.CInv.typemap[inv.type] == "TX":
-                        logging.debug("received {}".format(inv))
-                        if inv.hash not in self.txs:
-                            missing_inv.append(inv)
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
-                        logging.debug("we don't care about inv type={}".format(inv.type))
+                        pass
                 except KeyError:
                     logging.warn("unknown inv type={}")
-
-            if len(missing_inv) > 0:
-                msg = messages.msg_getdata()
-                msg.inv = missing_inv
-                connection.send('getdata', msg)
-                logging.debug('send getdata to {}'.format(self.repr_connection(connection)))
-
         finally:
             self.sync.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
@@ -122,11 +103,6 @@ class Networking(object):
                     self.send_inv([block])
                     self.blocks_to_send.remove(block_hash)
 
-                for tx in message.block.vtx:
-                    if tx.GetHash() in self.txs:
-                        del self.txs[tx.GetHash()]
-                        logging.debug('remove tx received through block and with hash={} from txs'
-                                      .format(core.b2lx(tx.GetHash()), core.b2lx(block_hash)))
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(block_hash), self.repr_connection(connection)))
@@ -215,100 +191,14 @@ class Networking(object):
                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
-                    elif net.CInv.typemap[inv.type] == 'TX':
-                        tx = self.get_tx(inv.hash)
-                        if tx is not None:
-                            if tx.is_coinbase():
-                                logging.debug(
-                                    'Will not relay TX(hash={}) requested from {} because it is a coinbase tx'
-                                    .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                            else:
-                                msg = messages.msg_tx()
-                                msg.tx = tx
-                                connection.send('tx', msg)
-                                logging.info('send TX(hash={}) to {}'
-                                             .format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                        else:
-                            logging.warn('TX(hash={}) requested from {} not available'
-                                         .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                     else:
-                        logging.debug("we don't care about inv type={}".format(inv.type))
+                        pass
                 except KeyError:
                     logging.warn("unknown inv type={}")
 
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
-
-    def tx_message(self, connection, message):
-        self.sync.lock.acquire()
-        try:
-            logging.debug('received tx message from {}'
-                          .format(self.repr_connection(connection)))
-
-            tx = message.tx
-            tx_hash = tx.GetHash()
-
-            if self.get_tx(tx_hash) is None:
-                missing_tx = []
-                for tx_in in message.tx.vin:
-                    if self.get_tx(tx_in.prevout.hash) is None:
-                        missing_tx.append(hash_to_inv('TX', tx_in.prevout.hash))
-
-                if len(missing_tx) > 0:
-                    msg = messages.msg_inv()
-                    msg.inv = missing_tx
-                    connection.send('inv', msg)
-                    self.txs_with_missing_prevout.append(message.tx)
-                    logging.debug('requested {} txs which are inputs of tx with hash={}'
-                                  .format(len(missing_tx), core.b2lx(tx_hash)))
-
-                else:
-                    self.txs[message.tx.GetHash()] = message.tx
-                    logging.debug('set tx with hash={} in transaction map'.format(core.b2lx(tx_hash)))
-
-                    txs = [message.tx]
-                    for tx_with_missing_prevout in self.txs_with_missing_prevout:
-                        if all(self.get_tx(tx_in.prevout.hash) is not None for tx_in in tx_with_missing_prevout.vin):
-                            txs.append(tx_with_missing_prevout)
-                            self.txs_with_missing_prevout.remove(tx_with_missing_prevout)
-                            logging.debug('all tx inputs of tx with hash={} are available, relaying tx with next batch'
-                                          .format(core.b2lx(tx_with_missing_prevout.GetHash())))
-
-                    for tx in txs:
-                        if connection.host[0] == self.private_ip:
-                            self.tx_invs_to_send_to_public.append(tx.GetHash())
-
-                            if len(self.tx_invs_to_send_to_public) >= TXS_SEND_BATCH_SIZE:
-                                msg = messages.msg_inv()
-                                msg.inv = [hash_to_inv('TX', inv_hash) for inv_hash in self.tx_invs_to_send_to_public]
-
-                                for connection in self.get_current_public_connection():
-                                    connection.send('inv', msg)
-                                    logging.info('send {} tx invs to connection={}'
-                                                 .format(len(self.tx_invs_to_send_to_public), self.repr_connection(connection)))
-                                self.tx_invs_to_send_to_public = []
-                        else:
-                            self.tx_invs_to_send_to_private.append(tx.GetHash())
-                            if len(self.tx_invs_to_send_to_private) >= TXS_SEND_BATCH_SIZE:
-
-                                private_connection = self.get_private_connection()
-
-                                if private_connection is not None:
-                                    msg = messages.msg_inv()
-                                    msg.inv = [hash_to_inv('TX', inv_hash) for inv_hash in self.tx_invs_to_send_to_private]
-
-                                    private_connection.send('inv', msg)
-                                    logging.info('send {} tx invs to connection={}'
-                                                 .format(len(self.tx_invs_to_send_to_private),
-                                                         self.repr_connection(private_connection)))
-
-                                    self.tx_invs_to_send_to_private = []
-            else:
-                logging.debug('already received tx with hash={}'.format(core.b2lx(tx_hash)))
-        finally:
-            self.sync.lock.release()
-            logging.debug('processed tx message from {}'.format(self.repr_connection(connection)))
 
     def try_to_send_inv(self, blocks):
         relay_blocks = []
@@ -353,22 +243,6 @@ class Networking(object):
                 i += 1
             logging.info('{} block invs send to {} public connections'
                          .format(len(public_block_invs), i))
-
-    def get_tx(self, tx_hash):
-        # TODO use bloom filter to know if tx is available or not
-
-        if tx_hash in self.txs:
-            logging.debug('found TX(hash={}) in mempool'.format(core.b2lx(tx_hash)))
-            return self.txs[tx_hash]
-
-        for block in self.chain.blocks.values():
-            if block.cblock is not None:
-                for tx in block.cblock.vtx:
-                    if tx.GetHash() == tx_hash:
-                        logging.debug('found TX(hash={}) in block with hash={}'
-                                      .format(core.b2lx(tx_hash), core.b2lx(block.cblock.GetHash())))
-                        return tx
-        return None
 
     def ping_message(self, connection, message):
         connection.send('pong', message)
