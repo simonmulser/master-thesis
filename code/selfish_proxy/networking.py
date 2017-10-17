@@ -128,9 +128,10 @@ class Networking(object):
         try:
             getdata_inv = []
             for header in message.headers:
-                if header.GetHash() not in self.chain.blocks:
+                header_hash = header.GetHash()
+                if header_hash not in self.chain.blocks and header_hash not in self.blocks_in_flight:
                     logging.debug('received header with hash={} from {}'
-                                  .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
+                                  .format(core.b2lx(header_hash), self.repr_connection(connection)))
                     getdata_inv.append(header.GetHash())
 
             if len(getdata_inv) > 0:

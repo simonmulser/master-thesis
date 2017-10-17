@@ -226,6 +226,17 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.public_connection1.send.call_args[0][1].inv[0].type, networking.inv_typemap['Block'])
         self.assertEqual(self.public_connection1.send.call_args[0][1].inv[0].hash, header.GetHash())
 
+    def test_headers_message_unknown_blocks_but_in_flight(self):
+        header = CBlockHeader(nNonce=1)
+
+        message = messages.msg_headers()
+        message.headers = [header]
+
+        self.networking.blocks_in_flight[header.GetHash()] = 'something'
+        self.networking.headers_message(self.public_connection1, message)
+
+        self.assertFalse(self.public_connection1.send.called)
+
     @patch('chainutil.respond_get_headers')
     def test_getheaders_message_no_blocks_to_return(self, mock):
         message = messages.msg_getheaders()
