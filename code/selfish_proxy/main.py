@@ -42,7 +42,7 @@ def parse_args():
                         )
 
     parser.add_argument('--reconnect-time'
-                        , help='Time to wait to trying to reconnect to host'
+                        , help='Time to wait for reconnecting to host'
                         , default=3
                         )
 
