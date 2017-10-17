@@ -97,50 +97,6 @@ class Networking(object):
             self.sync.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
-    def block_message(self, connection, message):
-        self.sync.lock.acquire()
-        try:
-            logging.debug('received block message from {}'
-                          .format(self.repr_connection(connection)))
-
-            block_hash = message.block.GetHash()
-            if block_hash not in self.chain.blocks:
-                if connection.host[0] == self.private_ip:
-                    self.chain.process_block(message.block, BlockOrigin.private)
-                else:
-                    self.chain.process_block(message.block, BlockOrigin.public)
-            if block_hash in self.blocks_in_flight:
-                del self.blocks_in_flight[block_hash]
-
-        finally:
-            self.sync.lock.release()
-            logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
-
-    def headers_message(self, connection, message):
-        self.sync.lock.acquire()
-        try:
-            logging.debug('received headers message with {} headers message from {}'
-                          .format(len(message.headers), self.repr_connection(connection)))
-
-            getdata_inv = []
-            for header in message.headers:
-                if header.GetHash() not in self.chain.blocks:
-                    logging.debug('received header with hash={} from {}'
-                                  .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
-                    getdata_inv.append(header.GetHash())
-
-            if len(getdata_inv) > 0:
-                message = messages.msg_getdata()
-                message.inv = [hash_to_inv('Block', block_hash) for block_hash in getdata_inv]
-                connection.send('getdata', message)
-                logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
-                for block_hash in getdata_inv:
-                    self.blocks_in_flight[block_hash] = BlockInFlight(block_hash, time.time(), connection.host[0])
-
-        finally:
-            self.sync.lock.release()
-            logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
-
     def getheaders_message(self, connection, message):
         self.sync.lock.acquire()
         try:
@@ -169,6 +125,31 @@ class Networking(object):
             self.sync.lock.release()
             logging.debug('processed getheaders message from {}'.format(self.repr_connection(connection)))
 
+    def headers_message(self, connection, message):
+        self.sync.lock.acquire()
+        try:
+            logging.debug('received headers message with {} headers message from {}'
+                          .format(len(message.headers), self.repr_connection(connection)))
+
+            getdata_inv = []
+            for header in message.headers:
+                if header.GetHash() not in self.chain.blocks:
+                    logging.debug('received header with hash={} from {}'
+                                  .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
+                    getdata_inv.append(header.GetHash())
+
+            if len(getdata_inv) > 0:
+                message = messages.msg_getdata()
+                message.inv = [hash_to_inv('Block', block_hash) for block_hash in getdata_inv]
+                connection.send('getdata', message)
+                logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
+                for block_hash in getdata_inv:
+                    self.blocks_in_flight[block_hash] = BlockInFlight(block_hash, time.time(), connection.host[0])
+
+        finally:
+            self.sync.lock.release()
+            logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
+
     def getdata_message(self, connection, message):
         self.sync.lock.acquire()
         try:
@@ -188,7 +169,7 @@ class Networking(object):
                             else:
                                 logging.warn(
                                     'Block(hash={}) requested from {} not available'
-                                    .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                        .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     else:
@@ -199,6 +180,25 @@ class Networking(object):
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
+
+    def block_message(self, connection, message):
+        self.sync.lock.acquire()
+        try:
+            logging.debug('received block message from {}'
+                          .format(self.repr_connection(connection)))
+
+            block_hash = message.block.GetHash()
+            if block_hash not in self.chain.blocks:
+                if connection.host[0] == self.private_ip:
+                    self.chain.process_block(message.block, BlockOrigin.private)
+                else:
+                    self.chain.process_block(message.block, BlockOrigin.public)
+            if block_hash in self.blocks_in_flight:
+                del self.blocks_in_flight[block_hash]
+
+        finally:
+            self.sync.lock.release()
+            logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
