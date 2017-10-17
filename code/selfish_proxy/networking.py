@@ -66,9 +66,9 @@ class Networking(object):
                             get_headers.locator = messages.CBlockLocator()
 
                             if connection.host[0] == self.private_ip:
-                                headers = chainutil.calc_get_headers(self.chain.tips, BlockOrigin.private)
+                                headers = chainutil.request_get_headers(self.chain.tips, BlockOrigin.private)
                             else:
-                                headers = chainutil.calc_get_headers(self.chain.tips, BlockOrigin.public)
+                                headers = chainutil.request_get_headers(self.chain.tips, BlockOrigin.public)
 
                             get_headers.locator.vHave = headers
                             connection.send('getheaders', get_headers)
@@ -148,9 +148,9 @@ class Networking(object):
                           .format(len(message.locator.vHave), self.repr_connection(connection)))
 
             if connection.host[0] == self.private_ip:
-                blocks = chainutil.get_headers(self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
+                blocks = chainutil.respond_get_headers(self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
             else:
-                blocks = chainutil.get_headers(self.chain.tips, BlockOrigin.public, message.locator.vHave, message.hashstop)
+                blocks = chainutil.respond_get_headers(self.chain.tips, BlockOrigin.public, message.locator.vHave, message.hashstop)
 
             message = messages.msg_headers()
             message.headers = [core.CBlock(block.cblock.nVersion,

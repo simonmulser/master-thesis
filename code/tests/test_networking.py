@@ -51,7 +51,7 @@ class NetworkingTest(unittest.TestCase):
 
         self.chain = self.networking.chain = MagicMock()
 
-    @patch('chainutil.calc_get_headers')
+    @patch('chainutil.request_get_headers')
     def test_inv_message_msg_block_private_unknown_with_tips(self, mock):
         mock.return_value = ['hash20', 'hash19']
 
@@ -262,7 +262,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(self.chain.process_block.called)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.public)
 
-    @patch('chainutil.get_headers')
+    @patch('chainutil.respond_get_headers')
     def test_getheaders_message_no_blocks_to_return(self, mock):
         message = messages.msg_getheaders()
         message.locator.vHave = ['hash1']
@@ -279,7 +279,7 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.private_connection.send.call_args[0][0], 'headers')
         self.assertEqual(self.private_connection.send.call_args[0][1].headers, [])
 
-    @patch('chainutil.get_headers')
+    @patch('chainutil.respond_get_headers')
     def test_getheaders_message_no_block_found(self, mock):
         message = messages.msg_getheaders()
         block1 = Block('cblock_header1', BlockOrigin.private)

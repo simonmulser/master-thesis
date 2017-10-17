@@ -52,7 +52,7 @@ def get_highest_block_with_cblock(tips, block_origin):
     return block
 
 
-def get_headers(tips, block_origin, vhave, hashstop):
+def respond_get_headers(tips, block_origin, vhave, hashstop):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 
     candidate_blocks = []
@@ -82,7 +82,7 @@ def get_tips_for_block_origin(tips, block_origin):
     return list(tips_for_block_origin)
 
 
-def calc_get_headers(tips, block_origin):
+def request_get_headers(tips, block_origin):
     tip = get_highest_block(tips, block_origin, block_origin)
 
     headers = [tip.hash()]

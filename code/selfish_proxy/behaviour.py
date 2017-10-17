@@ -23,7 +23,7 @@ class CatchUpBehaviour(network.ClientBehavior):
 
         msg = messages.msg_getheaders()
         msg.locator = messages.CBlockLocator()
-        headers = chainutil.calc_get_headers(self.chain.tips, BlockOrigin.public)
+        headers = chainutil.request_get_headers(self.chain.tips, BlockOrigin.public)
         msg.locator.vHave = headers
         connection.send('getheaders', msg)
         logging.info('requested getheaders with starting hash={} from new connection={}'

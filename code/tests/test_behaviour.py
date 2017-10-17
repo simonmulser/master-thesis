@@ -19,7 +19,7 @@ class BehaviourTest(unittest.TestCase):
         self.ip = '127.0.0.1'
         self.behaviour = CatchUpBehaviour(self.client, self.ip, self.chain)
 
-    @patch('chainutil.calc_get_headers', lambda chain, origin: ['hash1'])
+    @patch('chainutil.request_get_headers', lambda chain, origin: ['hash1'])
     def test_on_version_incoming_true(self):
         super(BehaviourTest, self).setUp()
         connection = MagicMock()
@@ -31,7 +31,7 @@ class BehaviourTest(unittest.TestCase):
         self.assertTrue(connection.send.call_count, 3)
         self.assertEqual(connection.send.call_args_list[-1][0][0], 'getheaders')
 
-    @patch('chainutil.calc_get_headers', lambda chain, origin: ['hash1'])
+    @patch('chainutil.request_get_headers', lambda chain, origin: ['hash1'])
     def test_on_version_incoming_false(self):
         super(BehaviourTest, self).setUp()
         connection = MagicMock()
