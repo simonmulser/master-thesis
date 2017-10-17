@@ -5,6 +5,7 @@ from mock import patch
 from mock import MagicMock
 import test_util
 from chain import Block
+from bitcoin.core import CBlock
 
 
 class ChainUtilTest(test_abstractchain.AbstractChainTest):
@@ -306,13 +307,13 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
     @patch('chainutil.get_highest_block')
     def test_request_get_headers_very_long_chain(self, mock):
-        first_block = Block(None, BlockOrigin.public)
+        first_block = Block(CBlock(), BlockOrigin.public)
         first_block.prevBlock = None
         first_block.cached_hash = '0'
 
         tmp = first_block
         for i in range(1, 17):
-            block = Block(None, BlockOrigin.public)
+            block = Block(CBlock(), BlockOrigin.public)
             block.prevBlock = tmp
             block.cached_hash = str(i)
 

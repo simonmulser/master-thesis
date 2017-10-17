@@ -73,7 +73,7 @@ class NetworkingTest(unittest.TestCase):
         msg = messages.msg_inv
         msg.inv = [inv]
 
-        block = Block(None, None)
+        block = Block(CBlock(), None)
         block.cached_hash = 'hash1'
         self.chain.blocks = {inv.hash: block}
         self.networking.inv_message(self.public_connection1, msg)
@@ -131,9 +131,9 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection2.send.called)
 
     def test_send_inv_private_blocks(self):
-        block1 = Block(None, BlockOrigin.private)
+        block1 = Block(CBlock(), BlockOrigin.private)
         block1.cached_hash = 'hash1'
-        block2 = Block(None, BlockOrigin.private)
+        block2 = Block(CBlock(), BlockOrigin.private)
         block2.cached_hash = 'hash2'
         self.networking.send_inv([block1, block2])
 
@@ -144,9 +144,9 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.private_connection.send.called)
 
     def test_send_inv_public_blocks(self):
-        block1 = Block(None, BlockOrigin.public)
+        block1 = Block(CBlock(), BlockOrigin.public)
         block1.cached_hash = 'hash1'
-        block2 = Block(None, BlockOrigin.public)
+        block2 = Block(CBlock(), BlockOrigin.public)
         block2.cached_hash = 'hash2'
         self.networking.send_inv([block1, block2])
 
@@ -158,15 +158,15 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(len(inv), 2)
 
     def test_send_inv_blocks(self):
-        block1 = Block(None, BlockOrigin.public)
+        block1 = Block(CBlock(), BlockOrigin.public)
         block1.cached_hash = 'hash1'
-        block2 = Block(None, BlockOrigin.public)
+        block2 = Block(CBlock(), BlockOrigin.public)
         block2.cached_hash = 'hash2'
-        block3 = Block(None, BlockOrigin.public)
+        block3 = Block(CBlock(), BlockOrigin.public)
         block3.cached_hash = 'hash3'
-        block4 = Block(None, BlockOrigin.private)
+        block4 = Block(CBlock(), BlockOrigin.private)
         block4.cached_hash = 'hash4'
-        block5 = Block(None, BlockOrigin.private)
+        block5 = Block(CBlock(), BlockOrigin.private)
         block5.cached_hash = 'hash5'
 
         self.networking.send_inv([block1, block2, block3, block4, block5])
@@ -187,16 +187,16 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection2.send.called)
 
     def test_headers_message_known_blocks(self):
-        header1 = CBlockHeader(nNonce=1)
-        block1 = Block(header1, None)
+        cblock1 = CBlock(nNonce=1)
+        block1 = Block(cblock1, None)
 
-        header2 = CBlockHeader(nNonce=2)
-        block2 = Block(header2, None)
+        cblock2 = CBlock(nNonce=2)
+        block2 = Block(cblock2, None)
 
         self.chain.blocks = {block1.hash(): block1, block2.hash(): block2}
 
         message = messages.msg_headers()
-        message.headers = [header1, header2]
+        message.headers = [cblock1.get_header(), cblock2.get_header()]
         self.networking.headers_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.send.called)
@@ -249,10 +249,8 @@ class NetworkingTest(unittest.TestCase):
     @patch('chainutil.respond_get_headers')
     def test_getheaders_message_no_block_found(self, mock):
         message = messages.msg_getheaders()
-        block1 = Block('cblock_header1', BlockOrigin.private)
-        block1.cblock = CBlock(nNonce=1)
-        block2 = Block('cblock_header2', BlockOrigin.private)
-        block2.cblock = CBlock(nNonce=2)
+        block1 = Block(CBlock(nNonce=1), BlockOrigin.private)
+        block2 = Block(CBlock(nNonce=2), BlockOrigin.private)
         mock.return_value = [block1, block2]
 
         self.networking.getheaders_message(self.private_connection, message)
@@ -267,13 +265,12 @@ class NetworkingTest(unittest.TestCase):
         cblock = CBlock()
         message.block = cblock
 
-        block = Block(None, BlockOrigin.private)
+        block = Block(CBlock(), BlockOrigin.private)
         block.cached_hash = message.block.GetHash()
 
         self.networking.block_message(self.private_connection, message)
 
-        self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock)
-
+        self.assertEqual(self.chain.process_block.call_count, 1)
 
     def test_getdata_message_with_block(self):
         cblock = CBlock()

@@ -104,13 +104,11 @@ class Networking(object):
                           .format(self.repr_connection(connection)))
 
             block_hash = message.block.GetHash()
-            header = message.block.get_header()
             if block_hash not in self.chain.blocks:
                 if connection.host[0] == self.private_ip:
-                    self.chain.process_block(header, BlockOrigin.private)
+                    self.chain.process_block(message.block, BlockOrigin.private)
                 else:
-                    self.chain.process_block(header, BlockOrigin.public)
-                self.chain.blocks[block_hash].cblock = message.block
+                    self.chain.process_block(message.block, BlockOrigin.public)
             if block_hash in self.blocks_in_flight:
                 del self.blocks_in_flight[block_hash]
 

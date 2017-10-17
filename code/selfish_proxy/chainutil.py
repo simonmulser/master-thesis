@@ -28,7 +28,7 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
     if not override_block_origin:
         override_block_origin = block_origin
 
-    highest_block = chain.Block('start', block_origin)
+    highest_block = chain.Block(core.CoreRegTestParams.GENESIS_BLOCK, block_origin)
     highest_block.height = -1
 
     for tip in get_tips_for_block_origin(tips, block_origin):

@@ -27,19 +27,19 @@ class Chain:
 
         logging.info('created chain with start_hash={}'.format(core.b2lx(start_hash)))
 
-    def process_block(self, block, block_origin):
-        logging.info('process Block(hash={}) from {}'.format(core.b2lx(block.GetHash()), block_origin))
+    def process_block(self, cblock, block_origin):
+        logging.info('process cblock(hash={}) from {}'.format(core.b2lx(cblock.GetHash()), block_origin))
 
         fork_before = chainutil.get_private_public_fork(self.tips)
         logging.info('fork before {}'.format(fork_before))
 
-        self.try_to_insert_block(block, block_origin)
+        self.try_to_insert_block(cblock, block_origin)
 
         fork_after = chainutil.get_private_public_fork(self.tips)
         logging.info('fork after {}'.format(fork_after))
 
         if self.initializing:
-            if block.GetHash() == self.start_hash or block.hashPrevBlock == self.start_hash:
+            if cblock.GetHash() == self.start_hash or cblock.get_header().hashPrevBlock == self.start_hash:
                 self.initializing = False
                 logging.info('Initializing over; now starting selfish mining')
             else:
@@ -58,19 +58,20 @@ class Chain:
             else:
                 logging.debug('the two forks are the same - no action needs to be taken')
 
-    def try_to_insert_block(self, received_block, block_origin):
+    def try_to_insert_block(self, cblock, block_origin):
+        header = cblock.get_header()
         prevBlock = None
         for tip in self.tips:
-            if tip.hash() == received_block.hashPrevBlock:
+            if tip.hash() == header.hashPrevBlock:
                 prevBlock = tip
                 break
         if prevBlock is None:
             for block in self.blocks.values():
-                if block.hash() == received_block.hashPrevBlock:
+                if block.hash() == header.hashPrevBlock:
                     prevBlock = block
                     break
 
-        block = Block(received_block, block_origin)
+        block = Block(cblock, block_origin)
         self.blocks[block.hash()] = block
 
         if prevBlock is None:
@@ -111,10 +112,10 @@ class Chain:
 
 class Block:
 
-    def __init__(self, cblock_header, block_origin):
-        self.cblock_header = cblock_header
+    def __init__(self, cblock, block_origin):
+        self.cblock_header = cblock.get_header()
         self.prevBlock = None
-        self.cblock = None
+        self.cblock = cblock
         self.height = 0
         self.block_origin = block_origin
         self.transfer_allowed = False
