@@ -69,7 +69,8 @@ class Networking(object):
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
-                        logging.info("received block inv {} from {}".format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                        logging.info("received block inv {} from {}"
+                                     .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         if inv.hash not in self.chain.blocks:
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
@@ -99,9 +100,11 @@ class Networking(object):
         try:
 
             if connection.host[0] == self.private_ip:
-                blocks = chainutil.respond_get_headers(self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
+                blocks = chainutil.respond_get_headers(
+                    self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
             else:
-                blocks = chainutil.respond_get_headers(self.chain.tips, BlockOrigin.public, message.locator.vHave, message.hashstop)
+                blocks = chainutil.respond_get_headers(
+                    self.chain.tips, BlockOrigin.public, message.locator.vHave, message.hashstop)
 
             message = messages.msg_headers()
             message.headers = [core.CBlock(block.cblock.nVersion,
@@ -156,7 +159,7 @@ class Networking(object):
                             else:
                                 logging.warn(
                                     'Block(hash={}) requested from {} not available'
-                                        .format(core.b2lx(inv.hash), self.repr_connection(connection)))
+                                    .format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         else:
                             logging.info('CBlock(hash={}) not found'.format(inv.hash))
                     else:
