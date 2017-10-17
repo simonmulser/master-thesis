@@ -115,11 +115,14 @@ class Networking(object):
                                            block.cblock.nBits,
                                            block.cblock.nNonce) for block in blocks]
             connection.send('headers', message)
-            logging.debug('sent headers message with {} headers to {}'
-                          .format(len(message.headers), self.repr_connection(connection)))
-            if len(message.headers) > 0:
-                logging.debug('sent headers with starting hash={}'.format(core.b2lx(message.headers[0].GetHash())))
 
+            if len(message.headers) > 0:
+                logging.debug('sent headers with {} and starting hash={} to'
+                              .format(len(message.headers), core.b2lx(message.headers[0].GetHash()),
+                                      self.repr_connection(connection)))
+            else:
+                logging.debug('sent headers message with {} headers to {}'
+                              .format(len(message.headers), self.repr_connection(connection)))
         finally:
             self.sync.lock.release()
 
