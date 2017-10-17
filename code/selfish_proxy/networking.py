@@ -14,10 +14,11 @@ import gevent
 
 
 class Networking(object):
-    def __init__(self, private_ip, sync, reconnect_time):
+    def __init__(self, private_ip, sync, reconnect_time, check_blocks_in_flight_interval):
         self.private_ip = private_ip
         self.sync = sync
         self.reconnect_time = reconnect_time
+        self.check_blocks_in_flight_interval = check_blocks_in_flight_interval
 
         self.client = None
         self.chain = None
@@ -58,9 +59,9 @@ class Networking(object):
 
     def check_blocks_in_flight(self):
         for block_in_flight in self.blocks_in_flight:
-            if time.time() - block_in_flight.time > 1:
+            if time.time() - block_in_flight.time > self.check_blocks_in_flight_interval:
                 del self.blocks_in_flight[block_in_flight.block_hash]
-        gevent.spawn_later(1, self.check_blocks_in_flight)
+        gevent.spawn_later(self.check_blocks_in_flight_interval, self.check_blocks_in_flight)
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()

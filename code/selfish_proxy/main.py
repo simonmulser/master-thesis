@@ -46,6 +46,11 @@ def parse_args():
                         , default=3
                         )
 
+    parser.add_argument('--check-blocks-in-flight-interval'
+                        , help='Interval to periodically check blocks in flight'
+                        , default=0.5
+                        )
+
     # strategies #
     parser.add_argument('--lead-stubborn'
                         , help='Use lead-stubbornness in strategy'
@@ -95,7 +100,7 @@ def main():
 
     sync = Sync()
 
-    networking = Networking(args.private_ip, sync, args.reconnect_time)
+    networking = Networking(args.private_ip, sync, args.reconnect_time, args.check_blocks_in_flight_interval)
     executor = Executor(networking)
     strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
     if args.start_hash:

@@ -28,7 +28,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain = None
 
     def setUp(self):
-        self.networking = Networking('127.0.0.1', MagicMock(), 0)
+        self.networking = Networking('127.0.0.1', MagicMock(), 0, 0)
         self.client = MagicMock()
         self.networking.client = self.client
 
