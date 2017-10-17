@@ -46,9 +46,9 @@ class ExecutorTest(unittest.TestCase):
     def test_match_same_height(self):
         self.executor.execute(Action.match, self.first_block_chain_a, self.first_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 2)
         self.assertTrue('1a' in blocks)
@@ -57,9 +57,9 @@ class ExecutorTest(unittest.TestCase):
     def test_match_lead_private(self):
         self.executor.execute(Action.match, self.second_block_chain_a, self.first_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 2)
         self.assertTrue('1a' in blocks)
@@ -98,9 +98,9 @@ class ExecutorTest(unittest.TestCase):
     def test_override_lead_private(self):
         self.executor.execute(Action.override, self.second_block_chain_a, self.first_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 3)
         self.assertTrue('1a' in blocks)
@@ -115,9 +115,9 @@ class ExecutorTest(unittest.TestCase):
 
         self.executor.execute(Action.override, third_block_chain_a, self.first_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 3)
         self.assertTrue('1a' in blocks)
@@ -147,9 +147,9 @@ class ExecutorTest(unittest.TestCase):
     def test_adopt_lead_public(self):
         self.executor.execute(Action.adopt, self.first_block_chain_a, self.second_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 2)
         self.assertTrue('1b' in blocks)
@@ -163,9 +163,9 @@ class ExecutorTest(unittest.TestCase):
 
         self.executor.execute(Action.adopt, self.first_block_chain_a, third_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
+        self.assertTrue(self.networking.send_inv.called)
 
-        blocks = [block.hash() for block in self.networking.try_to_send_inv.call_args[0][0]]
+        blocks = [block.hash() for block in self.networking.send_inv.call_args[0][0]]
 
         self.assertEqual(len(blocks), 3)
         self.assertTrue('1b' in blocks)
@@ -175,7 +175,7 @@ class ExecutorTest(unittest.TestCase):
     def test_execute_action_check_if_transfer_allowed_is_set(self):
         self.executor.execute(Action.match, self.first_block_chain_a, self.first_block_chain_b)
 
-        self.assertTrue(self.networking.try_to_send_inv.called)
-        self.assertEqual(len(self.networking.try_to_send_inv.call_args[0][0]), 2)
-        for block in self.networking.try_to_send_inv.call_args[0][0]:
+        self.assertTrue(self.networking.send_inv.called)
+        self.assertEqual(len(self.networking.send_inv.call_args[0][0]), 2)
+        for block in self.networking.send_inv.call_args[0][0]:
             self.assertTrue(block.transfer_allowed)

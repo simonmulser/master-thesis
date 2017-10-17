@@ -119,7 +119,6 @@ class Block:
         self.block_origin = block_origin
         self.transfer_allowed = False
         self.cached_hash = None
-        self.available = []
 
     def __repr__(self):
         return '{}(hash={} height={} block_origin={})'\

@@ -8,6 +8,9 @@ from bitcoin import messages
 from strategy import BlockOrigin
 import chainutil
 import behaviour
+import time
+from collections import namedtuple
+import gevent
 
 
 class Networking(object):
@@ -18,7 +21,7 @@ class Networking(object):
 
         self.client = None
         self.chain = None
-        self.blocks_to_send = []
+        self.blocks_in_flight = {}
 
     def start(self):
         logging.debug('starting client')
@@ -43,6 +46,8 @@ class Networking(object):
 
         self.client.listen(port=18444)
 
+        self.check_blocks_in_flight()
+
         self.client.run_forever()
 
     def connection_failed(self, connection, message=None):
@@ -50,6 +55,12 @@ class Networking(object):
 
     def connection_lost(self, connection, message=None):
         logging.warn('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
+
+    def check_blocks_in_flight(self):
+        for block_in_flight in self.blocks_in_flight:
+            if time.time() - block_in_flight.time > 1:
+                del self.blocks_in_flight[block_in_flight.block_hash]
+        gevent.spawn_later(1, self.check_blocks_in_flight)
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
@@ -93,19 +104,15 @@ class Networking(object):
                           .format(self.repr_connection(connection)))
 
             block_hash = message.block.GetHash()
-            if block_hash in self.chain.blocks:
-                block = self.chain.blocks[block_hash]
-                if block.cblock is None:
-                    block.cblock = message.block
-                    logging.info('set cblock in {}'.format(block.hash_repr()))
-
-                if block_hash in self.blocks_to_send:
-                    self.send_inv([block])
-                    self.blocks_to_send.remove(block_hash)
-
-            else:
-                logging.warn('received CBlock(hash={}) from {} which is not in the chain'
-                             .format(core.b2lx(block_hash), self.repr_connection(connection)))
+            header = message.block.get_header()
+            if block_hash not in self.chain.blocks:
+                if connection.host[0] == self.private_ip:
+                    self.chain.process_block(header, BlockOrigin.private)
+                else:
+                    self.chain.process_block(header, BlockOrigin.public)
+                self.chain.blocks[block_hash].cblock = message.block
+            if block_hash in self.blocks_in_flight:
+                del self.blocks_in_flight[block_hash]
 
         finally:
             self.sync.lock.release()
@@ -124,18 +131,13 @@ class Networking(object):
                                   .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
                     getdata_inv.append(header.GetHash())
 
-                    if connection.host[0] == self.private_ip:
-                        self.chain.process_block(header, BlockOrigin.private)
-                    else:
-                        self.chain.process_block(header, BlockOrigin.public)
-
-                self.chain.blocks[header.GetHash()].available.append(connection.host[0])
-
             if len(getdata_inv) > 0:
                 message = messages.msg_getdata()
-                message.inv = [hash_to_inv('Block', inv_hash) for inv_hash in getdata_inv]
+                message.inv = [hash_to_inv('Block', block_hash) for block_hash in getdata_inv]
                 connection.send('getdata', message)
                 logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
+                for block_hash in getdata_inv:
+                    self.blocks_in_flight[block_hash] = BlockInFlight(block_hash, time.time(), connection.host[0])
 
         finally:
             self.sync.lock.release()
@@ -199,16 +201,6 @@ class Networking(object):
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
-
-    def try_to_send_inv(self, blocks):
-        relay_blocks = []
-        for block in blocks:
-            if block.cblock is None:
-                self.blocks_to_send.append(block.hash())
-            else:
-                relay_blocks.append(block)
-
-        self.send_inv(relay_blocks)
 
     def send_inv(self, blocks):
         private_block_invs = []
@@ -277,3 +269,5 @@ def hash_to_inv(inv_type, inv_hash):
 
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
+
+BlockInFlight = namedtuple('BlockInFlight', 'block_hash time ip')

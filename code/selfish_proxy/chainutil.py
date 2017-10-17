@@ -41,17 +41,6 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
     return highest_block
 
 
-def get_highest_block_with_cblock(tips, block_origin):
-    block = get_highest_block(tips, block_origin)
-
-    while block.cblock is None:
-        logging.debug('using prev block because cblock for {} is not available'.format(block.hash_repr()))
-        block = block.prevBlock
-
-    logging.debug('current highest {} with cblock and block_origin={}'.format(block.hash_repr(), block_origin))
-    return block
-
-
 def respond_get_headers(tips, block_origin, vhave, hashstop):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 
@@ -62,11 +51,7 @@ def respond_get_headers(tips, block_origin, vhave, hashstop):
 
     blocks = []
     for block in reversed(candidate_blocks):
-        if block.cblock is not None:
-            blocks.append(block)
-        else:
-            break
-
+        blocks.append(block)
         if block.hash() == hashstop:
             break
     return blocks

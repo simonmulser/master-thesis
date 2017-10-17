@@ -46,7 +46,7 @@ class Executor:
             for block in blocks_to_transfer:
                 block.transfer_allowed = True
 
-            self.networking.try_to_send_inv(blocks_to_transfer)
+            self.networking.send_inv(blocks_to_transfer)
 
         logging.info('executed action {}'.format(action))
 

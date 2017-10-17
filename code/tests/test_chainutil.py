@@ -266,26 +266,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertIn(self.second_block_chain_b, blocks)
 
     @patch('chainutil.get_highest_block')
-    def test_get_headers_with_cblock_missing(self, mock):
-        self.second_block_chain_b.cblock = None
-        mock.return_value = self.second_block_chain_b
-
-        blocks = chainutil.respond_get_headers([], None, [], 0)
-
-        self.assertEqual(len(blocks), 1)
-        self.assertIn(self.first_block_chain_b, blocks)
-
-    @patch('chainutil.get_highest_block')
-    def test_get_headers_with_cblock_missing_in_the_middle(self, mock):
-        self.second_block_chain_b.cblock = None
-        mock.return_value = self.third_a_block_chain_b
-
-        blocks = chainutil.respond_get_headers([], None, [], 0)
-
-        self.assertEqual(len(blocks), 1)
-        self.assertIn(self.first_block_chain_b, blocks)
-
-    @patch('chainutil.get_highest_block')
     def test_get_headers_with_until(self, mock):
         mock.return_value = self.second_block_chain_a
 
@@ -296,39 +276,12 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertIn(self.second_block_chain_a, blocks)
 
     @patch('chainutil.get_highest_block')
-    def test_get_headers_first_block_no_cblock(self, mock):
-        self.second_block_chain_a.cblock = None
-        mock.return_value = self.second_block_chain_a
-
-        blocks = chainutil.respond_get_headers([], None, [test_util.genesis_block.hash()], 0)
-
-        self.assertEqual(len(blocks), 1)
-        self.assertIn(self.first_block_chain_a, blocks)
-
-    @patch('chainutil.get_highest_block')
     def test_get_headers_until_like_tip(self, mock):
         mock.return_value = self.third_a_block_chain_b
 
         blocks = chainutil.respond_get_headers([], None, [self.third_a_block_chain_b.hash()], 0)
 
         self.assertEqual(len(blocks), 0)
-
-    @patch('chainutil.get_highest_block')
-    def test_get_highest_block_with_cblock_cblock_not_present(self, mock):
-        mock.return_value = self.first_block_chain_a
-        self.first_block_chain_a.cblock = None
-
-        block = chainutil.get_highest_block_with_cblock([], None)
-
-        self.assertEqual(block, test_util.genesis_block)
-
-    @patch('chainutil.get_highest_block')
-    def test_get_highest_block_with_cblock(self, mock):
-        mock.return_value = self.second_block_chain_a
-
-        block = chainutil.get_highest_block_with_cblock([], None)
-
-        self.assertEqual(block, self.second_block_chain_a)
 
     @patch('chainutil.get_highest_block')
     def test_request_get_headers_with_3_headers(self, mock):
