@@ -290,17 +290,30 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(self.private_connection.send.call_args[0][1].headers[0], block1.cblock)
         self.assertEqual(self.private_connection.send.call_args[0][1].headers[1], block2.cblock)
 
-    def test_block_message(self):
+    def test_block_message_from_private(self):
         message = messages.msg_block()
         cblock = CBlock()
         message.block = cblock
 
-        block = Block(CBlock(), BlockOrigin.private)
-        block.cached_hash = message.block.GetHash()
+        self.networking.blocks_in_flight = {cblock.GetHash(): 'some_object'}
 
         self.networking.block_message(self.private_connection, message)
 
         self.assertEqual(self.chain.process_block.call_count, 1)
+        self.assertEqual(self.chain.process_block.call_args[0][0], message.block)
+        self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
+
+    def test_block_message_from_public(self):
+        message = messages.msg_block()
+        cblock = CBlock()
+        message.block = cblock
+
+        self.networking.block_message(self.public_connection1, message)
+
+        self.assertEqual(self.chain.process_block.call_count, 1)
+        self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.public)
+
 
     def test_getdata_message_with_block(self):
         cblock = CBlock()
