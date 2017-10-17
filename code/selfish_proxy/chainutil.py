@@ -1,7 +1,6 @@
 from strategy import BlockOrigin
 import chain
 from sets import Set
-import logging
 from bitcoin import core
 
 
