@@ -40,6 +40,16 @@ def get_highest_block(tips, block_origin, override_block_origin=None):
     return highest_block
 
 
+def get_tips_for_block_origin(tips, block_origin):
+    tips_for_block_origin = Set()
+    for tip in tips:
+        tmp = tip
+        while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
+            tmp = tmp.prevBlock
+        tips_for_block_origin.add(tmp)
+    return list(tips_for_block_origin)
+
+
 def respond_get_headers(tips, block_origin, vhave, hashstop):
     block = get_highest_block(tips, block_origin, BlockOrigin.private)
 
@@ -54,16 +64,6 @@ def respond_get_headers(tips, block_origin, vhave, hashstop):
         if block.hash() == hashstop:
             break
     return blocks
-
-
-def get_tips_for_block_origin(tips, block_origin):
-    tips_for_block_origin = Set()
-    for tip in tips:
-        tmp = tip
-        while tmp.block_origin is not block_origin and tmp.transfer_allowed is False:
-            tmp = tmp.prevBlock
-        tips_for_block_origin.add(tmp)
-    return list(tips_for_block_origin)
 
 
 def request_get_headers(tips, block_origin):
