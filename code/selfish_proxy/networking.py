@@ -65,8 +65,6 @@ class Networking(object):
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received inv message with {} invs from {}'
-                          .format(len(message.inv), self.repr_connection(connection)))
 
             for inv in message.inv:
                 try:
@@ -95,13 +93,10 @@ class Networking(object):
                     logging.warn("unknown inv type={}")
         finally:
             self.sync.lock.release()
-            logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def getheaders_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received getheaders message with {} headers from {}'
-                          .format(len(message.locator.vHave), self.repr_connection(connection)))
 
             if connection.host[0] == self.private_ip:
                 blocks = chainutil.respond_get_headers(self.chain.tips, BlockOrigin.private, message.locator.vHave, message.hashstop)
@@ -123,14 +118,10 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed getheaders message from {}'.format(self.repr_connection(connection)))
 
     def headers_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received headers message with {} headers message from {}'
-                          .format(len(message.headers), self.repr_connection(connection)))
-
             getdata_inv = []
             for header in message.headers:
                 if header.GetHash() not in self.chain.blocks:
@@ -148,14 +139,10 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
 
     def getdata_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received getdata message with {} inv from {}'
-                          .format(len(message.inv), self.repr_connection(connection)))
-
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == 'Block':
@@ -179,14 +166,10 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
 
     def block_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received block message from {}'
-                          .format(self.repr_connection(connection)))
-
             block_hash = message.block.GetHash()
             if block_hash not in self.chain.blocks:
                 if connection.host[0] == self.private_ip:
@@ -198,7 +181,6 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
     def send_inv(self, blocks):
         private_block_invs = []
