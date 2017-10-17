@@ -119,9 +119,7 @@ class Networking(object):
 
             getdata_inv = []
             for header in message.headers:
-                if header.GetHash() in self.chain.blocks:
-                    logging.debug('already received header with hash={}'.format(core.b2lx(header.GetHash())))
-                else:
+                if header.GetHash() not in self.chain.blocks:
                     logging.debug('received header with hash={} from {}'
                                   .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
                     getdata_inv.append(header.GetHash())
