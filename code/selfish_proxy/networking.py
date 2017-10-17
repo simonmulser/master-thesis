@@ -58,7 +58,7 @@ class Networking(object):
         logging.warn('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
 
     def check_blocks_in_flight(self):
-        for block_in_flight in self.blocks_in_flight:
+        for block_in_flight in self.blocks_in_flight.values():
             if time.time() - block_in_flight.time > self.check_blocks_in_flight_interval:
                 del self.blocks_in_flight[block_in_flight.block_hash]
         gevent.spawn_later(self.check_blocks_in_flight_interval, self.check_blocks_in_flight)

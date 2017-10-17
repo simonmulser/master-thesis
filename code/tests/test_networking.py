@@ -10,6 +10,7 @@ from bitcoin.core import CBlock
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
+from networking import BlockInFlight
 
 
 class NetworkingTest(unittest.TestCase):
@@ -47,6 +48,27 @@ class NetworkingTest(unittest.TestCase):
         }
 
         self.chain = self.networking.chain = MagicMock()
+
+    def test_check_blocks_in_flight_no_flights(self):
+        self.networking.blocks_in_flight = {}
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
+
+    @patch('time.time', lambda: 3)
+    def test_check_blocks_in_flight_no_flights(self):
+        cblock = CBlock()
+        self.networking.check_blocks_in_flight_interval = 2
+        self.networking.blocks_in_flight = {CBlock(): BlockInFlight(cblock.GetHash(), 0, 'ip')}
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
+
+    @patch('time.time', lambda: 1)
+    def test_check_blocks_in_flight_no_flights(self):
+        self.networking.check_blocks_in_flight_interval = 2
+        self.networking.blocks_in_flight = {CBlock().GetHash(): BlockInFlight(CBlock().GetHash(), 0, 'ip')}
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 1)
+
 
     @patch('chainutil.request_get_headers')
     def test_inv_message_msg_block_private_unknown_with_tips(self, mock):
