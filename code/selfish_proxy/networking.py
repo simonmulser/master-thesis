@@ -129,6 +129,8 @@ class Networking(object):
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
 
+                self.chain.blocks[header.GetHash()].available.append(connection.host[0])
+
             if len(getdata_inv) > 0:
                 message = messages.msg_getdata()
                 message.inv = [hash_to_inv('Block', inv_hash) for inv_hash in getdata_inv]
