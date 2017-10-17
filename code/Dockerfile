@@ -2,7 +2,7 @@ FROM python:2.7.14-wheezy
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-RUN pip install git+https://github.com/simonmulser/python-bitcoinlib@fix2
+RUN pip install git+https://github.com/simonmulser/python-bitcoinlib@simcoin
 
 RUN \
 	apt-get update &&\
@@ -10,7 +10,7 @@ RUN \
 
 RUN git clone https://github.com/simonmulser/pycoin.git
 RUN cd pycoin &&\
-    git checkout 944862ba44516b3923a67e841469585391467aea &&\
+    git checkout simcoin &&\
     python setup.py install
 
 COPY selfish_proxy /code
