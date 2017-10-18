@@ -40,7 +40,7 @@ Dez 2017
 * Optimal selfish mining strategies in bitcoin. In International Conference on Financial Cryptography and Data Security (pp. 515-532). Heidelberg, Berlin: Springer. Gervais, A., Karame, G. O., Wüst, K., Glykantzis, V., Ritzdorf, H., & Capkun, S. (2016, October).
 * On the security and performance of proof of work blockchains. In: Proceedings of the 2016 ACM SIGSAC Conference on Computer and Communications Security (pp. 3-16). ACM.
 
-# 2.8 Kurzer Lebenslauf der Antragstellerin / des Antragstellers *
+# 2.8 Kurzer Lebenslauf der Antragstellerin / des Antragstellers
 
 -- REMOVED --
 
@@ -49,15 +49,15 @@ WICHTIG: Im Video sollen vor allem (> 80%) die federführenden Projektakteure SE
 
 https://youtu.be/ed4d6ItirP4
 
-# 4.1 Relevanz der Arbeit für die Internet-Community in Österreich *
+# 4.1 Relevanz der Arbeit für die Internet-Community in Österreich
 
 Obwohl medial unterrepräsentiert, hat Österreich, auch im internationalen Vergleich, eine aktive und lebhafte Cryptocurrency- und Blockchain-Community. Grund dafür ist vermutlich eine Kombination aus Early-Adoptern, die geographische Nähe zum Crypto-Valley Zug in der Schweiz und die etwas liberalere Gesetzgebung im Vergleich zu anderen europäischen Nachbarländern. Diese Arbeit leistet nicht nur einen substanziellen Beitrag zu aktuellen Forschungsschwerpunkten im Bereich der Skalierbarkeit und Sicherheit von Blockchains, sondern zusätzlich profitieren heimische Cryptocurrency-Unternehmen und Start-Ups von dem gewonnen Know-How und Wissenstransfer in die heimische Community.
 
-# 4.2 So wird das Ergebnis der Öffentlichkeit zur Verfügung gestellt *
+# 4.2 So wird das Ergebnis der Öffentlichkeit zur Verfügung gestellt
 
 Die Diplomarbeit selbst wird über die TU Wien publiziert. Neben der Diplomarbeit werden auch alle Softwarekomponenten sowie die Dokumentation, über die Plattform github der Allgemeinheit zur Verfügung gestellt. Zusätzlich wird die Arbeit zusammen mit der Software der österreichischen Community bei Blockchain-Meetups vorgestellt und näher gebracht.
 
-# 4.3 Art der creative commons / open source / Verwertung des Projekts *
+# 4.3 Art der creative commons / open source / Verwertung des Projekts
 
 Geben Sie hier jene Lizenz(en) an, unter der/denen Sie Ihre Projektergebnisse der Öffentlichkeit zur möglichst uneingeschränkten weiteren Verwendung inkl. Weiterentwicklung zur Verfügung stellen werden.
 ACHTUNG: Bitte beachten Sie die diesbezüglichen Bestimmungen im Dokument „netidee Call 11 – Richtlinien und Bedingungen“ sowie die diesbezüglichen FAQ, beides auf www.netidee.at.
@@ -65,18 +65,18 @@ WICHTIG: Listen Sie ALLE Projektergebnisse konkret auf (sinnvolle Granularität,
 
 Dokument Diplomarbeit: Österreichisches Urheberrecht (sollte diese Art der Lizenz nicht Ihren Vorstellung entsprechen, bitten ich Sie mich zu kontaktieren) Software Selfish-Mining proxy: MIT Simcoin mitsamt Dokumentation: MIT
 
-# 4.4 Ergeben sich wirtschaftliche / wissenschaftlich interessante Kooperationen? *
+# 4.4 Ergeben sich wirtschaftliche / wissenschaftlich interessante Kooperationen?
 
 Die Diplomarbeit wird in einer wissenschaftlichen Kooperation zwischen der Technischen Universität Wien und dem privaten Forschungszentrum SBA Research gGmbH durchgeführt. Dadurch ist eine Einbettung in die internationale Forschungslandschaft gegeben. Zudem wird die Kooperation in diesem Forschungsfeld in Zukunft fortgesetzt und intensiviert.
 
-# 4.5 Ergeben sich beachtenswerte soziale, gesellschaftliche bzw. Umwelt-Aspekte? *
+# 4.5 Ergeben sich beachtenswerte soziale, gesellschaftliche bzw. Umwelt-Aspekte?
 
 Blockchain-Technologien haben einen disruptiven Charakter und können einen noch nicht absehbaren Einfluss auf gesellschaftliche und soziale Aspekte haben. Um diese Einflüsse besser abschätzen zu können, ist es wichtig, diese Technologien gut zu verstehen. Neben dem Behandeln der Forschungsfrage liefert die Diplomarbeit als zusätzliches Ergebnis eine Simulationssoftware. Die Software kann dazu benutzt werden, sichere und skalierbarer Versionen von Cryptocurrencies zu testen und zu verifizieren.
 
-# 4.6 Bildet die Arbeit eine Grundlage für weitere Forschungen? *
+# 4.6 Bildet die Arbeit eine Grundlage für weitere Forschungen?
 
 Durch die neuartige Simulation fließt die natürliche Netzwerklatenz direkt in die Simulation mit ein. Dies wird neue Einsichten in Selfish-Mining bringen und Grundlage für weitere Forschung sein. Weiters stellt die Simulationssoftware Simcoin eine neue und bessere Art der Simulierung dar. Sie bildet somit eine wichtige Grundlage für zukünftige Forschung im Bereich der Performance- und Sicherheitsverbesserungen von Cryptocurrencies.
 
-# 4.7 Haben Sie vor, sich dem Forschungsthema nach Beendigung der Arbeit weiter zu widmen? Wenn ja, in welcher Form? *
+# 4.7 Haben Sie vor, sich dem Forschungsthema nach Beendigung der Arbeit weiter zu widmen? Wenn ja, in welcher Form?
 
 Nach dem Abschluss der Arbeit werde ich mich weiterhin mit DLT- und Blockchain-Technologien beschäftigen und werde mich in diesem Bereich für einen Forschungsplatz oder eine Arbeit bewerben. Ein großes Anliegen ist mir auch die Simulationssoftware Simcoin. Diese möchte ich im Rahmen neuer Forschungen und Simulationen zusammen mit der Blockchain-Community weiterentwickeln und verbessern.
