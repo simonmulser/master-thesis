@@ -4,7 +4,7 @@ Beispielbild eines Roll-ups ist im gleichen Ordner unter rollup_example.png zu f
 2235
 
 # Einreicher_in bzw. Team [max. 40 Zeichen - federführende Antragsteller_innen oder  Teamleiter_in,  evtl. Organisation]:
-Simon Mulser & SBAResearch gGmbH
+Simon Mulser
 
 # Titel [max. 75 Zeichen]:
 Simulation verschiedener Selfish-Mining-Strategien in Bitcoin
