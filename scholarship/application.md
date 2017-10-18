@@ -1,4 +1,4 @@
-# Kurzbeschreibung der Arbeit
+# 2.1 Kurzbeschreibung der Arbeit
 
 Die Forschungsfrage der Arbeit bezieht sich auf den sogenannten Selfish-Mining-Angriff in Bitcoin. Dabei werden verschiedene Arten des Selfish-Minings simuliert und dem normalen, honest Mining gegenübergestellt. Im Gegensatz zur bisherigen Forschung wird bei dieser Simulierung Latenz im Peer-to-Peer-Netzwerk durch Simulierung des Netzwerkes berücksichtigt. Dies ermöglicht eine realistischere Simulierung, welche Verzögerung und natürliche Forks im Bitcoin-Netzwerk inkludiert. Zusätzlich kann in der Simulierung die Referenzimplementierung von Bitcoin direkt verwendet werden. Dadurch ist keine zusätzliche oder adapierterte Implementierung der Referenzimplementierung nötig und alle Eigenschaften des Bitcoin-Protokolls werden automatisch berücksichtigt. Neben der Analyses des Angriffes ist die Simulationssoftware an sich ein weiterer Fokus der Arbeit. Durch die neuartige Simulation können auch andere Angriffe und auch Modifikationen des Protokolls analysiert und getestet werden.
 
