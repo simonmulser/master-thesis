@@ -1,22 +1,22 @@
 Beispielbild eines Roll-ups ist im gleichen Ordner unter rollup_example.png zu finden
 
-#Projekt/Stipendien-ID
+# Projekt/Stipendien-ID
 2235
 
-#Einreicher_in bzw. Team [max. 40 Zeichen - federführende Antragsteller_innen oder  Teamleiter_in,  evtl. Organisation]:
+# Einreicher_in bzw. Team [max. 40 Zeichen - federführende Antragsteller_innen oder  Teamleiter_in,  evtl. Organisation]:
 Simon Mulser & SBAResearch gGmbH
 
-#Titel [max. 75 Zeichen]:
+# Titel [max. 75 Zeichen]:
 Simulation verschiedener Selfish-Mining-Strategien in Bitcoin
 
-#Kurzbeschreibung [mind. 200 - max. 535 Zeichen]:
+# Kurzbeschreibung [mind. 200 - max. 535 Zeichen]:
 Im Zuge der Diplomarbeit werden unterschiedliche Strategien des Selfish-Mining-Angriffs simuliert und dem gewöhnlichen Mining gegenübergestellt.
 Dafür wird eine Docker-basierte Simulationssoftware implementiert, die durch die Verwendung der Bitcoin-Referenzimplementierung und die Berücksichtigung des Peer-to-Peer-Netzwerk, eine wirklichkeitsnahe und bis jetzt noch nicht durchgeführte Simulierung ermöglicht.
 Die Ergebnisse der Simulierung verdeutlichen die Relevanz von Selfish-Mining als Angriff auf das Bitcoin-System.
 
-#Aufzählung – Ihre Abschlussarbeit/Projekt im Überblick [3 frei wählbare Überschriften & Unterpunkte – max. 500 Zeichen]:
+# Aufzählung – Ihre Abschlussarbeit/Projekt im Überblick [3 frei wählbare Überschriften & Unterpunkte – max. 500 Zeichen]:
 
-##Diplomarbeit im Bereich Blockchain
+## Diplomarbeit im Bereich Blockchain
 * Docker-basierte Simulation des Selfish-Mining-Angriffes in Bitcoin
 * Vergleichende Analyse zu normalen Mining
 * Resultate die Relevanz von Selfish-Mining untermauern
