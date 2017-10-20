@@ -1,0 +1,57 @@
+what are we doing now?
+ - describing proxy \todo{okay to write what I am doing now?}
+ - central point which implements selfish mining
+ - relays and withholds blocks
+ - not relaying tx
+
+why we used a proxy?
+ - fast implementation
+ - no need to touch reference implementation
+
+disadvanteges
+ - extra hop
+ - not a real proxy
+   - need to keep track of chain
+   - bitcoin protocol not easy
+
+create a component diagram
+ - network
+ - chain
+ - strategy
+create a picture showing how blocks are relayed in bitcoin
+\todo{any software recommendation for charts/diagrams}
+ 
+\section{Communication}
+ - how did we implement it?
+   - based on pycoin of decker and python-bitcoinlib of todd
+   - using gevent and hence co-routines to handle request
+   - listening for incoming connections
+   - private ip recognized because of unique ip
+ - block relay
+   - how does block relay work
+   - compact blocks
+   - how did we implement it
+     - no compact blocks
+     - assuming all blocks are valid
+     - when we have the whole block pass it to chain
+
+\section{Chain}
+ - how did we implement it?
+   - data structure
+   - private/public highest tip
+   - transfer\_allowed
+   - block arrives, try to insert in chain. yes or orphaned. if yes check if orphaned can be added.
+   - check if fork changed? pass it to strategy
+
+\section{Strategy}
+ - receives height of private and public
+ - searches action to execute
+   - 4 different types of actions (wait, adopt, match, implement)
+ - executes by sending inv's
+ - which strategies did we implement?
+ - \todo{how works each strategy? describe it here or in section simulation and reference to the section.}
+ - how did we implement it?
+   - search for an action
+   - if-else control structure
+   - many unit tests
+   
