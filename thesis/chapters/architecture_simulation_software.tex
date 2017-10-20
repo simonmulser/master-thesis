@@ -1,0 +1,91 @@
+what are we doing now?
+ - describing the simulation software
+ - simulation software exposes six commands
+   - nodes
+   - network
+   - connectivity
+   - ticks
+   - simulate
+   - run
+   - multi-run
+
+\section{Configuration files}
+
+nodes
+ - let you create groups of node with the same configuration
+ - group has type, amount, share, latency, docker image
+ - groups are persisted in a csv
+ 
+network
+ - let you create a network configuration
+ - takes nodes.csv and connects them based on defined connectivity
+ - network configuration is persisted in a csv
+
+ticks
+ - let you create a certain amount of ticks
+ - a tick contains block events
+ - using a exponential distribution and depending on the computational share it is determined when a node finds a block
+ - ticks are persisted in a csv
+
+component diagram of simulation software
+ - simulationfiles
+ - run, multi-run
+ -  prepare
+ - execution
+ - post processing
+ 
+ flow chart of run command
+
+\section{Simulation}
+
+ - executed eg. with simulate cmd
+ - in the simulation docker is used
+ - each simulation has three todo{phases/steps (which word should we use?)}
+ - takes configuration files as input 
+
+\subsection{Preparation}
+ - nodes are created and connected
+ - create RPC-connection
+ - wait until ready
+\subsection{Execution}
+ - execute ticks from ticks.csv line by line
+ - tick duration defined
+ - execute all events in tick sequentially
+ - afterwards sleep until tick is over, then start over again
+ - during execution CPU \& RAM usage is collected
+\subsection{Post processing}
+ - get chaintips of all nodes
+ - calculate consensus chain
+   - start at first block height
+   - request from all nodes blocks
+   - if every node has a block and all blocks are the same, add block to consensus chain and heigt++
+   - otherwise stop
+ - stop nodes
+ - process log file of every node and log file of simulation software
+ - parse log events:
+   - BlockCreateEvent
+   - BlockStatsEvent
+   - UpdateTipEvent
+   - PeerLogicValidationEvent
+   - TxEvent
+   - TickEvent
+   - BlockReceivedEvent
+   - BlockReconstructEvent
+   - TxReceivedEvent
+   - BlockExceptionEvent
+   - TxExceptionEvent
+   - RPCExceptionEvent
+ - pre-processing csv
+   - need to have one report.rmd for run and multi-runs
+   - remove skip-ticks
+   - files are not sorted because of multi-processed parsing; sort by timestamp 
+ - report creation
+   - with Rmarkdown, R ...
+   - calculate propagation time of blocks
+   - calculate stale blocks
+   - create useful stats about CPU \& RAM usage, duration, blocks, propagation, exceptions...
+   
+\subsection{Multi-runs}
+ - runs a simulation multiple times with the same arguments
+ - merges csv of all runs by type
+ - create a report showing all results of all runs
