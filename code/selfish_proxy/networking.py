@@ -118,6 +118,9 @@ class Networking(object):
                 if block.cblock is None:
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
+            else:
+                logging.warn('received CBlock(hash={}) from {} which is not in the chain'
+                             .format(core.b2lx(hash_), self.repr_connection(connection)))
 
             if hash_ in self.blocks_in_flight:
                 del self.blocks_in_flight[hash_]
@@ -129,10 +132,6 @@ class Networking(object):
                             self.send_block(connection, message.block)
                             break
                 del self.deferred_block_requests[hash_]
-
-            else:
-                logging.warn('received CBlock(hash={}) from {} which is not in the chain'
-                             .format(core.b2lx(hash_), self.repr_connection(connection)))
 
         finally:
             self.sync.lock.release()
