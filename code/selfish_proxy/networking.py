@@ -30,12 +30,12 @@ class Networking(object):
         self.client = network.GeventNetworkClient()
 
         for message in ['getaddr', 'addr', 'notfound', 'reject', 'getblocks', 'mempool']:
-            self.client.register_handler(message, self.ignore_message)
+            self.client.register_handler(message, ignore_message)
         # all the other messages are ignored (but not logged)
 
-        self.client.register_handler(ConnectionLostEvent.command, self.connection_lost)
-        self.client.register_handler(ConnectionFailedEvent.command, self.connection_failed)
-        self.client.register_handler('ping', self.ping_message)
+        self.client.register_handler(ConnectionLostEvent.command, connection_lost)
+        self.client.register_handler(ConnectionFailedEvent.command, connection_failed)
+        self.client.register_handler('ping', ping_message)
 
         self.client.register_handler('inv', self.inv_message)
         self.client.register_handler('block', self.block_message)
@@ -50,12 +50,6 @@ class Networking(object):
         self.check_blocks_in_flight()
 
         self.client.run_forever()
-
-    def connection_failed(self, connection, message=None):
-        logging.warn('Connecting to host={} failed'.format(connection.host))
-
-    def connection_lost(self, connection, message=None):
-        logging.warn('Connecting to host={} lost'.format(connection.host))
 
     def check_blocks_in_flight(self):
         for block_in_flight in self.blocks_in_flight.values():
@@ -275,12 +269,6 @@ class Networking(object):
         connection.send('block', msg)
         logging.info('send CBlock(hash={}) to {}'.format(core.b2lx(block.GetHash()), self.repr_connection(connection)))
 
-    def ping_message(self, connection, message):
-        connection.send('pong', message)
-
-    def ignore_message(self, connection, message):
-        logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
-
     def get_current_public_connection(self):
         for connection in self.client.connections.values():
             if connection.host[0] != self.private_ip:
@@ -298,6 +286,22 @@ class Networking(object):
             return 'private{}'.format(connection.host)
         else:
             return 'public{}'.format(connection.host)
+
+
+def connection_failed(connection, message=None):
+    logging.warn('Connecting to host={} failed'.format(connection.host))
+
+
+def connection_lost(connection, message=None):
+    logging.warn('Connecting to host={} lost'.format(connection.host))
+
+
+def ping_message(connection, message):
+    connection.send('pong', message)
+
+
+def ignore_message(connection, message):
+    logging.debug('ignoring message={} from {}'.format(message, connection.host[0]))
 
 
 def hash_to_inv(inv_type, inv_hash):
