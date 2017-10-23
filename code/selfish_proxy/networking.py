@@ -285,7 +285,7 @@ class Networking(object):
             logging.info('{} block invs send to {} public connections'
                          .format(len(public_block_invs), i))
 
-    def send_block(self, connection , block):
+    def send_block(self, connection, block):
         msg = messages.msg_block()
         msg.block = block
         connection.send('block', msg)
