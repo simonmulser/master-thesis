@@ -91,20 +91,20 @@ class Networking(object):
             logging.debug('received block message from {}'
                           .format(self.repr_connection(connection)))
 
-            block_hash = message.block.GetHash()
-            if block_hash in self.chain.blocks:
-                block = self.chain.blocks[block_hash]
+            hash_ = message.block.GetHash()
+            if hash_ in self.chain.blocks:
+                block = self.chain.blocks[hash_]
                 if block.cblock is None:
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
 
-                if block_hash in self.blocks_to_send:
+                if hash_ in self.blocks_to_send:
                     self.send_inv([block])
-                    self.blocks_to_send.remove(block_hash)
+                    self.blocks_to_send.remove(hash_)
 
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
-                             .format(core.b2lx(block_hash), self.repr_connection(connection)))
+                             .format(core.b2lx(hash_), self.repr_connection(connection)))
 
         finally:
             self.sync.lock.release()
