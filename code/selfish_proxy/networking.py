@@ -8,16 +8,20 @@ from bitcoin import messages
 from strategy import BlockOrigin
 import chainutil
 import behaviour
+import time
+import gevent
 
 
 class Networking(object):
-    def __init__(self, private_ip, sync):
+    def __init__(self, check_blocks_in_flight_interval, private_ip, sync):
         self.private_ip = private_ip
+        self.check_blocks_in_flight_interval = check_blocks_in_flight_interval
         self.sync = sync
 
         self.client = None
         self.chain = None
         self.blocks_to_send = []
+        self.blocks_in_flight = {}
 
     def start(self):
         logging.debug('starting client')
@@ -42,6 +46,8 @@ class Networking(object):
 
         self.client.listen(port=18444)
 
+        self.check_blocks_in_flight()
+
         self.client.run_forever()
 
     def connection_failed(self, connection, message=None):
@@ -49,6 +55,12 @@ class Networking(object):
 
     def connection_lost(self, connection, message=None):
         logging.warn('Connecting to host={} lost'.format(connection.host))
+
+    def check_blocks_in_flight(self):
+        for block_in_flight in self.blocks_in_flight.values():
+            if time.time() - block_in_flight.time > self.check_blocks_in_flight_interval:
+                del self.blocks_in_flight[block_in_flight.block_hash]
+        gevent.spawn_later(self.check_blocks_in_flight_interval, self.check_blocks_in_flight)
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
@@ -102,6 +114,9 @@ class Networking(object):
                     self.send_inv([block])
                     self.blocks_to_send.remove(hash_)
 
+            if hash_ in self.blocks_in_flight:
+                del self.blocks_in_flight[hash_]
+
             else:
                 logging.warn('received CBlock(hash={}) from {} which is not in the chain'
                              .format(core.b2lx(hash_), self.repr_connection(connection)))
@@ -121,7 +136,9 @@ class Networking(object):
                 if header.GetHash() not in self.chain.blocks:
                     logging.debug('received header with hash={} from {}'
                                   .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
-                    getdata_inv.append(header.GetHash())
+
+                    if header.GetHash() not in self.blocks_in_flight:
+                        getdata_inv.append(header.GetHash())
 
                     if connection.host[0] == self.private_ip:
                         self.chain.process_block(header, BlockOrigin.private)
@@ -129,6 +146,9 @@ class Networking(object):
                         self.chain.process_block(header, BlockOrigin.public)
 
             if len(getdata_inv) > 0:
+                for hash_ in getdata_inv:
+                    self.blocks_in_flight[hash_] = 'in_flight'
+
                 message = messages.msg_getdata()
                 message.inv = [hash_to_inv('Block', inv_hash) for inv_hash in getdata_inv]
                 connection.send('getdata', message)

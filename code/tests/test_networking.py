@@ -31,7 +31,7 @@ class NetworkingTest(unittest.TestCase):
         self.chain = None
 
     def setUp(self):
-        self.networking = Networking('127.0.0.1', MagicMock(), 0)
+        self.networking = Networking(5, '127.0.0.1', MagicMock())
         self.client = MagicMock()
         self.networking.client = self.client
 
@@ -238,6 +238,7 @@ class NetworkingTest(unittest.TestCase):
 
         message = messages.msg_headers()
         message.headers = [header1, header2]
+        self.networking.blocks_in_flight = {}
         self.networking.headers_message(self.private_connection, message)
 
         self.assertFalse(self.public_connection1.send.called)
@@ -247,6 +248,18 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 2)
         self.assertEqual(self.chain.process_block.call_count, 2)
         self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)
+
+    def test_headers_message_one_block_not_in_flight(self):
+        header1 = CBlockHeader(nNonce=1)
+        header2 = CBlockHeader(nNonce=2)
+        message = messages.msg_headers()
+        message.headers = [header1, header2]
+        self.networking.blocks_in_flight = {header1.GetHash(): 'in_flight'}
+
+        self.networking.headers_message(self.private_connection, message)
+
+        self.assertEqual(self.private_connection.send.call_args[0][0], 'getdata')
+        self.assertEqual(len(self.private_connection.send.call_args[0][1].inv), 1)
 
     def test_headers_message_unknown_blocks(self):
         header = CBlockHeader(nNonce=1)
@@ -308,6 +321,21 @@ class NetworkingTest(unittest.TestCase):
         self.networking.block_message(self.private_connection, message)
 
         self.assertEqual(self.chain.blocks[block.hash()].cblock, cblock)
+
+    def test_block_message_remove_from_blocks_in_flight(self):
+        message = messages.msg_block()
+        cblock = CBlock()
+        message.block = cblock
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = message.block.GetHash()
+
+        self.chain.blocks = {block.hash():  block}
+        self.networking.blocks_in_flight = {block.hash():  'in_flight'}
+
+        self.networking.block_message(self.private_connection, message)
+
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
 
     def test_block_message_with_block_to_send(self):
         message = messages.msg_block()

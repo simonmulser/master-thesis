@@ -41,6 +41,9 @@ def parse_args():
                         , default='240.0.0.2'
                         )
 
+    parser.add_argument('--check-blocks-in-flight-interval'
+                        , help='Interval to periodically check blocks in flight'
+                        , default=0.5
                         )
 
     # strategies #
@@ -92,7 +95,7 @@ def main():
 
     sync = Sync()
 
-    networking = Networking(args.private_ip, sync)
+    networking = Networking(args.check_blocks_in_flight_interval, args.private_ip, sync)
     executor = Executor(networking)
     strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
     if args.start_hash:
