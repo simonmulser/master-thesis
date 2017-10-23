@@ -68,11 +68,16 @@ class Networking(object):
             logging.debug('received inv message with {} invs from {}'
                           .format(len(message.inv), self.repr_connection(connection)))
 
+            getdata_inv = []
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
                         logging.info("received block inv {} from {}".format(core.b2lx(inv.hash), self.repr_connection(connection)))
                         if inv.hash not in self.chain.blocks:
+
+                            if inv.hash not in self.blocks_in_flight:
+                                getdata_inv.append(inv.hash)
+
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
 
@@ -93,6 +98,8 @@ class Networking(object):
                         pass
                 except KeyError:
                     logging.warn("unknown inv type={}")
+
+            self.request_blocks(connection, getdata_inv)
         finally:
             self.sync.lock.release()
             logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))

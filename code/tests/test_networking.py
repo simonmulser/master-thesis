@@ -52,8 +52,9 @@ class NetworkingTest(unittest.TestCase):
         self.chain = self.networking.chain = MagicMock()
 
     @patch('chainutil.request_get_headers')
-    def test_inv_message_msg_block_private_unknown_with_tips(self, mock):
+    def test_inv_message_msg_block_private(self, mock):
         mock.return_value = ['hash20', 'hash19']
+        self.networking.request_blocks = MagicMock()
 
         inv = net.CInv()
         inv.hash = 'hash1'
@@ -66,22 +67,22 @@ class NetworkingTest(unittest.TestCase):
         self.assertTrue(mock.called)
         self.assertEqual(self.private_connection.send.call_args_list[0][0][0], 'getheaders')
 
-    def test_inv_message_msg_block_known_transfer_unallowed(self):
+    @patch('chainutil.request_get_headers')
+    def test_inv_message_msg_request_block(self, mock):
+        mock.return_value = ['hash20', 'hash19']
+        self.networking.request_blocks = MagicMock()
+
         inv = net.CInv()
         inv.hash = 'hash1'
         inv.type = networking.inv_typemap['Block']
         msg = messages.msg_inv
         msg.inv = [inv]
 
-        block = Block(None, None)
-        block.cached_hash = 'hash1'
-        self.chain.blocks = {inv.hash: block}
-        self.networking.inv_message(self.public_connection1, msg)
+        self.networking.inv_message(self.private_connection, msg)
 
-        self.assertFalse(self.private_connection.send.called)
-        self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.public_connection2.send.called)
-        self.assertFalse(self.chain.inv_message.called)
+        self.assertTrue(self.networking.request_blocks.called)
+        self.assertEqual(self.networking.request_blocks.call_args[0][0], self.private_connection)
+        self.assertEqual(self.networking.request_blocks.call_args[0][1], ['hash1'])
 
     def test_inv_message_msg_filtered_block(self):
         inv = net.CInv()
