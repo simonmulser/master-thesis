@@ -7,9 +7,6 @@ from bitcoin import net
 from bitcoin import messages
 from bitcoin.core import CBlockHeader
 from bitcoin.core import CBlock
-from bitcoin.core import CTransaction
-from bitcoin.core import CTxIn
-from bitcoin.core import COutPoint
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
