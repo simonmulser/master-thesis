@@ -13,6 +13,7 @@ from bitcoin.core import COutPoint
 from bitcoin.net import CInv
 from chain import Block
 from chain import BlockOrigin
+from networking import BlockInFlight
 
 
 class NetworkingTest(unittest.TestCase):
@@ -50,6 +51,30 @@ class NetworkingTest(unittest.TestCase):
         }
 
         self.chain = self.networking.chain = MagicMock()
+
+    def test_check_blocks_in_flight_no_flights(self):
+        self.networking.blocks_in_flight = {}
+
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
+
+    @patch('time.time', lambda: 3)
+    def test_check_blocks_in_flight_timeout(self):
+        hash_ = CBlock().GetHash()
+        self.networking.check_blocks_in_flight_interval = 2
+        self.networking.blocks_in_flight = {hash_: BlockInFlight(hash_, 0)}
+
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 0)
+
+    @patch('time.time', lambda: 1)
+    def test_check_blocks_in_flight_does_not_timeout(self):
+        hash_ = CBlock().GetHash()
+        self.networking.check_blocks_in_flight_interval = 2
+        self.networking.blocks_in_flight = {hash_: BlockInFlight(hash_, 0)}
+
+        self.networking.check_blocks_in_flight()
+        self.assertEqual(len(self.networking.blocks_in_flight), 1)
 
     @patch('chainutil.request_get_headers')
     def test_inv_message_msg_block_private(self, mock):

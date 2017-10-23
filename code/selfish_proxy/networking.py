@@ -10,6 +10,7 @@ import chainutil
 import behaviour
 import time
 import gevent
+from collections import namedtuple
 
 
 class Networking(object):
@@ -60,7 +61,7 @@ class Networking(object):
     def check_blocks_in_flight(self):
         for block_in_flight in self.blocks_in_flight.values():
             if time.time() - block_in_flight.time > self.check_blocks_in_flight_interval:
-                del self.blocks_in_flight[block_in_flight.block_hash]
+                del self.blocks_in_flight[block_in_flight.hash_]
         gevent.spawn_later(self.check_blocks_in_flight_interval, self.check_blocks_in_flight)
 
     def inv_message(self, connection, message):
@@ -233,7 +234,7 @@ class Networking(object):
     def request_blocks(self, connection, inv):
         if len(inv) > 0:
             for hash_ in inv:
-                self.blocks_in_flight[hash_] = 'in_flight'
+                self.blocks_in_flight[hash_] = BlockInFlight(hash_, time.time())
 
             message = messages.msg_getdata()
             message.inv = [hash_to_inv('Block', hash_) for hash_ in inv]
@@ -321,5 +322,7 @@ def hash_to_inv(inv_type, inv_hash):
     inv.hash = inv_hash
     return inv
 
+
+BlockInFlight = namedtuple('BlockInFlight', 'hash_ time')
 
 inv_typemap = {v: k for k, v in net.CInv.typemap.items()}
