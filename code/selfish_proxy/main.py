@@ -41,9 +41,6 @@ def parse_args():
                         , default='240.0.0.2'
                         )
 
-    parser.add_argument('--reconnect-time'
-                        , help='Time to wait for reconnecting to host'
-                        , default=3
                         )
 
     # strategies #
@@ -95,7 +92,7 @@ def main():
 
     sync = Sync()
 
-    networking = Networking(args.private_ip, sync, args.reconnect_time)
+    networking = Networking(args.private_ip, sync)
     executor = Executor(networking)
     strategy = Strategy(args.lead_stubborn, args.equal_fork_stubborn, args.trail_stubborn)
     if args.start_hash:

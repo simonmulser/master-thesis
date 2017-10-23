@@ -11,10 +11,9 @@ import behaviour
 
 
 class Networking(object):
-    def __init__(self, private_ip, sync, reconnect_time):
+    def __init__(self, private_ip, sync):
         self.private_ip = private_ip
         self.sync = sync
-        self.reconnect_time = reconnect_time
 
         self.client = None
         self.chain = None
@@ -46,10 +45,10 @@ class Networking(object):
         self.client.run_forever()
 
     def connection_failed(self, connection, message=None):
-        logging.warn('Connecting to host={} failed'.format(connection.host, self.reconnect_time))
+        logging.warn('Connecting to host={} failed'.format(connection.host))
 
     def connection_lost(self, connection, message=None):
-        logging.warn('Connecting to host={} lost'.format(connection.host, self.reconnect_time))
+        logging.warn('Connecting to host={} lost'.format(connection.host))
 
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
