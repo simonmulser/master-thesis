@@ -342,6 +342,25 @@ class NetworkingTest(unittest.TestCase):
 
         self.assertEqual(len(self.networking.blocks_in_flight), 0)
 
+    def test_block_message_deferred_requests(self):
+        message = messages.msg_block()
+        cblock = CBlock()
+        hash_ = cblock.GetHash()
+        message.block = cblock
+
+        block = Block(None, BlockOrigin.private)
+        block.cached_hash = hash_
+
+        self.networking.deferred_block_requests = \
+            {hash_: [self.private_connection.host[0], self.public_connection2.host[0]]}
+        self.networking.send_block = MagicMock()
+
+        self.networking.block_message(self.public_connection1, message)
+
+        self.assertEqual(len(self.networking.deferred_block_requests), 0)
+        self.assertEqual(self.networking.send_block.call_count, 2)
+        self.assertEqual(self.networking.send_block.call_args[0][1], cblock)
+
     def test_block_message_with_block_to_send(self):
         message = messages.msg_block()
         cblock = CBlock()
@@ -397,18 +416,21 @@ class NetworkingTest(unittest.TestCase):
 
     def test_getdata_message_cblock_not_available(self):
         cblock = CBlock()
+        hash_ = cblock.GetHash()
         block = Block(cblock, BlockOrigin.private)
         message = messages.msg_getdata()
         cInv = CInv()
         cInv.type = networking.inv_typemap['Block']
-        cInv.hash = cblock.GetHash()
+        cInv.hash = hash_
         message.inv = [cInv]
 
-        self.chain.blocks = {cblock.GetHash(): block}
-
+        self.chain.blocks = {hash_: block}
+        self.networking.deferred_block_requests = {}
         self.networking.getdata_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.called)
+        self.assertIn(hash_, self.networking.deferred_block_requests)
+        self.assertIn(self.public_connection1.host[0], self.networking.deferred_block_requests[hash_])
 
     def test_getdata_message_with_unknown_hashes(self):
         message = messages.msg_getdata()
