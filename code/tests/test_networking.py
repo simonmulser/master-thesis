@@ -153,35 +153,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertFalse(self.public_connection1.send.called)
         self.assertFalse(self.public_connection2.send.called)
 
-    def test_try_to_send_inv_two_blocks_with_cblock(self):
-        block1 = Block(None, BlockOrigin.private)
-        block1.cblock = MagicMock()
-        block2 = Block(None, BlockOrigin.private)
-        block2.cblock = MagicMock()
-
-        self.networking.send_inv = MagicMock()
-
-        self.networking.try_to_send_inv([block1, block2])
-
-        self.assertEqual(self.networking.send_inv.call_count, 1)
-        self.assertEqual(self.networking.send_inv.call_args[0][0], [block1, block2])
-
-    def test_try_to_send_inv_block_without_cblock(self):
-        block1 = Block(None, BlockOrigin.private)
-        block1.cached_hash = 'hash1'
-        block2 = Block(None, BlockOrigin.private)
-        block2.cached_hash = 'hash2'
-
-        self.networking.send_inv = MagicMock()
-
-        self.networking.try_to_send_inv([block1, block2])
-
-        self.assertEqual(self.networking.send_inv.call_count, 1)
-        self.assertEqual(self.networking.send_inv.call_args[0][0], [])
-
-        self.assertEqual(len(self.networking.blocks_to_send), 2)
-        self.assertEqual(self.networking.blocks_to_send, ['hash1', 'hash2'])
-
     def test_send_inv_private_blocks(self):
         block1 = Block(None, BlockOrigin.private)
         block1.cached_hash = 'hash1'
@@ -382,24 +353,6 @@ class NetworkingTest(unittest.TestCase):
         self.assertEqual(len(self.networking.deferred_block_requests), 0)
         self.assertEqual(self.networking.send_block.call_count, 2)
         self.assertEqual(self.networking.send_block.call_args[0][1], cblock)
-
-    def test_block_message_with_block_to_send(self):
-        message = messages.msg_block()
-        cblock = CBlock()
-        message.block = cblock
-
-        block = Block(None, BlockOrigin.private)
-        block.cached_hash = message.block.GetHash()
-
-        self.chain.blocks = {block.hash():  block}
-        self.networking.send_inv = MagicMock()
-        self.networking.blocks_to_send = [block.hash()]
-
-        self.networking.block_message(self.private_connection, message)
-
-        self.assertTrue(self.networking.send_inv.called)
-        self.assertEqual(self.networking.send_inv.call_args[0][0], [block])
-        self.assertEqual(len(self.networking.blocks_to_send), 0)
 
     def test_block_message_two_times(self):
         message = messages.msg_block()

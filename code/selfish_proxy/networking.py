@@ -21,7 +21,6 @@ class Networking(object):
 
         self.client = None
         self.chain = None
-        self.blocks_to_send = []
         self.blocks_in_flight = {}
         self.deferred_block_requests = {}
 
@@ -120,10 +119,6 @@ class Networking(object):
                     block.cblock = message.block
                     logging.info('set cblock in {}'.format(block.hash_repr()))
 
-                if hash_ in self.blocks_to_send:
-                    self.send_inv([block])
-                    self.blocks_to_send.remove(hash_)
-
             if hash_ in self.blocks_in_flight:
                 del self.blocks_in_flight[hash_]
 
@@ -157,7 +152,7 @@ class Networking(object):
                                   .format(core.b2lx(hash_), self.repr_connection(connection)))
 
                     if hash_ not in self.blocks_in_flight:
-                        getdata_inv.append(header.GetHash())
+                        getdata_inv.append(hash_)
 
                     if connection.host[0] == self.private_ip:
                         self.chain.process_block(header, BlockOrigin.private)
@@ -240,16 +235,6 @@ class Networking(object):
             message.inv = [hash_to_inv('Block', hash_) for hash_ in inv]
             connection.send('getdata', message)
             logging.info('requested getdata for {} blocks'.format(len(inv)))
-
-    def try_to_send_inv(self, blocks):
-        relay_blocks = []
-        for block in blocks:
-            if block.cblock is None:
-                self.blocks_to_send.append(block.hash())
-            else:
-                relay_blocks.append(block)
-
-        self.send_inv(relay_blocks)
 
     def send_inv(self, blocks):
         private_block_invs = []
