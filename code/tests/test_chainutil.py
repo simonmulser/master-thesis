@@ -330,7 +330,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
         self.assertEqual(block, self.second_block_chain_a)
 
-    @patch('chainutil.get_highest_block')
+    @patch('chainutil.get_highest_block_with_cblock')
     def test_request_get_headers_with_3_headers(self, mock):
         mock.return_value = self.fourth_block_chain_b
 
@@ -341,7 +341,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(headers[1], self.third_a_block_chain_b.hash())
         self.assertEqual(headers[2], self.first_block_chain_b.hash())
 
-    @patch('chainutil.get_highest_block')
+    @patch('chainutil.get_highest_block_with_cblock')
     def test_request_get_headers_including_genesis_block(self, mock):
         mock.return_value = self.first_block_chain_b
 
@@ -351,7 +351,7 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(headers[0], self.first_block_chain_b.hash())
         self.assertEqual(headers[1], test_util.genesis_hash)
 
-    @patch('chainutil.get_highest_block')
+    @patch('chainutil.get_highest_block_with_cblock')
     def test_request_get_headers_very_long_chain(self, mock):
         first_block = Block(None, BlockOrigin.public)
         first_block.prevBlock = None
