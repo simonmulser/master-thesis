@@ -145,15 +145,7 @@ class Networking(object):
                     else:
                         self.chain.process_block(header, BlockOrigin.public)
 
-            if len(getdata_inv) > 0:
-                for hash_ in getdata_inv:
-                    self.blocks_in_flight[hash_] = 'in_flight'
-
-                message = messages.msg_getdata()
-                message.inv = [hash_to_inv('Block', inv_hash) for inv_hash in getdata_inv]
-                connection.send('getdata', message)
-                logging.info('requested getdata for {} blocks'.format(len(getdata_inv)))
-
+            self.request_blocks(connection, getdata_inv)
         finally:
             self.sync.lock.release()
             logging.debug('processed headers message from {}'.format(self.repr_connection(connection)))
@@ -216,6 +208,16 @@ class Networking(object):
         finally:
             self.sync.lock.release()
             logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
+
+    def request_blocks(self, connection, inv):
+        if len(inv) > 0:
+            for hash_ in inv:
+                self.blocks_in_flight[hash_] = 'in_flight'
+
+            message = messages.msg_getdata()
+            message.inv = [hash_to_inv('Block', hash_) for hash_ in inv]
+            connection.send('getdata', message)
+            logging.info('requested getdata for {} blocks'.format(len(inv)))
 
     def try_to_send_inv(self, blocks):
         relay_blocks = []
