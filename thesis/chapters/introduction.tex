@@ -1,1 +1,37 @@
-My introduction. Coming soon...
+The cryptocurrency Bitcoin started back in the year 2008 with the release of the Bitcoin white paper \cite{nakamoto2008bitcoin}.
+As of today, the cryptocurrency has reached a market capitalization of over 20 billion dollars \cite{marketcap2017}.
+Internally the Bitcoin cryptocurrency records all transactions in a public ledger called \emph{blockchain}.
+The blockchain is basically an immutable linked list of blocks where a block contains multiple transactions of the cryptocurrency.
+In Bitcoin, each block needs to contain a so-called proof of work (PoW) which is the solution to a costly and time-consuming cryptographic puzzle.
+Miners connected in a peer-to-peer network compete with their computation power to find solutions to the puzzle and hence to find the next block for the blockchain.
+Finding a block allows the miners to add a transaction to the block and gives them right to newly create a certain amount of bitcoins.
+Additionally, the grouping of the transactions in blocks creates a total order and hence makes it possible to prevent double-spending.
+After a block is found by a miner, all other miners should adopt to this new tip of the chain and try to find a new block on top.
+This mining process is considered as incentive compatible as long as no single miner has more than 50\% of the total computation power.
+
+\cite{eyal2014majority} showed that also miners under 50\% have an incentive to not follow the protocol as described depending on their connectivity and share of computation power in the peer-to-peer network.
+By implementing a so-called selfish mining strategy a miner can obtain relatively more revenue than his actual proportion of computational power in the network.
+In general, the miner simply does not share found blocks with the others and secretly mines on his own chain.
+If his chain is longer then the public chain, he is able to overwrite all blocks found by the honest miners.
+If the two chains have the same length the private miner also publishes his block and causes a block race.
+Now the network is split into two parts where one part is mining on the public tip and the other part is mining on the now public-private tip.
+In general, the selfish miner achieves that the other miners are wasting their computational power on blocks which will not end up in the longest chain.
+
+Further research \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical} explored different modifications of the original selfish mining algorithm by \cite{eyal2014majority} and found slightly modifications of the algorithm which perform better under certain circumstances.
+For example, it could make sense for the selfish miner to even trail behind the public chain.
+
+To prove the existence and attributes of selfish mining different approaches were applied.
+The researchers used simple probabilistic arguments \cite{eyal2014majority, bahack2013theoretical}, numeric simulation of paths with state machines \cite{gervais2015tampering, nayak2016stubborn}, advanced Markov Decision Processes (MDP) \cite{sapirshtein2016optimal, gervais2016security} or gave results of closed-source simulations \cite{eyal2014majority, sapirshtein2016optimal}.
+Unfortunately, we cannot discuss the closed source simulations in detail.
+All other above-mentioned methodologies have the following drawbacks:
+\begin{itemize}
+\item Abstraction of the Bitcoin source code which normally runs on a single node.
+Since there is no official specification of the Bitcoin protocol it is hard to capture all details.
+Furthermore, it is hard to keep the simulation software up-to-date because of the ongoing development of the protocol.
+\item Abstraction of the whole network layer of the peer-to-peer network.
+The available simulations abstract the network topology by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by using the block stale rate as input for the MDP \cite{gervais2016security}.
+Hence the highly abstract the presence of network delays and natural forks of the chain.
+\end{itemize}
+
+In this thesis, we propose a new simulation approach to more accurately capture the details of the Blockchain protocol under simulation, while allowing for a high degree of determinism.
+With our simulation, it would be possible to model the selfish mining attack with different network topologies and to use the Bitcoin source code directly in the simulation.
