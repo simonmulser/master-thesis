@@ -1,9 +1,91 @@
-what are we doing now?
- - describing proxy \todo{okay to write what I am doing now?}
- - central point which implements selfish mining
- - relays and withholds blocks
- - not relaying tx
+The selfish proxy is the node in our peer-to-peer network implementing the different selfish mining strategies.
+He eclipses a normal bitcoin node from the rest of the network and accepts blocks created by the eclipsed node or by the normal nodes.
+With the collected blocks he recreates the chain locally and on every received block he runs the configured selfish mining algorithm.
+The algorithm then decides if the received block should be withhold or relayed to the other part of the network.
+\todo{not relaying tx}
 
+create a component diagram
+ - network
+ - chain
+ - strategy
+create a picture showing how blocks are relayed in bitcoin
+\todo{any software recommendation for charts/diagrams}
+ 
+\section{Architecture}
+
+\subsection{Network component}
+\todo{reference}
+The implementation of network component is based on the two libraries \textit{pycoin} and \textit{python-bitcoinlib}.
+The library \textit{pycoin} provides simple networking utilities to connect to other bitcoin nodes and to manage those connections. 
+Where on the other hand the \textit{python-bitcoinlib} library implements functionalities to serialize and deserialize bitcoin network messages.
+In general the network component is responsible for:
+\begin{itemize}
+ \item listening and accepting incoming connections
+ \item be able to distinguish between connections from the eclipsed node or connections from the rest of the network
+ \item managing and keep his connections a live by replying to ping messages
+ \item accepting, processing and replying to messages relevant for the selfish relay
+ \item detecting and re-triggering of failed requests
+\end{itemize}
+
+\subsection{Chain component}
+The main responsibility of the chain component is to reassemble the chain with the blocks received by the network component.
+This can be done easily by just looking at the hash of the previous block stored in the received block.
+If the previous block is already in the chain, the newly received block gets added to the chain.
+In the case the block identified by its hash is not available in the chain, the block gets preserved as an orphan block.
+On every successful inserted block all orphaned blocks are checked if they can be added now to the chain.
+Along side the information stored in the block, the chain component also keeps track of the block origin and a boolean reflecting if the transfer of this block to other nodes is allowed.
+This information is necessary for the chain component to be able to calculate the current fork between the eclipsed node and the rest of the network.
+
+\subsection{Strategy component}
+The strategy component implements the four different selfish mining strategies:
+\begin{itemize}
+ \item selfish mining
+ \item trail stubborn mining
+ \item equal-fork stubborn mining
+ \item lead stubborn mining
+\end{itemize}
+
+The strategies are implemented by accepting the current fork as an input and based on that fork the action to be taken is determined with simple control structures like if and else.\todo{describe actions here? or in state-of-the-art}
+Additionally the strategy component contains a module for determining which blocks are supposed to be relayed depending on a determined action and a fork.
+
+\section{Selfish relaying}
+
+The overall concept of the selfish proxy is to do selfish mining without actually mining blocks.
+By eclipsing a node the selfish proxy is able to withhold and relay blocks corresponding to a selfish mining strategy.
+Hence the selfish proxy is, as we call it, selfish relaying.
+
+To be able to do selfish relaying the proxy continuously collects all blocks advertised by the connected nodes.
+In bitcoin newly found blocks are broadcasted over the peer-to-peer network by sending the hash in an inv message.
+Whenever the proxy receives such a inv msg with a block hash unknown to him, he immediately requests the new block by sending a getdata message.
+The node, which found the block, replies then with a block message containing the actual block.
+The proxy, after receiving the block, tries to insert the block in his own local chain.
+If the block can be inserted on top of a tip in the chain, the proxy runs the selfish mining algorithm.
+The algorithm determines based on the current fork between eclipsed node and the rest of the network an action.
+In the case that the action is one out of match or override, the algorithm further determines which blocks need to be relayed and sends out the corresponding block hashes over a inv message.
+
+When a normal node receives a inv message with a unknown block from the proxy, the node first request all new headers with a getheaders call.
+The proxy replies to the node then the new headers, which are then
+
+\todo{figure block relay}
+ - block relay
+   - how does block relay work
+   - compact blocks
+   - how did we implement it
+     - no compact blocks
+     - assuming all blocks are valid
+     - when we have the whole block pass it to chain
+ - receives height of private and public
+ - searches action to execute
+   - 4 different types of actions (wait, adopt, match, override)
+ - executes by sending inv's
+ - which strategies did we implement?
+ - \todo{how works each strategy? describe it here or in section simulation and reference to the section.}
+ - how did we implement it?
+   - search for an action
+   - if-else control structure
+   - many unit tests
+   
+\todo{move maybe to another section. here we should only DESCRIBE the selfish proxy}
 why we used a proxy?
  - fast implementation
  - no need to touch reference implementation
@@ -13,45 +95,3 @@ disadvanteges
  - not a real proxy
    - need to keep track of chain
    - bitcoin protocol not easy
-
-create a component diagram
- - network
- - chain
- - strategy
-create a picture showing how blocks are relayed in bitcoin
-\todo{any software recommendation for charts/diagrams}
- 
-\section{Communication}
- - how did we implement it?
-   - based on pycoin of decker and python-bitcoinlib of todd
-   - using gevent and hence co-routines to handle request
-   - listening for incoming connections
-   - private ip recognized because of unique ip
- - block relay
-   - how does block relay work
-   - compact blocks
-   - how did we implement it
-     - no compact blocks
-     - assuming all blocks are valid
-     - when we have the whole block pass it to chain
-
-\section{Chain}
- - how did we implement it?
-   - data structure
-   - private/public highest tip
-   - transfer\_allowed
-   - block arrives, try to insert in chain. yes or orphaned. if yes check if orphaned can be added.
-   - check if fork changed? pass it to strategy
-
-\section{Strategy}
- - receives height of private and public
- - searches action to execute
-   - 4 different types of actions (wait, adopt, match, implement)
- - executes by sending inv's
- - which strategies did we implement?
- - \todo{how works each strategy? describe it here or in section simulation and reference to the section.}
- - how did we implement it?
-   - search for an action
-   - if-else control structure
-   - many unit tests
-   
