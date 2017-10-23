@@ -224,7 +224,7 @@ class NetworkingTest(unittest.TestCase):
         self.networking.headers_message(self.public_connection1, message)
 
         self.assertFalse(self.public_connection1.send.called)
-        self.assertFalse(self.chain.process_block.called)
+        self.assertFalse(self.chain.process_header.called)
         self.assertFalse(self.private_connection.send.called)
         self.assertTrue(self.networking.request_blocks.called)
         self.assertEqual(len(self.networking.request_blocks.call_args[0][1]), 0)
@@ -240,8 +240,8 @@ class NetworkingTest(unittest.TestCase):
 
         self.networking.headers_message(self.private_connection, message)
 
-        self.assertEqual(self.chain.process_block.call_count, 2)
-        self.assertEqual(self.chain.process_block.call_args[0][1], BlockOrigin.private)
+        self.assertEqual(self.chain.process_header.call_count, 2)
+        self.assertEqual(self.chain.process_header.call_args[0][1], BlockOrigin.private)
 
         self.assertTrue(self.networking.request_blocks.called)
         self.assertEqual(len(self.networking.request_blocks.call_args[0][1]), 2)

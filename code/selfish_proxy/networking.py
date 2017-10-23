@@ -155,9 +155,9 @@ class Networking(object):
                         getdata_inv.append(hash_)
 
                     if connection.host[0] == self.private_ip:
-                        self.chain.process_block(header, BlockOrigin.private)
+                        self.chain.process_header(header, BlockOrigin.private)
                     else:
-                        self.chain.process_block(header, BlockOrigin.public)
+                        self.chain.process_header(header, BlockOrigin.public)
 
             self.request_blocks(connection, getdata_inv)
         finally:
