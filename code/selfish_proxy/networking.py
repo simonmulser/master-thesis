@@ -72,11 +72,12 @@ class Networking(object):
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == "Block":
+                        hash_ = inv.hash
                         logging.info("received block inv {} from {}".format(core.b2lx(inv.hash), self.repr_connection(connection)))
-                        if inv.hash not in self.chain.blocks:
+                        if hash_ not in self.chain.blocks:
 
-                            if inv.hash not in self.blocks_in_flight:
-                                getdata_inv.append(inv.hash)
+                            if hash_ not in self.blocks_in_flight:
+                                getdata_inv.append(hash_)
 
                             get_headers = messages.msg_getheaders()
                             get_headers.locator = messages.CBlockLocator()
@@ -91,7 +92,7 @@ class Networking(object):
                             logging.info('requested new headers with {} headers and starting hash={} from {}'
                                          .format(len(headers), core.b2lx(headers[0]), self.repr_connection(connection)))
                         else:
-                            logging.info('block inv {} already in local chain'.format(core.b2lx(inv.hash)))
+                            logging.info('block inv {} already in local chain'.format(core.b2lx(hash_)))
                     elif net.CInv.typemap[inv.type] == "Error":
                         logging.warn("received an error inv from {}".format(self.repr_connection(connection)))
                     else:
@@ -140,11 +141,12 @@ class Networking(object):
 
             getdata_inv = []
             for header in message.headers:
-                if header.GetHash() not in self.chain.blocks:
+                hash_ = header.GetHash()
+                if hash_ not in self.chain.blocks:
                     logging.debug('received header with hash={} from {}'
-                                  .format(core.b2lx(header.GetHash()), self.repr_connection(connection)))
+                                  .format(core.b2lx(hash_), self.repr_connection(connection)))
 
-                    if header.GetHash() not in self.blocks_in_flight:
+                    if hash_ not in self.blocks_in_flight:
                         getdata_inv.append(header.GetHash())
 
                     if connection.host[0] == self.private_ip:
