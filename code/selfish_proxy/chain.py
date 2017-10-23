@@ -110,7 +110,8 @@ class Chain:
         logging.info('{} inserted into chain'.format(block))
 
 
-class Block:
+class Block(object):
+    __slots__ = ['cblock_header', 'prevBlock', 'cblock', 'height', 'block_origin', 'transfer_allowed', 'cached_hash']
 
     def __init__(self, cblock_header, block_origin):
         self.cblock_header = cblock_header
