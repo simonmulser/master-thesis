@@ -23,6 +23,14 @@
 \usepackage{hyperref}  % Enables cross linking in the electronic document version. This package has to be included second to last.
 \usepackage[acronym,toc]{glossaries} % Enables the generation of glossaries and lists fo acronyms. This package has to be included last.
 
+\usepackage{listings}
+\lstset{
+	aboveskip = 20pt,
+	belowskip = 10pt,
+	numbers   = left,
+	}
+\renewcommand\lstlistlistingname{List of Listings}
+
 % Define convenience functions to use the author name and the thesis title in the PDF document properties.
 \newcommand{\authorname}{Simon Mulser} % The author name without titles.
 \newcommand{\thesistitle}{Simulation of different selfish mining strategies in Bitcoin} % The title of the thesis. The English version should be used, if it exists.
@@ -171,8 +179,10 @@
 \listoftables % Starred version, i.e., \listoftables*, removes the toc entry.
 
 % Use an optional list of alogrithms.
-\listofalgorithms
-\addcontentsline{toc}{chapter}{List of Algorithms}
+% \listofalgorithms
+% \addcontentsline{toc}{chapter}{List of Algorithms}
+\cleardoublepage
+\lstlistoflistings
 
 % Add an index.
 \printindex
