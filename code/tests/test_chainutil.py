@@ -5,6 +5,7 @@ from mock import patch
 from mock import MagicMock
 import test_util
 from chain import Block
+from bitcoin.core import CBlock
 
 
 class ChainUtilTest(test_abstractchain.AbstractChainTest):
@@ -296,16 +297,6 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
         self.assertIn(self.second_block_chain_a, blocks)
 
     @patch('chainutil.get_highest_block')
-    def test_get_headers_first_block_no_cblock(self, mock):
-        self.second_block_chain_a.cblock = None
-        mock.return_value = self.second_block_chain_a
-
-        blocks = chainutil.respond_get_headers([], None, [test_util.genesis_block.hash()], 0)
-
-        self.assertEqual(len(blocks), 1)
-        self.assertIn(self.first_block_chain_a, blocks)
-
-    @patch('chainutil.get_highest_block')
     def test_get_headers_until_like_tip(self, mock):
         mock.return_value = self.third_a_block_chain_b
 
@@ -353,13 +344,13 @@ class ChainUtilTest(test_abstractchain.AbstractChainTest):
 
     @patch('chainutil.get_highest_block_with_cblock')
     def test_request_get_headers_very_long_chain(self, mock):
-        first_block = Block(None, BlockOrigin.public)
+        first_block = Block(CBlock(), BlockOrigin.public)
         first_block.prevBlock = None
         first_block.cached_hash = '0'
 
         tmp = first_block
         for i in range(1, 17):
-            block = Block(None, BlockOrigin.public)
+            block = Block(CBlock(), BlockOrigin.public)
             block.prevBlock = tmp
             block.cached_hash = str(i)
 

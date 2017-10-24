@@ -60,8 +60,6 @@ class Networking(object):
     def inv_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received inv message with {} invs from {}'
-                          .format(len(message.inv), self.repr_connection(connection)))
 
             getdata_inv = []
             for inv in message.inv:
@@ -98,13 +96,10 @@ class Networking(object):
             self.request_blocks(connection, getdata_inv)
         finally:
             self.sync.lock.release()
-            logging.debug('processed inv message from {}'.format(self.repr_connection(connection)))
 
     def block_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received block message from {}'
-                          .format(self.repr_connection(connection)))
 
             hash_ = message.block.GetHash()
             if hash_ in self.chain.blocks:
@@ -129,14 +124,10 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed block message from {}'.format(self.repr_connection(connection)))
 
     def headers_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received headers message with {} headers message from {}'
-                          .format(len(message.headers), self.repr_connection(connection)))
-
             getdata_inv = []
             for header in message.headers:
                 hash_ = header.GetHash()
@@ -188,9 +179,6 @@ class Networking(object):
     def getdata_message(self, connection, message):
         self.sync.lock.acquire()
         try:
-            logging.debug('received getdata message with {} inv from {}'
-                          .format(len(message.inv), self.repr_connection(connection)))
-
             for inv in message.inv:
                 try:
                     if net.CInv.typemap[inv.type] == 'Block':
@@ -217,7 +205,6 @@ class Networking(object):
 
         finally:
             self.sync.lock.release()
-            logging.debug('processed getdata message from {}'.format(self.repr_connection(connection)))
 
     def request_blocks(self, connection, inv):
         if len(inv) > 0:

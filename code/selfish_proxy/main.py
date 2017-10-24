@@ -46,6 +46,11 @@ def parse_args():
                         , default=0.5
                         )
 
+    parser.add_argument('--check-blocks-in-flight-interval'
+                        , help='Interval to periodically check blocks in flight'
+                        , default=0.5
+                        )
+
     # strategies #
     parser.add_argument('--lead-stubborn'
                         , help='Use lead-stubbornness in strategy'

@@ -8,6 +8,7 @@ from bitcoin import core
 from strategy import BlockOrigin
 from strategy import ActionException
 import test_util
+from bitcoin.core import CBlock
 
 
 class ChainTest(test_abstractchain.AbstractChainTest):
@@ -191,10 +192,10 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertTrue(self.chain.executor.execute.called)
 
     def test_insert_block(self):
-        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock = Block(CBlock(), BlockOrigin.private)
         prevBlock.cached_hash = 'hash2'
         prevBlock.height = 45
-        block = Block(None, BlockOrigin.private)
+        block = Block(CBlock(), BlockOrigin.private)
         block.cached_hash = 'hash1'
         self.chain.tips = [prevBlock]
 
@@ -209,10 +210,10 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(retrieved_block.height, 46)
 
     def test_insert_block_initializing_true(self):
-        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock = Block(CBlock(), BlockOrigin.private)
         prevBlock.cached_hash = 'hash2'
         prevBlock.height = 45
-        block = Block(None, BlockOrigin.private)
+        block = Block(CBlock(), BlockOrigin.private)
         block.cached_hash = 'hash1'
         self.chain.tips = [prevBlock]
         self.chain.initializing = True
@@ -224,10 +225,10 @@ class ChainTest(test_abstractchain.AbstractChainTest):
         self.assertEqual(retrieved_block.transfer_allowed, True)
 
     def test_insert_block_initializing_false(self):
-        prevBlock = Block(None, BlockOrigin.private)
+        prevBlock = Block(CBlock(), BlockOrigin.private)
         prevBlock.cached_hash = 'hash2'
         prevBlock.height = 45
-        block = Block(None, BlockOrigin.private)
+        block = Block(CBlock(), BlockOrigin.private)
         block.cached_hash = 'hash1'
         self.chain.tips = [prevBlock]
         self.chain.initializing = False

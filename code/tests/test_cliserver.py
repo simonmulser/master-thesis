@@ -21,7 +21,7 @@ class CliServerTest(unittest.TestCase):
         self.chain = MagicMock()
         self.functions = Functions(self.chain, self.sync)
 
-    @patch('chainutil.get_highest_block_with_cblock')
+    @patch('chainutil.get_highest_block')
     def test_get_best_public_block_hash(self, mock):
         mock.return_value = Block(core.CoreRegTestParams.GENESIS_BLOCK, BlockOrigin.public)
 
