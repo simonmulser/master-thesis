@@ -22,31 +22,22 @@ In the case of a block race they artificially split the network where one part i
 \label{fig:selfish_mining}
 \end{figure}
 
-
 Further research showed that more generalised selfish mining strategies lead to even more relative gain for the selfish miner \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
-Figure \ref{fig:stubborn_mining} shows a possible categorization of the different selfish mining strategies where $\alpha$ and $\gamma$ is used equivalent as in figure \ref{fig:selfish_mining} and $\beta$ expresses (1 - $\alpha$).
-Furthermore, the prime states are standing for states where a block race happens on certain height and the \textit{0''} represent the state where both chains have the same height but the selfish miner and the rest of the network are mining on different branches.
-The idea behind the different variations of selfish mining strategies in figure \ref{fig:stubborn_mining} are:
+\cite{nayak2016stubborn} provided a comprehensive description of the strategy space and also coined different names for the selfish mining variations:
+
 \begin{itemize}
-\item Lead stubborn mining strategy compromises the idea to cause as many block races as possible and to never overwrite the public chain with a longer chain.
-This strategy continuously tries to split the network to mine on different blocks and is therefore especially promising when the probability to win the block race is very high.
-\item Equal-fork stubborn mining strategy changes the selfish mining strategy just by one transition.
-In case the selfish miner finds a block during a block race, he does not publish his block to win the race but he also keeps this block undisclosed to secretly mine on this new tip of the chain.
-\item Trail stubborn mining strategies reflects the idea to even trail behind the public chain and to eventually catch up.
-The figure \ref{fig:stubborn_mining} depicts the trail stubborn mining strategy \textit{T1}.
-The number one denotes that the selfish miner is allowed to trail one block behind the public chain.
+	\item \textbf{Lead stubborn}: 
+	This mining strategy compromises the idea to cause as many block races as possible and to never overwrite the public chain with a longer chain.
+	This strategy continuously tries to split the network to mine on different blocks and is therefore especially promising when the probability to win the block race is very high.
+	\item \textbf{Equal-fork stubborn}: 
+	The mining strategy equal-fork stubborn changes the selfish mining strategy just by one transition.
+	In case the selfish miner finds a block during a block race, he does not publish his block to win the race but he also keeps this block undisclosed to secretly mine on this new tip of the chain.
+\item \textbf{Trail stubborn}: 
+The mining strategies based on trail stubbornness are reflecting the idea to even trail behind the public chain and to eventually catch up.
+	Trail stubbornness is defined with an integer denoting how many blocks the strategy should allow the selfish miner to trail back.
 \end{itemize}
 
 The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and are leading to even more relative gain compared to honest miners\cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
-
-
-\begin{figure}[t]
-\includegraphics[width=10cm]{stubborn_mining}
-\centering
-\caption{Categorization of different mining strategies \cite{nayak2016stubborn}}
-\label{fig:stubborn_mining}
-\end{figure}
-
 
 To find the best strategy for a given mining power share $\alpha$ and connectivity $\gamma$ researchers used different methodologies.
 \cite{gervais2015tampering, nayak2016stubborn} used numeric simulations of paths in the state machine to find optimal selfish mining strategies.
