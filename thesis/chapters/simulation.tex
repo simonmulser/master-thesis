@@ -1,2 +1,47 @@
-\section{Results}
+With the introduced simulation software and selfish proxy, it is now possible to analyse selfish mining and its impact on the relative gain of the selfish miner.
+As a base, the scenario described in chapter 7 is used where the selfish proxy eclipses one node of the network forming a selfish miner.
+To obtain a comprehensive overview of the impact of selfish mining various combinations of selfish strategies and different distributions of computation power between the nodes are used.
 
+\section{Selfish mining scenarios}
+
+As strategies, the standard selfish mining strategy and the three modifications lead stubborn, equal-fork stubborn and trail stubborn mining are put into action.
+The used trail-stubborn strategy is parametrised with 1 meaning that the selfish miner will at the maximum trail one block behind the public chain.
+Hence, the at least trail stubborn strategy is executed in the different scenarios.
+Since the modifications of the selfish mining strategies can be combined a total of eight different selfish mining strategies are composed.
+For the distribution of computation power, five different settings are used where the selfish miner receives either 15\%, 22.5\%, 30\%, 37.5\% or 45\% of the computation power.
+The rest of the computation power in each scenario is distributed equally over all remaining, honest nodes.
+The five used shares are each 7.5\% apart covering sensitive shares of the computation share.
+The scenario with a share of 7.5\% and all scenarios above 50\% are omitted.
+The scenario where the selfish miner would get 7.5\% is discarded because it is very likely that in that case, selfish mining has no advantages.
+The other simulations where the selfish miner would get more than 50\% are ignored because in that cases the most efficient strategy would be to just mine on the own chain and never to accept blocks from other nodes. 
+Since the miner has more than 50\%, it would always create the longest chain copping all mining rewards.
+
+With eight different mining strategies and five different distributions of computation power, a total of 40 different scenarios are obtained.
+Listing \ref{lst:simulation_cmd} shows how a specific scenario is started with the simulation software.
+In this particular scenario, the selfish miner receives 30\% of the computation power (line 4), and the rest of the network consisting of 19 nodes gets with 70\% the rest of the power (line 3).
+As can be seen in line 5 the selfish mining strategy in this simulation run is modified with equal-fork and trail stubbornness.
+These arguments are passed by the simulation software to the selfish proxy when it gets created.
+From line 6 to 8 the scenario is configured with the same blocks per tick rate, amount of ticks and tick duration as in the reference scenario described in chapter 7.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption=Command to execute a particular selfish mining scenario, label={lst:simulation_cmd}, basicstyle=\ttfamily, captionpos=b]
+python3 simcoin.py multi-run 
+	--repeat 3 
+	--group-a bitcoin 19 0.7 25 simcoin/patched:v2 
+	--group-b selfish 1 0.3 0 simcoin/proxy:v1 
+	--selfish-args '--equal-fork-stubborn --trail-stubborn 1' 
+	--blocks-per-tick 0.0333333333333333 
+	--amount-of-ticks 60480 
+	--tick-duration 0.1
+\end{lstlisting}
+\end{minipage}
+
+\section{Simulation}
+
+The previously defined selfish mining scenarios are executed on a \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation software in chapter 7.
+Each scenario got executed three times by using the \textit{multi-run} command as shown in line 1 and 2 in the listing \ref{lst:simulation_cmd}.
+To extract a particular metric from the multiple executions of a scenario the median is calculated.
+Since the simulation software does not always produce the same results, the median provides a robust method against possible outliers and hence, provides more accurate results are achieved.
+
+Similar as during the evaluation of the deterministic behaviour of the simulation software, also during the execution of the selfish mining scenarios the utilisation of the CPU and the memory of the host machine stayed under 10\%.
+Thus, the specifications of the host machine did not restrict the simulations in any way.
