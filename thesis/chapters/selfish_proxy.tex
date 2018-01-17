@@ -17,6 +17,7 @@ First, the software starts the selfish proxy which then just listens for new inc
 Afterwards, the normal \textit{Bitcoin} nodes are started with the respective \textit{-connect} parameters set.
 If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the \textit{Bitcoin} node simply connects to the listening proxy.
 The proxy accepts the connection and behaves like a normal \textit{Bitcoin} node during the whole simulation run by obeying the \textit{Bitcoin} communication protocol.
+\todo[inline]{Is it possible to have multiple eclipsed nodes? I guess not - but then the selfish mining proxy can directly be used as an attack tool by a MiTM attacker. Maybe this should be mentioned}
 
 \begin{figure}
 	\centering
@@ -35,7 +36,7 @@ The selfish proxy continuously collects all block and block headers sent by the 
 To execute the selfish mining algorithm efficiently the proxy needs to retrieve updates of the private and public chain as fast as possible.
 Therefore the proxy uses solely block headers to update the chain despite using whole blocks.
 The block headers which contain all necessary information to updated the chain can be retrieved faster than the full block because they are just a part of the block and hence smaller.
-Furthermore, it is secure for the proxy to trust in the validity of the block header since all other nodes in the network are behaving honestly and hence are sending only valid block headers.
+Furthermore, it is secure for the proxy to trust in the validity of the block header since all other nodes in the network are assumed to behave honestly in our simulation and hence are sending only valid block headers.
 
 When the selfish proxy tries to update the chain with a so far unknown block header, it simply looks at the hash of the previous block stored in the block header.
 If the previous block hash is in the chain, the newly received block header is appended to the chain.
@@ -121,7 +122,7 @@ During the simulation, the proxy monitors the honest network which works on the 
 
 \subsection{Private lead}
 
-Every time a block header is inserted in the chain the proxy checks if either the public or private chain altered.
+Every time a block header is inserted in the chain the proxy checks if either the public or private chain was altered.
 In the case that one of these two chains changed the proxy executes the configured selfish mining algorithm.
 To easier track the changes between the two chains an integer variable called private lead is used which describes the distance between the two tips of the chain as shown in figure \ref{fig:private_lead}.
 A positive lead \textit{n} denotes an advantage of \textit{n} blocks of the private chain over the chain of the honest network.
@@ -209,12 +210,15 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 \end{itemize}
 
 The modifications of the selfish mining strategy can lead to even more relative gain for the selfish miner depending on the actual computational share and the parameter $\gamma$.
+\todo[inline]{Some comment as in Introduction, explain relative gain}
 Furthermore, the strategies can be combined and since the trail stubbornness can be parametrized the build an infinite strategy space
+
+\todo[inline]{I would generally suggest to switch the section "Selfish Mining" into the Introduction.}
 
 \subsection{Algorithm}
 
 The selfish mining strategies and its modifications are implemented in selfish proxy by a simple algorithm using normal control flow structures.
-Since the selfish proxy does not has a holistic overview of when a node finds a block, it only can try to apply selfish mining whenever the public or private chain changes locally after the insertion of a new block header.
+Since the selfish proxy does not have a holistic overview of when a node finds a block, it only can try to apply selfish mining whenever the public or private chain changes locally after the insertion of a new block header.
 The algorithm mimics the behavior shown in the state diagram from figure \ref{fig:stubborn_mining} by looking at the private lead before the insertion of the block header and the origin of the inserted block header.
 For example if the private lead before the insertion of the block header was one and the block header was appended to the public chain.
 This would correspond to the state \textit{1} and the outgoing transition $\beta$ which leads in the state diagram to the state \textit{0'} denoting a block race.

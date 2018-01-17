@@ -1,9 +1,10 @@
 The simulation framework provides all needed functionalities to orchestrate a peer-to-peer network where on each node is running the \textit{Bitcoin} reference implementation.
-This peer-to-peer network is implemented as a \textit{Docker} network containing multiple \textit{Docker} containers each running \textit{Bitcoin}.
+This peer-to-peer network is implemented as a \textit{Docker} network containing multiple \textit{Docker} containers each running one instance of \textit{Bitcoin-core}.
 The framework also coordinates the block discovery in the network.
 Based on a sequence defined in a configuration file the framework sends commands to the nodes which are then generating valid blocks.
 This is possible because all nodes are executed in the so-called \textit{regtest mode}, where the CPU-heavy proof-of-work is disabled and the nodes are accepting and RPC-call from outside which lets them create immediately a new block.
 After a simulation run, the framework parses the logs created by the nodes and based on them a report gets created which displays the key metrics of the simulation.
+\todo[inline]{Go a little bit into the details what the rational behind this design was e.g., pre-defined sequence -> reproducability. Also outline the structure of this chapter a little might be helpful. First describe terms and concepts ... } 
   
 \section{Tick}
 A key concept of the simulation framework is a so-called tick.
@@ -12,16 +13,19 @@ For a simulation run, multiple ticks are generated forming a sequence of ticks.
 This sequence is basically the simulation scenario for a particular simulation run.
 The exact duration of a tick is defined on execution of the simulation, hence defining the speed of the simulation.
 The smaller the defined duration, the higher the execution speed of the simulation.\todo{advantages: fake discrete, we can speed up/slow down}
+\todo[inline]{I would call it "approximate discrete event behavior" or an abstraction of real time to simulation time. Also state the basic rule of a tick: During one tick a node is not allowed to mine more than one block.}
 
 \section{Configuration files}
 
 A simulation executed by the framework needs to be configured with the configuration files \textit{nodes.csv}, \textit{network.csv} and \textit{ticks.csv}.
 The configuration files are stored in the concise CSV format and on a specific location on the disk to be easily processed by the simulation framework.
-This approach gives high flexibility and reproducibility for each simulation run.
+%This approach gives high flexibility and reproducibility for each simulation run.
+\todo[inline]{Directly argue why this is flexible and note that the reproducibility is limited by the software under test or provide a reference to where this is explained}
 The configuration files provide the flexibility to be written manually, to be created by a script or a combination of both.
 Furthermore, the created configuration files can be copied to the output directory of a simulation run providing reproducibility.
 
-The simulation framework already implements for each configuration file a simple script which can be executed with the corresponding commands \textit{nodes} (chapter \ref{chap:nodes_command}), \textit{network} (chapter \ref{chap:network_command}) and \textit{ticks} (chapter \ref{chap:ticks_command}).
+The simulation framework already implements for each configuration file a script which can be executed with the corresponding commands \textit{nodes} (chapter \ref{chap:nodes_command}), \textit{network} (chapter \ref{chap:network_command}) and \textit{ticks} (chapter \ref{chap:ticks_command}).
+\todo[inline]{Generally avoid using unspecific words and superlatives like: simple, highly something, ...} 
 
 \subsection{\textit{nodes.csv}}
 
@@ -31,8 +35,8 @@ Each row in the file reflects one node containing:
 	\item \textit{node\_type}: Either \textit{bitcoin} if the node is a normal node or \textit{selfish} if the node should act as a selfish node.
 	\item \textit{share}: The computational share of the node in the network.
 	\item \textit{docker\_image}: The Docker image to use when starting the node.
-	\item \textit{group}: Which node group the node belongs to.
-	\item \textit{latency}: The latency  of the node in the peer-to-peer network.
+  \item \textit{group}: Which node group the node belongs to. \todo[inline]{What does the node group specify?}
+	\item \textit{latency}: The latency of the node in the peer-to-peer network.
 \end{itemize}
  
 \subsection{\textit{network.csv}}
@@ -66,6 +70,7 @@ This is achieved by using the high-level programming language \textit{Python} an
 \textit{Docker} on the other side provides the needed capabilities to run the \textit{Bitcoin} reference implementation and other programs in virtual, lightweight containers on one single host.
 These containers are using the functionalities of the same kernel in an isolated manner and hence they do not interfere each other as long as the host system provides enough resources to them.
 The containers can also reuse the networking stack of the kernel, making possible to create a peer-to-peer network needed for the simulation.
+\todo[inline]{The main benefit here is that the time returned by the system is synchronized among all containers, which mean the aggregation of the log is easy}
 
 To execute a simulation the command \textit{simulate} (chapter \ref{chap:simulate_command}) can be used.
 In that case the configuration files need to be available on disk.
@@ -117,11 +122,12 @@ If a tick contains a block event, the framework calls \textit{generate} on the \
 Since all nodes are running in \textit{regtest mode} the proof-of-work is deactivated and the block can be created immediately.
 Some ticks may contain multiple block events.
 In this case the block events are executed one after another always waiting for the block hash to be returned by the nodes.
+\todo[inline]{This waiting might be a problem, it would be better to make these request asynchronous}
 A simulation run is always executed with a certain tick duration.
-This tick duration specifies how long a tick should last.
+This tick duration specifies how long a tick should last in real time.
 Therefore the simulation framework simply keeps track of the passed time during the execution of the block events and sleeps afterwards until the tick is over.
-In rare case the completion of the block events may last longer then the tick duration.
-Then the framework immediately starts with the next tick and tries to regain the lost time.
+If the completion of the block events last longer then the tick duration, then the framework immediately starts with the next tick and tries to regain the lost time.
+\todo[inline]{In such a case the simulation software should output a warning that the simulation might not be accurate anymore!}
 
 During the execution of the ticks a thread separately collects information about the current CPU and memory usage.
 For the CPU usage the thread queries periodically the \textit{/proc/stat} file which is showing how much time the CPU spent in a certain state. 
@@ -137,9 +143,12 @@ This is done by starting at block height one and asking each node for the hash o
 If all nodes have a block at this height and the hashes of all blocks are the same, then all nodes reached consensus and the block is added to the consensus chain.
 In the next step the height is increased by one and the previously described check is repeated.
 If one node has no block at a certain height or the hashes of the blocks differ then the calculation of the consensus chain stops.
+\todo[inline]{Why not top down? From last block to first? And why stop?}
 
 After the calculation of the consensus chain all \textit{Docker} nodes are stopped and removed.
 Because a separate data directory was mounted on each node by using \textit{Docker volumes} all relevant data, especially the log files, are still available on the host machine after the deletion of the \textit{Docker} nodes.
+\todo[inline]{What happens to the mempool? is the mempool persisted in a level DB?}
+
 In the next step lines of the logs from nodes and from the log file of the simulation framework are parsed to retrieve information about the simulation run.
 These log line types are:
 
@@ -158,13 +167,14 @@ These log line types are:
 The log lines \textit{BlockGenerateLine}, \textit{BlockStatsLine}, \textit{UpdateTipLine}, \textit{PeerLogicValidationLine}, \textit{BlockReconstructLine} and \textit{BlockReceivedLine} are all produced by nodes executing \textit{Bitcoin} where on the other hand \textit{TickLine}, \textit{BlockExceptionLine} and \textit{RPCExceptionEventLine} are created by the simulation framework.
 Furthermore, the \textit{BlockGenerateLine} log line was added especially for the simulation framework to the \textit{Bitcoin} reference implementation.
 Normally the reference implementation does not create a log line containing the block hash when it creates a new block.
-Hence to easily circumvent this fact, a log line was added to the reference implementation to persist the event of the block creation including a hash of the block.
+To circumvent this fact, a log line was added to the reference implementation to persist the event of the block creation including a hash of the block.
 
 The simulation framework persists all parsed log lines into CSV files where each log line type gets his own file.
 Subsequently the \textit{preprocess.R} script prepares the CSV files for the final report creation.
 When a simulation is executed a parameter can be passed which denotes how many ticks at the beginning and at the end should not be evaluated in the post-processing phase (\textit{skip\_ticks}).
+\todo[inline]{Please stat why you would want to omit ticks.}
 The \textit{R} script then figures out when the first and the last tick to be evaluated occurred and tailors the log line types \textit{BlockGenerateLine} and \textit{BlockStatsLine} respectively.
-All other types do not need to be tailored because the either are used to calculate some combined statistics like the block propagation time or because the statistics of these types are still calculated over the whole simulation duration.
+All other types do not need to be tailored because they either are used to calculate some combined statistics like the block propagation time or because the statistics of these types are still calculated over the whole simulation duration.
 Additionally the \textit{preprocess.R} script sorts all CSV files according to the timestamp of the log line.
 This is necessary because the parsing of the log files is implemented in a multi-threading manner and thus the ordering from the original log files is lost.
 
@@ -181,8 +191,12 @@ The final report contains:
 	\item charts and informations about blocks created during the simulation
 	\item charts and informations about exceptions happened during the simulation
 \end{itemize}
+\todo[inline]{Maybe provide such a report in the appendix}
 
-Where most of the informations and charts are just simple representations of the data present in the CSV files, the stale block rate and propagation time of blocks needs to be calculated in the report.
+%Where most of the informations and charts are just simple representations of the data present in the CSV files, 
+\todo[inline]{Do not undersell ;)}
+The stale block rate and propagation time of blocks needs to be calculated in the report.
+\todo[inline]{The term stale block rate should be explained in the State-of-the-Art section when talking about the other simulations - this is a key metric that is important and it should be clear why - maybe also cite Eyals Bitcoin NG}
 The stale rate, describing how many blocks did not end up in the longest chain, is calculated by checking each created block against the consensus chain determined previously by simply merging the \textit{BlockGenerateLine} log lines with the consensus chain.
 The propagation time of blocks is calculated with \textit{R} as shown in listing \ref{lst:propagation_time}.
 First the \textit{BlockGenerateLine} log lines are merged with the lines describing the event of receiving a block, namely	\textit{UpdateTipLine}, \textit{PeerLogicValidationLine}, \textit{BlockReconstructLine} and \textit{BlockReceivedLine} creating a new data frame.
@@ -277,3 +291,6 @@ It is possible to pass all desired input arguments to the specific commands, but
 
 The \textit{multi-run} command accepts an input parameter denoting how often a run should be repeated ($repeat$).
 The simulation software then creates all configuration files using the passed input arguments and subsequently executes the simulation $repeat$ times using the same configuration files as depicted in figure \ref{fig:flow_chart_multi_run}.
+
+
+\todo[inline]{You could also add some notes on ZFS and alignment - this is relevant for long time storage of simulation data. This is perfectly valid since this chapter is dealing with engineering questions anyway.}
