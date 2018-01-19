@@ -8,13 +8,16 @@ After a simulation run, the software parses the logs produced by the nodes and b
 \section{Tick}
 A fundamental concept of the simulation software is a so-called tick.
 A tick represents a small time span containing information about which nodes should find a new block in this tick.
+Hence a tick forms an abstraction of a certain time span in the real time.
+All blocks which should be generated in this time span are aggregated into the corresponding tick.
+Since all blocks created in the same tick are considered to be created at the same time, a tick should never contain the information that one node creates multiple blocks.
+
 For a simulation run, multiple ticks are generated forming a sequence of ticks.
 This sequence is the simulation scenario for a particular simulation run.
 The exact duration of a tick is defined on execution time of the simulation and determines the actual speed of the simulation.
 The concept of a tick helps to have an upper bound for the simulation speed.
 An upper bound of a certain sequence of ticks is reached when the execution time of at least one tick last longer than the tick duration itself.
 In that case, the temporal succession of the block events is disturbed resulting in inaccurate or wrong results, and the simulation speed should be lowered.
-\todo[inline]{I would call it "approximate discrete event behavior" or an abstraction of real time to simulation time. Also state the basic rule of a tick: During one tick a node is not allowed to mine more than one block.}
 
 \section{Configuration files}
 
