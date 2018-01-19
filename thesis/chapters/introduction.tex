@@ -46,8 +46,16 @@ The selfish mining strategies used in the thesis include:
 \end{itemize}
 
 For the simulation, these strategies are combined with different distributions of computation power in the underlying peer-to-peer network.
-The result of the simulations shows which strategy is the best strategy for a certain distribution of mining power and if the selfish mining increases the relative gain of the selfish miner compared to the normal, honest mining.
-The simulation results emphasise the recent work in the area of selfish mining and show that the current implementation of Bitcoin protocol is vulnerable against different selfish mining strategies.
+The result of the simulations shows which strategy is the best strategy for a certain distribution of mining power between the selfish miner and the honest network.
+Furthermore the relative and total gain of the selfish miner in the different simulation scenarios is observed.
+The total gain of a miner describes the total amount of received mining rewards, where the relative gain describes the received share of the mining rewards.
+In the optimal case where all nodes behave honestly and      all miner have the same connection to the network the relative gain of a miner is equal to its computational share.
+Hence each miner receives its fair shares of mining rewards.
+In the simulations is shown that the selfish miner can increase its relative gain by executing a selfish mining strategy.
+But because of the selfish mining less blocks end up in the longest chain and therefore also less mining rewards are distributed to the miners.
+Therefore the selfish miner, even though its relative gain rises, is not able to increase its total gain.
+To be able to also raise the total gain the selfish miner would need to wait for the difficulty adjustment which in Bitcoin happens every two weeks.
+The case where the difficulty is adjusted is not part of the thesis.
 
 The outcome of the thesis is supported with the following two research questions:
 
