@@ -45,21 +45,21 @@ The selfish mining strategies used in the thesis include:
 \item equal-fork stubborn mining \cite{nayak2016stubborn}
 \end{itemize}
 
-For the simulation, these strategies are combined with different distributions of computation power in the underlying peer-to-peer network.
-The result of the simulations shows which strategy is the best strategy for a certain distribution of mining power between the selfish miner and the honest network.
-Furthermore the relative and total gain of the selfish miner in the different simulation scenarios is observed.
-The total gain of a miner describes the total amount of received mining rewards, where the relative gain describes the received share of the mining rewards.
-In the optimal case where all nodes behave honestly and      all miner have the same connection to the network the relative gain of a miner is equal to its computational share.
-Hence each miner receives its fair shares of mining rewards.
-In the simulations is shown that the selfish miner can increase its relative gain by executing a selfish mining strategy.
-But because of the selfish mining less blocks end up in the longest chain and therefore also less mining rewards are distributed to the miners.
-Therefore the selfish miner, even though its relative gain rises, is not able to increase its total gain.
-To be able to also raise the total gain the selfish miner would need to wait for the difficulty adjustment which in Bitcoin happens every two weeks.
-The case where the difficulty is adjusted is not part of the thesis.
-In the optimal case where all nodes behave honestly and      all miner have the same connection to the network the relative gain of a miner is equal to its computational share.
-\todo[inline]{The term "relative gain" needs to to be explained before usage. Why is the gain only relative? Because overall hash rate drops ... Why is this still in favour of the attacker ...make it easier here... move expl of relative gain into state-of-the-art }
+For the simulation, these strategies are combined with different distributions of computation power between the participating nodes.
+For the underlying network a realistic scenario with a certain amount of nodes and network topology is defined.
 
-The outcome of the thesis is supported with the following two research questions:
+The result of the executed simulations shows which strategy is the best strategy for a certain distribution of mining power between the selfish miner and the honest network.
+Furthermore, the relative and total gain of the selfish miner in the different simulation scenarios is observed.
+The total gain of a miner describes the total amount of received mining rewards, where the relative gain describes the received share of the mining rewards.
+In the optimal case, where all nodes behave honestly and      all miner have the same connection to the network the relative gain of a miner is equal to its computational share.
+Hence, each miner receives its fair shares of mining rewards.
+In the simulations is shown that the selfish miner can increase its relative gain by executing a selfish mining strategy, but at the same time its total gain decreases.
+This is possible because the execution of the selfish mining decreases the amount of blocks which end up in the longest chain.
+Thus, less mining rewards are distributed between the miners which reduces also the total gain of the selfish miner.
+To be able to raise the total gain the selfish miner would need to wait for the difficulty adjustment which in Bitcoin happens every two weeks.
+The attack scenario where the selfish miner waits for the difficulty adjustment is not part of this thesis.
+
+The outcome of the thesis is further analysed by answering the following two research questions:
 
 \begin{itemize}
 	\item \textbf{RQ1:} Do the simulations of selfish mining with the proposed software solutions show an increase of the relative gain for the selfish miner compared to the normal, honest mining behaviour?
@@ -70,25 +70,26 @@ The outcome of the thesis is supported with the following two research questions
 
 An additional outcome of the thesis is the simulation software.
 The software should allow an accurate and deterministic simulation of the blockchain by using directly the reference implementation and a realistic network topology.
-Hence, the simulation software could not only be used to simulate selfish mining attacks but could for example also be used to simulate other attacks or new protocol versions of Bitcoin. 
-Since many other cryptocurrencies are derived from Bitcoin, they simulation software could be used also to simulate their behaviour and properties.
+Hence, the simulation software could not only be used to simulate selfish mining attacks but could for example be used to simulate other attacks or new protocol versions of Bitcoin. 
+Since many other cryptocurrencies are derived from Bitcoin, they simulation software could also be utilized to simulate their behaviour and properties.
 
 \section{Structure of this thesis}
 
-First, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \cite{nayak2016stubborn} and \cite{eyal2014majority} need to be implemented.
+First, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \cite{nayak2016stubborn} and \cite{eyal2014majority} are implemented.
 This is achieved by implementing a proxy which eclipses a normal Bitcoin client from the other nodes in the network.
 Now, if a block is found the proxy decides, depending on its selfish mining strategy, if a block should be transmitted from the eclipsed node to the rest of the network or vice versa.
 The proxy design pattern makes it possible to implement the selfish mining strategies without altering the reference implementation of Bitcoin and is therefore preferred over an implementation directly in the Bitcoin client.
 
 In the next step, a simulation program is implemented.
-To be able to control when a certain node finds a block, all Bitcoin nodes should be executed in \textit{regtest} mode.
+To be able to control when a certain node finds a block, all Bitcoin nodes are executed in \textit{regtest} mode.
 In this test mode, the real PoW-algorithm is disabled and every node accepts a command which lets the node create immediately a new block.
 With this functionality, it is possible to define a block discovery series which basically reflects the computation power of each node.
 The more blocks are found by a node the more simulated computation power the node has.
-Additionally to the block generation, the simulation program should also control the network topology and hence the connectivity of each node.
+Additionally to the block generation, the simulation program also controls the network topology and hence the connectivity of each node.
 For the simulation run, it is important that the connectivity of the nodes stays the same to make the results better comparable.
-This should be achieved by setting the connections from the nodes by the simulation program itself which is in contrast to normal behaviour.
+This is achieved by setting the connections from the nodes by the simulation program itself which is in contrast to normal behaviour.
 Normally Bitcoin nodes share their connections with other nodes over the Bitcoin protocol and try to improve the connectivity over time.
 
 After the implementation of the selfish mining strategies and the simulation program, the mining strategies are simulated.
-Different network topologies and distributions of computation power are used to compare the relative gain of the selfish mining strategies over the normal, honest mining.
+Different distributions of computation power between the selfish miner and the honest network are used to find the best selfish mining strategies for different scenarios.
+Furthermore, the results of the simulation are compared with previous research.
