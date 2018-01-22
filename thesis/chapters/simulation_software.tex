@@ -146,7 +146,7 @@ This tick duration specifies how long a tick should last in real time.
 Therefore the simulation framework simply keeps track of the passed time during the execution of the block events and sleeps afterwards until the tick is over.
 If the completion of the block events last longer then the tick duration, then the framework immediately starts with the next tick and tries to regain the lost time.
 The case where the execution of block events last longer then the tick duration, should be a rare exception.
-If this happens more frequent the simulation scenario is configure too fast, which likely creates inaccurate results.
+If this happens more frequent the simulation scenario is configure too fast, which likely creates inaccurate results as explained in chapter \ref{chap:tick}.
 Thus, the defined scenario should be created with less block events per tick or a higher tick duration should be configured on simulation start.
 The simulation software warns the user about the total amount of exception of this type in the final report.
 
