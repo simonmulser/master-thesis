@@ -88,7 +88,8 @@ The software uses therefore the high-level programming language \textit{Python} 
 \textit{Docker} on the other side provides the needed capabilities to run the \textit{Bitcoin} reference implementation and other programs in virtual, lightweight containers on one single host.
 These containers are using the functionalities of the same kernel in an isolated manner and hence they do not interfere each other as long as the host system provides enough resources to them.
 The containers can also reuse the networking stack of the kernel, making possible to create a peer-to-peer network needed for the simulation.
-Furthermore all containers use the system time of the host machine, which allows to order the log files based on their timestamp in the post-processing of the simulation.
+Furthermore by using \textit{Docker} all containers use the system time of the host machine.
+This is especially helpful for the aggregation of the log files of all different containers, because it assures that the timestamps in the log lines actually happened in exactly this order.
 	
 To execute a simulation the command \textit{simulate} (chapter \ref{chap:simulate_command}) can be used.
 In that case the configuration files need to be available on disk.
