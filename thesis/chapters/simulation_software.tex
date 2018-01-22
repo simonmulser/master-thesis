@@ -139,6 +139,8 @@ If a tick contains a block event, the framework calls \textit{generate} on the \
 Since all nodes are running in \textit{regtest mode} the proof-of-work is deactivated and the block can be created immediately.
 Some ticks may contain multiple block events.
 In this case the block events are executed one after another always waiting for the block hash to be returned by the nodes.
+The sequential execution of the block events is preferred over a parallelisation, which would introduce a new source of uncontrollable indeterminism making the results harder to reproduce even on the same host.
+
 A simulation run is always executed with a certain tick duration.
 This tick duration specifies how long a tick should last in real time.
 Therefore the simulation framework simply keeps track of the passed time during the execution of the block events and sleeps afterwards until the tick is over.
