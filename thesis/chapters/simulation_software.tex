@@ -194,10 +194,17 @@ To circumvent this fact, a log line was added to the reference implementation to
 The simulation software persists all parsed log lines into CSV files where each log line type gets its file.
 Subsequently the \textit{preprocess.R} script prepares the CSV files for the final report creation.
 When a simulation is executed a parameter can be passed which denotes how many ticks at the beginning and at the end should not be evaluated in the post-processing phase (\textit{skip\_ticks}).
-\todo[inline]{Please stat why you would want to omit ticks.}
 The \textit{R} script then figures out when the first and the last tick to be evaluated occurred and tailors the log line types \textit{BlockGenerateLine} and \textit{BlockStatsLine} respectively.
-All other types do not need to be tailored because they either are used to calculate some combined statistics like the block propagation time or because the statistics of these types are still calculated over the whole simulation duration.
-Additionally the \textit{preprocess.R} script sorts all CSV files according to the timestamp of the log line.
+All other types do not need to be tailored because they either are used to calculate some combined statistics like the block propagation time or because the statistics of these types are still calculated over the whole simulation duration like the memory usage.
+The \textit{skip\_ticks} parameter allows the user to discard ticks which may created distorted data.
+Right after the start it is likely that the nodes behave differently because the execute some initializing routines or run faster because they just started up.
+At the end of the simulation run it makes sense to ignore some ticks because blocks created at the end of the simulation would distort the analysis of the simulation.
+Those blocks probably propagate faster, because right after them no other competing blocks are created.
+Another problem could be that the simulation frameworks already starts to shut down the peer-to-peer network even though some blocks are still transmitted to other nodes.
+How many ticks should be omitted depends on the simulation scenario and the right amount is difficult to determine.
+An additional mitigation is to extend the overall simulation, which would reduce the influence of the distorted data from the first and last ticks.
+
+Additionally to omitting some ticks, the \textit{preprocess.R} script sorts all CSV files according to the timestamp of the log line.
 This is necessary because the parsing of the log files is implemented in a multi-threading manner and thus the ordering from the original log files is lost.
 
 After all CSV files are created the simulation frameworks generates a report by executing a \textit{R Markdown} file.
