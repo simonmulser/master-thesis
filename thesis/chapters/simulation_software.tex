@@ -4,8 +4,16 @@ The software furthermore coordinates the block discovery in the network.
 Based on a sequence defined in a configuration file the software sends commands to the nodes which are then generating valid blocks.
 To be able to create blocks the nodes are executed in the \textit{regtest mode}, where the CPU-heavy proof-of-work is disabled, and the nodes are accepting a RPC-call from outside which lets them create a new block immediately.
 After a simulation run, the software parses the logs produced by the nodes and based on them the software generates a report which displays the key metrics of the simulation.
+\todo{add rational}
+
+The remaining of this chapter starts with the sub-chapter \ref{chap:tick}, where the general concept of a tick is introduced.
+Afterwards in the chapter \ref{chap:config_files} the different configuration files are explained.
+In the chapter \ref{chap:simulation} the whole procedure of a simulation with the three main steps preparation, execution and post-processing is explained.
+Lastly, in the chapter \ref{chap:commands} the implemented commands to execute the simulation framework are listed.
   
 \section{Tick}
+\label{chap:tick}
+
 A fundamental concept of the simulation software is a so-called tick.
 A tick represents a small time span containing information about which nodes should find a new block in this tick.
 Hence a tick forms an abstraction of a certain time span in the real time.
@@ -20,6 +28,7 @@ An upper bound of a certain sequence of ticks is reached when the execution time
 In that case, the temporal succession of the block events is disturbed resulting in inaccurate or wrong results, and the simulation speed should be lowered.
 
 \section{Configuration files}
+\label{chap:config_files}
 
 A simulation executed by the software needs to be configured with the configuration files \textit{nodes.csv}, \textit{network.csv} and \textit{ticks.csv}.
 The configuration files are stored in the concise CSV format and on a specific location on the disk to be easily processed by the simulation software.
@@ -63,7 +72,8 @@ The \textit{ticks.csv} contains all ticks which should be executed by the simula
 Each line represents a tick with no, one or multiple block events.
 Hence the length of lines in a \textit{ticks.csv} varies depending on the number of block events in the corresponding tick.
 
-\section{Simulation} \label{chap:simulation}
+\section{Simulation}
+\label{chap:simulation}
 
 The main functionality of the simulation software is to coordinate a simulation based on the configuration files.
 The software uses therefore the high-level programming language \textit{Python} and the virtualisation software technology \textit{Docker}.
@@ -229,6 +239,7 @@ Once the last simulation finishes the software aggregates all copied CSV files i
 Subsequently the \textit{R Markdown} file, which also is used to create the final report of a single  simulation, is executed to create a report comparing all simulation runs.
  
 \section{Commands}
+\label{chap:commands}
 
 The simulation software exposes six commands to the user.
 Three of this commands are creating configuration files necessary for the execution of a simulation. One command, the \textit{simulate} command, executes a simulation based on these configuration files.
