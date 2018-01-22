@@ -44,9 +44,13 @@ Each row in the file reflects one node consisting of:
 \begin{itemize}
 	\item \textit{node\_type}: Either \textit{bitcoin} if the node is a normal node or \textit{selfish} if the node should act like a selfish node.
 	\item \textit{share}: The computation power proportion of the node in the network.
-	\item \textit{docker\_image}: The \textit{Docker} image to use when starting the node.
-	\item \textit{group}: Which node group the node belongs to. \todo[inline]{What does the node group specify?}
+	\item \textit{docker\_image}: The \textit{Docker} image to use for the node.
 	\item \textit{latency}: The latency  of the node in the peer-to-peer network.
+	The node will have this latency to all other nodes with the exact same latency.
+	For other connections the two different latencies are added.
+	Hence, two nodes, one node with 100 milliseconds of latency and one node with 50 milliseconds, will have 150 milliseconds of latency during the simulation.
+	\item \textit{group}: Which group the node did belong to during the creation of the \textit{nodes.csv} by the script introduce in chapter \ref{chap:commands}.
+	During the actual execution of the simulation this parameter is ignored.
 \end{itemize}
  
 \subsection{\textit{network.csv}}
