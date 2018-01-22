@@ -168,11 +168,9 @@ This is done by starting at block height one and asking each node for the hash o
 If all nodes have a block at this height and the hashes of all blocks are the same, then all nodes reached consensus and the block is added to the consensus chain.
 In the next step the height is increased by one and the previously described check is repeated.
 If one node has no block at a certain height or the hashes of the blocks differ then the calculation of the consensus chain stops.
-\todo[inline]{Why not top down? From last block to first? And why stop?}
 
 After the calculation of the consensus chain all \textit{Docker} nodes are stopped and removed.
 Because a separate data directory was mounted on each node by using \textit{Docker volumes} all relevant data, especially the log files, are still available on the host machine after the deletion of the \textit{Docker} nodes.
-\todo[inline]{What happens to the mempool? is the mempool persisted in a level DB?}
 In the next step lines of the logs from nodes and from the log file of the simulation framework are parsed to retrieve information about the simulation run.
 These log line types are:
 
