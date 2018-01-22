@@ -28,6 +28,7 @@ All configuration parameters of a simulation run influence the stale block rate 
 The definition of the deterministic behaviour is subjective and needs to be considered when trying to conclude something from the results of a simulation software with such a deterministic behaviour.
 
 \section{Reference scenario}
+\label{chap:reference_scenario}
 
 The reference scenario used to evaluate the simulation software for its deterministically behaviour, tries to abstract the real \textit{Bitcoin} network.
 The mining process in the real system is known to be centralised by a few mining pools \cite{gervais2014bitcoin, beikverdi2015trend, tschorsch2016bitcoin, clarkresearch}.
@@ -55,13 +56,14 @@ Hence, by setting the blocks per tick to $0.0\dot{3}$, the simulated network fin
 Compared to \textit{Bitcoin}, wherein average every ten minutes a block is created, this results in a 200 times shorter block interval, and instead of two weeks, it takes 100.8 minutes to simulate about 2016 blocks.
 
 \section{Evaluation}
+\label{chap:evaluation}
 
 For the evaluation of the deterministic behaviour the reference scenario was executed 100 times to obtain sufficient figures of the stale block rate.
 The individual simulations were conducted on a \textit{x86 Linux} host machine with \textit{Ubuntu 4.4.0-97-generic} installed.
 The CPU of the host machine was virtualised with \textit{QEMO 2.5+} and provided 16 cores.
 Furthermore, the machine provided 57.718 GB of memory.
 During a particular simulation run, about 4\% of CPU and 6\% of the storage were utilised as shown in the corresponding figures \ref{fig:cpu_usage} and \ref{fig:storage_usage}.
-The metrics about the usage of the CPU and storage were continuously collected by the simulation software as described in chapter 45.
+The metrics about the usage of the CPU and storage were continuously collected by the simulation software as described in chapter \ref{chap:commands}.
 
 The outcome of the evaluation is shown as box plot in figure \ref{fig:box_stale_rate} and as a density plot in \ref{fig:density_stale_rate}.
 Despite one outlier at 4.521\% all data points are inside the whiskers area defined by $[Q1 - 1.5IQR, Q3 + 1.5IQR]$ with the median value equal 4.821\%.

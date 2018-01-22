@@ -1,6 +1,5 @@
 With the introduced software solutions, the simulation software and the selfish proxy, it is now possible to analyse selfish mining and its impact on the relative gain of the selfish miner.
-For the simulation, the scenario described in chapter 45 is adapted.
-\todo[inline]{Use label and ref instead of hardcoded references}
+For the simulation, the scenario described in chapter \ref{chap:reference_scenario} is adapted.
 One of the twenty nodes is eclipsed with the selfish proxy forming a selfish miner.
 To obtain a comprehensive overview of the impact of selfish mining the selfish miners conducts various combinations of selfish mining strategies.
 Additionally, different distributions of the computation power between the nodes and the selfish miner are applied.
@@ -28,7 +27,7 @@ In this particular scenario, the selfish miner receives 30\% of the computation 
 As shown in line 5 the selfish mining strategy in this simulation run is modified with equal-fork and trail stubbornness.
 These arguments are passed by the simulation software to the selfish proxy when it gets created.
 Furthermore, it can be seen in line 5 that the strategy modification trail stubborn is set to 1.
-From line 6 to 8 the scenario is configured with the same blocks per tick rate, amount of ticks and tick duration as in the reference scenario described in chapter 45.
+From line 6 to 8 the scenario is configured with the same blocks per tick rate, amount of ticks and tick duration as in the reference scenario described in \ref{chap:reference_scenario}.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption=Command to execute a particular selfish mining scenario, label={lst:simulation_cmd}, basicstyle=\ttfamily, captionpos=b]
@@ -45,12 +44,13 @@ python3 simcoin.py multi-run
 
 \section{Simulation}
 
-The previously defined selfish mining scenarios are executed on a \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation software in chapter 45.
+The previously defined selfish mining scenarios are executed on a \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation software in chapter \ref{chap:evaluation}.
 Each scenario gets executed three times by using the \textit{multi-run} command as shown in line 1 and 2 in the listing \ref{lst:simulation_cmd}.
 To extract a particular metric from the multiple executions of a scenario, the simulation with the median stale block rate is used.
 Since the simulation software can not behave perfectly deterministic due its architecture, the median provides a robust method against possible outliers and hence, more accurate results are achieved.
 
 \section{Results}
+\label{chap:results}
 
 \afterpage{
     \begin{landscape}
@@ -119,7 +119,7 @@ The two columns \textit{blocks honest} and \textit{blocks selfish} contain the n
 The following two columns reflect the number of stale blocks for the honest network and the selfish miner.
 The columns \textit{share selfish} and \textit{share stale selfish} are derived from the previous columns and describe the relative proportion of accepted and stale blocks for the selfish miner.
 Lastly, in the ninth column, the overall stale block rate of each simulation run is stated.
-Additionally, to the 40 results, the simulation with the median stale block rate from the evaluation of the simulation software in chapter 45 is added with the abbreviation \textit{H}.
+Additionally, to the 40 results, the simulation with the median stale block rate from the evaluation of the simulation software in chapter \ref{chap:evaluation} is added with the abbreviation \textit{H}.
 Since in that simulation the computational share was always distributed evenly amongst all nodes the result of the simulation is multiplied by the corresponding share for each defined distribution of computation power.
 
 \begin{figure}[t]
@@ -211,7 +211,7 @@ In the case that a node conducts a selfish mining strategy the stale block rate 
 Furthermore, the gap between the two worst performing selfish strategies and the other strategies can be observed.
 If a node conducts lead stubbornness combined with equal-fork stubbornness (\textit{L, F}) or selfish mining with all three modifications (\textit{L, F, T\textsubscript{1}}), there are even more stale blocks in the network.
 
-Similar as during the evaluation of the deterministic behaviour of the simulation software in chapter 45, also during the execution of the selfish mining scenarios the utilisation of the CPU and the memory of the host machine stayed under 10\% as shown in figure \ref{fig:selfish_simulations_cpu} and figure \ref{fig:selfish_simulations_memory}.
+Similar as during the evaluation of the deterministic behaviour of the simulation software in chapter \ref{chap:evaluation}, also during the execution of the selfish mining scenarios the utilisation of the CPU and the memory of the host machine stayed under 10\% as shown in figure \ref{fig:selfish_simulations_cpu} and figure \ref{fig:selfish_simulations_memory}.
 Thus, the specifications of the host machine did not restrict the simulations in any way.
 
 \begin{figure}[t]

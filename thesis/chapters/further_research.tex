@@ -7,7 +7,7 @@ Both approaches, the selfish proxy and the virtualised peer-to-peer network, are
 \section{Selfish proxy}
 
 The selfish proxy needs to receive information of new blocks as fast as possible to conduct selfish mining efficiently.
-Currently, the proxy requests the whole block and all headers of blocks higher than its local best tip after hearing about a new block as described in chapter 45.
+Currently, the proxy requests the whole block and all headers of blocks higher than its local best tip after hearing about a new block as described in chapter \ref{chap:receiving_blocks} and \ref{chap:sending_blocks}.
 To successfully relay the block to the other side of the network, the selfish proxy needs to receive both messages entirely where especially the full block request is very time-consuming.
 By using the compact block relay mechanism, the selfish proxy could speed up this whole communication.
 The compact block relay mechanism shown in figure \ref{fig:compact_block_relay} is implemented in the \textit{Bitcoin} reference implementation since late 2016 \cite{bitcoinrelease13} and allows the node to broadcast blocks to its peers directly \cite{bip152}.
