@@ -37,7 +37,7 @@ The downside of this approach would be that the reference implementation is alte
 
 Last but not least combining attacks with selfish mining provides a possible field of research.
 The selfish miner could improve the profitability of the selfish mining by combining it with other attacks \cite{gervais2016security, sapirshtein2016optimal, nayak2016stubborn, gervais2015tampering}.
-New insights and combinations could be tested by implementing and simulating the attacks directly in the simulation software or selfish proxy.
+New insights and combinations could be tested by implementing and simulating the attacks directly in the simulation framework or selfish proxy.
 
 \section{Simulation scenario}
 
@@ -47,7 +47,7 @@ A further research direction consists of including transactions in a simulation 
 This could be either achieved by filling up the mempool with prepared transactions \todo{ask aljosha for paper} or by creating the transactions during the simulation run.
 In the latter approach also the relaying of transaction would be simulated resulting in an even more realistic simulation.
 Using this method the performance and reliability of the RPC-connections over TCP/IP needs to be considered.
-The current implementation of the simulation software has troubles to maintain the connection to the API of the nodes often resulting in \textit{broken pipe} errors.
+The current implementation of the simulation framework has troubles to maintain the connection to the API of the nodes often resulting in \textit{broken pipe} errors.
 At the moment these errors are recovered by simply reconnecting to the node which costs precious time.
 Due to the lost time the execution speed of the simulation needs to be lowered resulting in unsustainable long simulation durations.
 Hence, to support the creation of transaction during a simulation run, the unreliability of the RPC-connections should be dissolved, or it should be considered to use the more performant Unix domain sockets.
@@ -62,6 +62,6 @@ Hence, a better capturing of the actual topology of the \textit{Bitcoin} peer-to
 \section{Mitigation}
 
 The mitigation of selfish mining is also a possible future research direction.
-The simulation software and the proxy can be used to assess different proposed mitigation approaches \cite{eyal2014majority, billah2015one, solat2016zeroblock, zhang2017publish} against their impact on selfish mining.
-Since the simulation software uses the reference implementation a mitigation proposal like the uniform tie-breaking \cite{eyal2014majority} can be implemented directly in the actual code.
+The simulation framework and the proxy can be used to assess different proposed mitigation approaches \cite{eyal2014majority, billah2015one, solat2016zeroblock, zhang2017publish} against their impact on selfish mining.
+Since the simulation framework uses the reference implementation a mitigation proposal like the uniform tie-breaking \cite{eyal2014majority} can be implemented directly in the actual code.
 Hence, those mitigations can be tested quickly and under realistic circumstances providing accurate results.

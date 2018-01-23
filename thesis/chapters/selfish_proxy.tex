@@ -12,7 +12,7 @@ During the simulation run, the proxy mimics the behaviour of a normal \textit{Bi
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
-The topology of the peer-to-peer network is solely established by the simulation software.
+The topology of the peer-to-peer network is solely established by the simulation framework.
 First, the software starts the selfish proxy which then just listens for new incoming connections.
 Afterwards, the normal \textit{Bitcoin} nodes are started with the respective \textit{-connect} parameters set.
 If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the \textit{Bitcoin} node simply connects to the listening proxy.
