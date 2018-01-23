@@ -10,7 +10,7 @@ The selfish proxy needs to receive information of new blocks as fast as possible
 Currently, the proxy requests the whole block and all headers of blocks higher than its local best tip after hearing about a new block as described in chapter \ref{chap:receiving_blocks} and \ref{chap:sending_blocks}.
 To successfully relay the block to the other side of the network, the selfish proxy needs to receive both messages entirely where especially the full block request is very time-consuming.
 By using the compact block relay mechanism, the selfish proxy could speed up this whole communication.
-The compact block relay mechanism shown in figure \ref{fig:compact_block_relay} is implemented in the \textit{Bitcoin} reference implementation since late 2016 \cite{bitcoinrelease13} and allows the node to broadcast blocks to its peers directly \cite{bip152}.
+The compact block relay mechanism shown in figure \ref{fig:compact_block_relay} is implemented in the \textit{Bitcoin} reference implementation since late 2016 \cite{bitcoin13} and allows the node to broadcast blocks to its peers directly \cite{bip152}.
 The difference to the normal block relay mechanism is that the node relays the block without any transactions.
 To verify the block, the receiving node first checks which transaction are in the local mempool and asks afterwards with a specific request only for the missing transactions.
 Compared to the traditional block relay mechanism where the node sends the full block containing all transactions, the compact block relay mechanism reduces the amount of data transferred and accelerates the block relay \cite{bip152, ozisik2017graphene}.
