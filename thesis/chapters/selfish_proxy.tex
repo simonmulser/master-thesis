@@ -12,12 +12,14 @@ During the simulation run, the proxy mimics the behaviour of a normal \textit{Bi
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
-The topology of the peer-to-peer network is solely established by the simulation framework.
+In the current implementation the selfish proxy can only eclipse one single node.
+In the case where the proxy could eclipse multiple nodes to build a private chain, the selfish proxy could also be used as a stand-alone man-in-the-middle attacking tool eclipsing a larger amount of nodes.
+
+The topology of the peer-to-peer network in a simulation run is solely established by the simulation framework.
 First, the software starts the selfish proxy which then just listens for new incoming connections.
 Afterwards, the normal \textit{Bitcoin} nodes are started with the respective \textit{-connect} parameters set.
 If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the \textit{Bitcoin} node simply connects to the listening proxy.
 The proxy accepts the connection and behaves like a normal \textit{Bitcoin} node during the whole simulation run by obeying the \textit{Bitcoin} communication protocol.
-\todo[inline]{Is it possible to have multiple eclipsed nodes? I guess not - but then the selfish mining proxy can directly be used as an attack tool by a MiTM attacker. Maybe this should be mentioned}
 
 \begin{figure}
 	\centering
@@ -214,7 +216,6 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 The modifications of the selfish mining strategy can lead to even more relative gain for the selfish miner depending on the actual computational share and the parameter $\gamma$.
 Furthermore, the strategies can be combined and since the trail stubbornness can be parametrised the build an infinite strategy space.
 
-\todo[inline]{Some comment as in Introduction, explain relative gain}
 Furthermore, the strategies can be combined and since the trail stubbornness can be parametrized the build an infinite strategy space
 
 \subsection{Algorithm}
