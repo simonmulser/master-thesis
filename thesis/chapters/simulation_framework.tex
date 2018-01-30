@@ -20,18 +20,23 @@ A tick represents a small time span containing information about which nodes sho
 Hence a tick forms an abstraction of a certain time span in the real time.
 All blocks which should be generated in this time span are aggregated into the corresponding tick.
 Since all blocks created in the same tick are considered to be created at the same time, a tick should never contain the information that one node creates multiple blocks.
-For a simulation run, multiple ticks are generated forming a sequence of ticks.
-This sequence is the simulation scenario for a particular simulation run.
+This fact is also respected by the script creating the \textit{ticks.csv} explained in chapter \ref{chap:ticks_command}.
+
+For a simulation run, multiple ticks are combined forming a sequence of ticks.
+In combination with two other configuration files, the tick sequence builds the simulation scenario for a particular simulation run.
 The exact duration of a tick is defined on execution time of the simulation and determines the actual speed of the simulation.
 
 The concept of a tick helps to have an upper bound for the simulation speed.
-An upper bound of a certain sequence of ticks is reached when the execution time of at least one tick last longer than the tick duration itself.
-In that case, the temporal succession of the block events is disturbed resulting in inaccurate or wrong results, and the simulation speed should be lowered.
-Furthermore the usage of ticks would allow to speed up the simulation by cutting out empty ticks or ticks which do not influence the investigated results of the simulation.
+This upper bound of a certain simulation scenario is reached when the execution time of at least one tick last longer than the tick duration itself.
+In that case, the temporal succession of the block events is disturbed, which can result in inaccurate or wrong results.
+In such a case the simulation speed should be lowered or the simulation scenario should be changed.
+The simulation framework itself states the number of times, when the execution of the events lasted longer than the tick duration, in the final report.
+
+Additionally, the usage of ticks would allow to speed up the simulation by cutting out empty ticks or ticks which do not influence the investigated results of the simulation.
 In that case, it needs to be defined when a certain event in a tick is over.
 For example, block events can be considered to be over when all nodes received the whole block or heard about the block but did not requested it.
-If such a block event is over, all ticks afterwards until the next tick with a block event could be ignored because those ticks would not influence block related simulation results.
-Currently such a mechanism is not implemented and therefore no ticks of a simulation scenario are ignored even though they are empty and would not influence the results.
+If such a block event is over, all subsequent ticks until the next tick with a block event could be ignored because those ticks would not influence block related simulation results.
+Currently, such a mechanism is not implemented and therefore no ticks of a simulation scenario are ignored even though they are empty and would not influence the results.
 
 \section{Virtualisation}
 \label{chap:virtualisation}
@@ -39,15 +44,15 @@ Currently such a mechanism is not implemented and therefore no ticks of a simula
 The simulation framework virtualises the whole peer-to-peer network on one single host by using \textit{Docker}.
 The software \textit{Docker} runs the nodes as so-called containers, which are using the functionalities of the same kernel in an isolated manner.
 Hence, they do not interfere each other as long as the host system provides enough resources to them.
-In the case that the host system is underprovisoned and does not provide enough resources to the nodes the simulation results may be distorted.
+In the case that the host system is under-provisioned and does not provide enough resources to the nodes, the simulation results may be distorted.
 To resolve that problem the simulation scenario needs to be simplified or a better host machine needs to be used.
 
 The virtualisation of the network on one host machine has the advantage of an easy and manageable setup.
 As long as the host machine can scale vertically with the defined simulation scenario, there is no need to deploy a physically peer-to-peer network to simulate the scenario.
 Furthermore, since all nodes rely on the same kernel functionalities also all nodes use the same system time.
-This is especially helpful for the aggregation of the log files of all different containers, because it assures that the timestamps in the log lines actually happened in exactly this order.
+This is especially helpful for the aggregation of the log files of all different containers because it assures that the timestamps in the log lines actually happened in exactly this order.
 
-Other simulation technologies are not using virtualisation features and simulate the peer-to-peer networks with more abstract models such as numeric simulations and MDP's \cite{eyal2014majority, bahack2013theoretical, gervais2015tampering, nayak2016stubborn, sapirshtein2016optimal, gervais2016security}. Compared to these simulation technologies the introduced simulation framework has the advantage that already existing implementations, as in the case of this thesis the Bitcoin reference implementation \cite{bitcoin}, can be reused directly.
+Other simulation technologies are not using virtualisation features and simulate the peer-to-peer networks with more abstract models such as numeric simulations and MDP's \cite{eyal2014majority, bahack2013theoretical, gervais2015tampering, nayak2016stubborn, sapirshtein2016optimal, gervais2016security}. Compared to these simulation technologies the introduced simulation framework has the advantage that already existing implementations, as in the case of this thesis the Bitcoin reference implementation, can be reused directly.
 Hence, there is no significant implementation effort needed to simulate a certain blockchain protocol and the simulations reflect all implementation details by relying directly on the implemented code.
 
 \section{Configuration files}
