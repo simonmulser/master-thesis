@@ -30,7 +30,6 @@ The concept of a tick helps to have an upper bound for the simulation speed.
 This upper bound of a certain simulation scenario is reached when the execution time of at least one tick last longer than the tick duration itself.
 In that case, the temporal succession of the block events is disturbed, which can result in inaccurate or wrong results.
 In such a case the simulation speed should be lowered or the simulation scenario should be changed.
-The simulation framework itself states the number of times, when the execution of the events lasted longer than the tick duration, in the final report.
 
 Additionally, the usage of ticks would allow to speed up the simulation by cutting out empty ticks or ticks which do not influence the investigated results of the simulation.
 In that case, it needs to be defined when a certain event in a tick is over.
@@ -178,7 +177,7 @@ If the completion of the block events last longer then the tick duration, then t
 The case where the execution of block events last longer then the tick duration, should be a rare exception.
 If this happens more frequent the simulation scenario is configure too fast, which likely creates inaccurate results as explained in chapter \ref{chap:tick}.
 Thus, the defined scenario should be created with less block events per tick or a higher tick duration should be configured on simulation start.
-The simulation framework warns the user about the total amount of exception of this type in the final report.
+The simulation framework itself states the number of exceptions of this type in the final report.
 
 During the execution of the ticks a thread separately collects information about the current CPU and memory usage.
 For the CPU usage the thread queries periodically the \textit{/proc/stat} file which is showing how much time the CPU spent in a certain state. 
