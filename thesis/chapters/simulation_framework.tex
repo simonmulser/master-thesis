@@ -341,4 +341,39 @@ It is possible to pass all desired input arguments to the specific commands, but
 The \textit{multi-run} command accepts an input parameter denoting how often a run should be repeated ($repeat$).
 The simulation framework then creates all configuration files using the passed input arguments and subsequently executes the simulation $repeat$ times using the same configuration files as depicted in figure \ref{fig:flow_chart_multi_run}.
 
-\todo[inline]{You could also add some notes on ZFS and alignment - this is relevant for long time storage of simulation data. This is perfectly valid since this chapter is dealing with engineering questions anyway.}
+\section{Long-term storage of simulation data}
+
+During a simulation run, all nodes persist their data on the disk of the host machine.
+Most of the persisted data by a node are the blocks created during the simulation scenario.
+Since all nodes act independently, these blocks are furthermore replicated multiple times on the host.
+Thus, the amount of simulation data can be very large occupying multiple gigabytes on the host disk.
+To reduce the needed space for a long-term storage the replicated blocks can be deduplicated by using the file system \textit{ZFS}.
+The usage of deduplication trades off with a slower performance when persisting or retrieving files from a \textit{ZFS} system.
+Hence, a \textit{ZFS} file system may not be used during a simulation where a slow file system could impact the results of a simulation.
+
+To use deduplication for the created blocks the method to store the blocks is crucial.
+The nodes involved in the simulation persist their blocks in files with the name \textit{blk*.dat}, where the \textit{*} is an ongoing file number.
+These \textit{blk-files} have a fixed size and whenever a file is full a new file is allocated starting initially with one single file.
+During the simulation, the node persists the blocks according to their arrival order.
+Hence, the arrangement of the blocks in the files can vary between the nodes, because the blocks can arrive with a different order at a node.
+For example, when a fork happens, some nodes will persist block \textit{A} as next block, where other nodes will persist the competing block \textit{B} which results in different \textit{blk-files} between the nodes.
+These differing \textit{blk-files} cannot be deduplicated by \textit{ZFS} even though they contain the same blocks of the simulation.
+If \textit{ZFS} is configured to deduplicate newly stored files, it internally splits the files according to a pre-defined block size (to avoid confusion this block sizes will be called \textit{ZFS-block-size}) and checks if this block (\textit{ZFS-block}) is already stored by the file system.
+In the case that the \textit{ZFS-block} is already stored, \textit{ZFS} stores for the inserted file a reference to this block.
+In the other case where the ZFS-block is not known, \textit{ZFS} stores the new block and updates an internal table denoting the presence of this \textit{ZFS-block}.
+Hence, to fully deduplicate all blocks available multiple times in the \textit{blk-files}, the blocks need to be aligned with a multiple of the \textit{ZFS-block-size}.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption=Aligning the block size in the Bitcoin reference implementation for \textit{ZFS}, label={lst:align_zfs}, basicstyle=\ttfamily, captionpos=b]
+unsigned int nextPowerOfTwoExponent
+	= ceil(log2(nBlockSize + 8));
+unsigned int nextPowerOfTwo
+	= nextPowerOfTwoExponent > 9?
+		pow(2, nextPowerOfTwoExponent) : pow(2,9);
+nBlockSize = nextPowerOfTwo - 8;
+\end{lstlisting}
+\end{minipage}
+
+Listing \ref{lst:align_zfs} shows how this can be achieved in the Bitcoin reference implementation by setting the \textit{nBlockSize} in the file \textit{validation.cpp} to the next power of two.
+If the node now persists a block, the block occupies a power of two big space in the used \textit{blk-file}. Then afterwards the \textit{ZFS} file system is able to deduplicate the aligned block on the files system.
+The added and subtracted eight bytes in line 2 and 6 are an implementation detail in the Bitcoin reference implementation.
