@@ -1,15 +1,16 @@
 The simulation framework provides all needed functionalities to orchestrate a peer-to-peer network where the nodes are running the \textit{Bitcoin} reference implementation.
 The whole simulation runs on a single host using the virtualisation software \textit{Docker}.
-The software furthermore coordinates the block discovery in the network.
+The framework furthermore coordinates the block discovery in the network.
 Based on a sequence defined in a configuration file the software sends commands to the nodes which are then generating valid blocks.
 To be able to create blocks the nodes are executed in the \textit{regtest mode}, where the CPU-heavy proof-of-work is disabled, and the nodes are accepting a RPC-call from outside which lets them create a new block immediately.
 After a simulation run, the software parses the logs produced by the nodes and based on them the software generates a report which displays the key metrics of the simulation.
-\todo[inline]{go a little into the details what the rational behind this desgin was. eg. predefined sequence.}
 
-The remaining of this chapter starts with the sub-chapter \ref{chap:tick}, where the general concept of a tick is introduced.
-Afterwards in the chapter \ref{chap:config_files} the different configuration files are explained.
-In the chapter \ref{chap:simulation} the whole procedure of a simulation with the three main steps preparation, execution and post-processing is explained.
-Lastly, in the chapter \ref{chap:commands} the implemented commands to execute the simulation framework are listed.
+\todo[inline]{this should remain an introduction to the whole chapter (as all other chapters have an introductional paragraph). i extended the tick chapter and added the virtualisation chapter to explain why we did what.}
+
+%The remaining of this chapter starts with the sub-chapter \ref{chap:tick}, where the general concept of a tick is introduced.
+%Afterwards in the chapter \ref{chap:config_files} the different configuration files are explained.
+%In the chapter \ref{chap:simulation} the whole procedure of a simulation with the three main steps preparation, execution and post-processing is explained.
+%Lastly, in the chapter \ref{chap:commands} the implemented commands to execute the simulation framework are listed.
   
 \section{Tick}
 \label{chap:tick}
@@ -19,13 +20,39 @@ A tick represents a small time span containing information about which nodes sho
 Hence a tick forms an abstraction of a certain time span in the real time.
 All blocks which should be generated in this time span are aggregated into the corresponding tick.
 Since all blocks created in the same tick are considered to be created at the same time, a tick should never contain the information that one node creates multiple blocks.
+This fact is also respected by the script creating the \textit{ticks.csv} explained in chapter \ref{chap:ticks_command}.
 
-For a simulation run, multiple ticks are generated forming a sequence of ticks.
-This sequence is the simulation scenario for a particular simulation run.
+For a simulation run, multiple ticks are combined forming a sequence of ticks.
+In combination with two other configuration files, the tick sequence builds the simulation scenario for a particular simulation run.
 The exact duration of a tick is defined on execution time of the simulation and determines the actual speed of the simulation.
+
 The concept of a tick helps to have an upper bound for the simulation speed.
-An upper bound of a certain sequence of ticks is reached when the execution time of at least one tick last longer than the tick duration itself.
-In that case, the temporal succession of the block events is disturbed resulting in inaccurate or wrong results, and the simulation speed should be lowered.
+This upper bound of a certain simulation scenario is reached when the execution time of at least one tick last longer than the tick duration itself.
+In that case, the temporal succession of the block events is disturbed, which can result in inaccurate or wrong results.
+In such a case the simulation speed should be lowered or the simulation scenario should be changed.
+
+Additionally, the usage of ticks would allow to speed up the simulation by cutting out empty ticks or ticks which do not influence the investigated results of the simulation.
+In that case, it needs to be defined when a certain event in a tick is over.
+For example, block events can be considered to be over when all nodes received the whole block or heard about the block but did not requested it.
+If such a block event is over, all subsequent ticks until the next tick with a block event could be ignored because those ticks would not influence block related simulation results.
+Currently, such a mechanism is not implemented and therefore no ticks of a simulation scenario are ignored even though they are empty and would not influence the results.
+
+\section{Virtualisation}
+\label{chap:virtualisation}
+
+The simulation framework virtualises the whole peer-to-peer network on one single host by using \textit{Docker}.
+The software \textit{Docker} runs the nodes as so-called containers, which are using the functionalities of the same kernel in an isolated manner.
+Hence, they do not interfere each other as long as the host system provides enough resources to them.
+In the case that the host system is under-provisioned and does not provide enough resources to the nodes, the simulation results may be distorted.
+To resolve that problem the simulation scenario needs to be simplified or a better host machine needs to be used.
+
+The virtualisation of the network on one host machine has the advantage of an easy and manageable setup.
+As long as the host machine can scale vertically with the defined simulation scenario, there is no need to deploy a physically peer-to-peer network to simulate the scenario.
+Furthermore, since all nodes rely on the same kernel functionalities also all nodes use the same system time.
+This is especially helpful for the aggregation of the log files of all different containers because it assures that the timestamps in the log lines actually happened in exactly this order.
+
+Other simulation technologies are not using virtualisation features and simulate the peer-to-peer networks with more abstract models such as numeric simulations and MDP's \cite{eyal2014majority, bahack2013theoretical, gervais2015tampering, nayak2016stubborn, sapirshtein2016optimal, gervais2016security}. Compared to these simulation technologies the introduced simulation framework has the advantage that already existing implementations, as in the case of this thesis the Bitcoin reference implementation, can be reused directly.
+Hence, there is no significant implementation effort needed to simulate a certain blockchain protocol and the simulations reflect all implementation details by relying directly on the implemented code.
 
 \section{Configuration files}
 \label{chap:config_files}
@@ -51,7 +78,7 @@ Each row in the file reflects one node consisting of:
 	\item \textit{latency}: The latency  of the node in the peer-to-peer network.
 	The node will have this latency to all other nodes with the exact same latency.
 	For other connections the two different latencies are added.
-	Hence, two nodes, one node with 100 milliseconds of latency and one node with 50 milliseconds, will have 150 milliseconds of latency during the simulation.
+	Hence, two nodes, one node with 100 milliseconds of latency and one node with 50 milliseconds, will have 150 milliseconds of latency between each other during the simulation.
 	\item \textit{group}: Which group the node did belong to during the creation of the \textit{nodes.csv} by the script introduce in chapter \ref{chap:commands}.
 	During the actual execution of the simulation this parameter is ignored.
 \end{itemize}
@@ -85,15 +112,12 @@ Hence the length of lines in a \textit{ticks.csv} varies depending on the number
 The main functionality of the simulation framework is to coordinate a simulation based on the configuration files.
 The software uses therefore the high-level programming language \textit{Python} and the virtualisation software technology \textit{Docker}.
 \textit{Python} is mainly used to handle the configuration files and to execute \textit{Docker} and other binaries whenever necessary automatically.
-\textit{Docker} on the other side provides the needed capabilities to run the \textit{Bitcoin} reference implementation and other programs in virtual, lightweight containers on one single host.
-These containers are using the functionalities of the same kernel in an isolated manner and hence they do not interfere each other as long as the host system provides enough resources to them.
-The containers can also reuse the networking stack of the kernel, making possible to create a peer-to-peer network needed for the simulation.
-Furthermore by using \textit{Docker} all containers use the system time of the host machine.
-This is especially helpful for the aggregation of the log files of all different containers, because it assures that the timestamps in the log lines actually happened in exactly this order.
+\textit{Docker} on the other side provides the needed capabilities to run the \textit{Bitcoin} reference implementation and other programs in lightweight containers on one single host as explained in chapter \ref{chap:virtualisation}.
 	
 To execute a simulation the command \textit{simulate} (chapter \ref{chap:simulate_command}) can be used.
 In that case the configuration files need to be available on disk.
-The commands \textit{run} (chapter \ref{chap:run_command}) and \textit{multi-run} (chapter \ref{chap:multi_run_command}) provide another possibility to execute a simulation, creating all configuration files before starting the simulation. 
+The commands \textit{run} (chapter \ref{chap:run_command}) and \textit{multi-run} (chapter \ref{chap:multi_run_command}) provide another possibility to execute a simulation, creating all configuration files before starting the simulation.
+The simulation itself can be split up in the three phases preparation, execution and post-processing.
 
 \begin{figure}[t]
 \includegraphics[width=8cm]{overview_setup}
@@ -153,7 +177,7 @@ If the completion of the block events last longer then the tick duration, then t
 The case where the execution of block events last longer then the tick duration, should be a rare exception.
 If this happens more frequent the simulation scenario is configure too fast, which likely creates inaccurate results as explained in chapter \ref{chap:tick}.
 Thus, the defined scenario should be created with less block events per tick or a higher tick duration should be configured on simulation start.
-The simulation framework warns the user about the total amount of exception of this type in the final report.
+The simulation framework itself states the number of exceptions of this type in the final report.
 
 During the execution of the ticks a thread separately collects information about the current CPU and memory usage.
 For the CPU usage the thread queries periodically the \textit{/proc/stat} file which is showing how much time the CPU spent in a certain state. 
@@ -323,4 +347,40 @@ It is possible to pass all desired input arguments to the specific commands, but
 The \textit{multi-run} command accepts an input parameter denoting how often a run should be repeated ($repeat$).
 The simulation framework then creates all configuration files using the passed input arguments and subsequently executes the simulation $repeat$ times using the same configuration files as depicted in figure \ref{fig:flow_chart_multi_run}.
 
-\todo[inline]{You could also add some notes on ZFS and alignment - this is relevant for long time storage of simulation data. This is perfectly valid since this chapter is dealing with engineering questions anyway.}
+\section{Long-term storage of simulation data}
+
+During a simulation run, all nodes persist their data on the disk of the host machine.
+Most of the persisted data by a node are the blocks created during the simulation scenario.
+Since all nodes act independently, these blocks are furthermore replicated multiple times on the host.
+Thus, the amount of simulation data can be very large occupying multiple gigabytes on the host disk.
+To reduce the needed space for a long-term storage the replicated blocks can be deduplicated by using the file system \textit{ZFS}.
+The usage of deduplication trades off with a slower performance when persisting or retrieving files from a \textit{ZFS} system.
+Hence, a \textit{ZFS} file system may not be used during a simulation where a slow file system could impact the results of a simulation.
+
+To use deduplication for the created blocks the method to store the blocks is crucial.
+The nodes involved in the simulation persist their blocks in files with the name \textit{blk*.dat}, where the \textit{*} is an ongoing file number.
+These \textit{blk-files} have a fixed size and whenever a file is full a new file is allocated starting initially with one single file.
+During the simulation, the node persists the blocks according to their arrival order.
+Hence, the arrangement of the blocks in the files can vary between the nodes, because the blocks can arrive with a different order at a node.
+For example, when a fork happens, some nodes will persist block \textit{A} as next block, where other nodes will persist the competing block \textit{B} which results in different \textit{blk-files} between the nodes.
+These differing \textit{blk-files} cannot be deduplicated by \textit{ZFS} even though they contain the same blocks of the simulation.
+If \textit{ZFS} is configured to deduplicate newly stored files, it internally splits the files according to a pre-defined block size (to avoid confusion this block sizes will be called \textit{ZFS-block-size}) and checks if this block (\textit{ZFS-block}) is already stored by the file system.
+In the case that the \textit{ZFS-block} is already stored, \textit{ZFS} stores for the inserted file a reference to this block.
+In the other case where the ZFS-block is not known, \textit{ZFS} stores the new block and updates an internal table denoting the presence of this \textit{ZFS-block}.
+Hence, to fully deduplicate all blocks available multiple times in the \textit{blk-files}, the blocks need to be aligned with a multiple of the \textit{ZFS-block-size}.
+
+\begin{minipage}{\linewidth}
+\begin{lstlisting}[caption=Aligning the block size in the Bitcoin reference implementation for \textit{ZFS}, label={lst:align_zfs}, basicstyle=\ttfamily, captionpos=b]
+unsigned int nextPowerOfTwoExponent
+	= ceil(log2(nBlockSize + 8));
+unsigned int nextPowerOfTwo
+	= nextPowerOfTwoExponent > 9?
+		pow(2, nextPowerOfTwoExponent) : pow(2,9);
+nBlockSize = nextPowerOfTwo - 8;
+\end{lstlisting}
+\end{minipage}
+
+Listing \ref{lst:align_zfs} shows how this can be achieved in the Bitcoin reference implementation by setting the \textit{nBlockSize} in the file \textit{validation.cpp} to the next power of two.
+The blocks persisted by nodes implementing the introduced patch are then occupying a power of two big space in the used \textit{blk-file}.
+If now the \textit{ZFS} file system persists a \textit{blk-file} all blocks are aligned and can be deduplicate if they are already stored in the file system.
+The added and subtracted eight bytes in line 2 and 6 are an implementation detail in the Bitcoin reference implementation.

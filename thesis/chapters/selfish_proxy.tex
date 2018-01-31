@@ -12,12 +12,14 @@ During the simulation run, the proxy mimics the behaviour of a normal \textit{Bi
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
-The topology of the peer-to-peer network is solely established by the simulation framework.
+In the current implementation the selfish proxy can only eclipse one single node.
+In the case where the proxy could eclipse multiple nodes to build a private chain, the selfish proxy could also be used as a stand-alone man-in-the-middle attacking tool eclipsing a larger amount of nodes.
+
+The topology of the peer-to-peer network in a simulation run is solely established by the simulation framework.
 First, the software starts the selfish proxy which then just listens for new incoming connections.
 Afterwards, the normal \textit{Bitcoin} nodes are started with the respective \textit{-connect} parameters set.
 If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the \textit{Bitcoin} node simply connects to the listening proxy.
 The proxy accepts the connection and behaves like a normal \textit{Bitcoin} node during the whole simulation run by obeying the \textit{Bitcoin} communication protocol.
-\todo[inline]{Is it possible to have multiple eclipsed nodes? I guess not - but then the selfish mining proxy can directly be used as an attack tool by a MiTM attacker. Maybe this should be mentioned}
 
 \begin{figure}
 	\centering
@@ -214,9 +216,6 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 The modifications of the selfish mining strategy can lead to even more relative gain for the selfish miner depending on the actual computational share and the parameter $\gamma$.
 Furthermore, the strategies can be combined and since the trail stubbornness can be parametrised the build an infinite strategy space.
 
-\todo[inline]{Some comment as in Introduction, explain relative gain}
-Furthermore, the strategies can be combined and since the trail stubbornness can be parametrized the build an infinite strategy space
-
 \subsection{Algorithm}
 
 The selfish mining strategies and its modifications are implemented in selfish proxy by a simple algorithm using normal control flow structures.
@@ -232,8 +231,6 @@ Hence, this part of the algorithm reflects the states 0, 0' and 0'' of the state
 In the lines 2 to 6, the state 0 is treated by simply looking at the origin of the last block.
 If the block was mined by the honest network, then the proxy just adopts to the public chain.
 In the other case, the block was found by the eclipsed node, and the proxy just waits for the next block to be discovered.
-
-The lines 7 to 17 are covering the 0' and 0'' states.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption=Part of the selfish mining algorithm where private lead is zero, label={lst:algo}, basicstyle=\ttfamily, captionpos=b]
@@ -257,6 +254,7 @@ if private_lead == 0:
 \end{lstlisting}
 \end{minipage}
 
+The lines 7 to 17 are covering the 0' and 0'' states.
 In the case the last block was found by the honest network, the proxy adopts to the public chain except the algorithm was configured with trail stubbornness.
 Then the proxy waits and hopes to catch up with the public chain at a later point (line 10).
 The other case, implemented from line 7 to 17, reflects the fact when the block is found by the eclipsed node.
