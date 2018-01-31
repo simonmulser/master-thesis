@@ -37,13 +37,18 @@ The mining strategies based on trail stubbornness are reflecting the idea to eve
 	Trail stubbornness is defined with an integer denoting how many blocks the strategy should allow the selfish miner to trail back.
 \end{itemize}
 
-The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and are leading to even more relative gain compared to honest miners\cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
+The strategy space for a selfish miner is practically endless and combinations of the aforementioned strategies are possible and are leading to even more relative gain compared to honest miners \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
+
+\todo[inline]{extend to explain stale block rate}
 
 To find the best strategy for a given mining power share $\alpha$ and connectivity $\gamma$ researchers used different methodologies.
-\cite{gervais2015tampering, nayak2016stubborn} used numeric simulations of paths in the state machine to find optimal selfish mining strategies.
-\cite{sapirshtein2016optimal, gervais2016security} on the other hand used MDPs based on a state machine to find strategies with the most relative gain.
-The basic structure of the used state machines is for all publications the same.
-To further validate their results \cite{eyal2014majority, sapirshtein2016optimal} used a closed-source simulation.
+\cite{eyal2014majority, sapirshtein2016optimal} used a closed-source simulations which we cannot discuss here.
+Other researchers used numeric simulations of paths in the state machine to find optimal selfish mining strategies \cite{gervais2015tampering, nayak2016stubborn}.
+Lastly, \cite{sapirshtein2016optimal, gervais2016security} used MDPs based on a state machine to find strategies with the most relative gain.
+The basic structure of the used state machines is for all publications the same, despite the MDP introduced by \cite{gervais2016security}.
+They additionally used in their MDP the so-called stale block rate which denotes the ratio between blocks from the consensus chain and stale blocks.
+This metric accounts for the most important parameters of a blockchain protocol such as block sizes, block intervals, network delays, information propagation mechanisms and network configuration and can be seen as a general security parameter of a blockchain protocol.
+The higher the stale block rate, the less secure the blockchain protocol is \cite{gervais2016security}.
 
 Besides using variations of the selfish mining strategies, the attack can also be combined with other attacks to achieve better results \cite{gervais2016security, sapirshtein2016optimal, nayak2016stubborn, gervais2015tampering}.
 If the eclipse attack is used in combination with selfish mining the victim contributes its mining power to the private chain and hence, strengthens the position of the selfish miner \cite{nayak2016stubborn, gervais2016security}.
