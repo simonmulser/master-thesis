@@ -289,7 +289,7 @@ The other two commands, \textit{run} and \textit{multi-run}, are aggregations of
 \subsection{\textit{nodes} command} \label{chap:nodes_command}
 
 The \textit{nodes} command can be executed with so-called node groups (eg. \textit{node\_group\_a}) as input parameters.
-A node group represents a group with a certain amount of nodes sharing the same node type, Docker image and latency.
+A node group represents a group with a certain amount of nodes sharing the same node type, \textit{Docker} image and latency.
 Alongside these attributes a node group specifies a certain share of the computational power in the network.
 On execution the simulation framework parses all passed node groups and checks if the shares defined for each group are summing up to a total of 100\%.
 In that case, the framework persists the nodes of each group in a file called \textit{node.csv}, where the share of the computational power of the group is equally distributed over all members of the respective group.
