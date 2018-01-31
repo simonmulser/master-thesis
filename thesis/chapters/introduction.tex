@@ -9,7 +9,7 @@ Additionally, the grouping of the transactions in blocks creates a total order a
 After a block is found by a miner, all other miners should adopt to this new tip of the chain and try to find a new block on top.
 This mining process is considered as incentive compatible as long as no single miner has more than 50\% of the total computation power.
 
-\cite{eyal2014majority} showed that also miners under 50\% have an incentive to not follow the protocol as described depending on their connectivity and share of computation power in the peer-to-peer network.
+\cite{eyal2014majority} showed that miners under 50\% have an incentive to not follow the protocol as described depending on their connectivity and share of computation power in the peer-to-peer network.
 By conducting a so-called selfish mining strategy a miner can obtain relatively more revenue than its actual proportion of computational power in the network.
 In general, the miner simply does not share found blocks with the others and secretly mines on its own chain.
 If its chain is longer then the public chain, it is able to overwrite all blocks found by the honest miners.
@@ -17,7 +17,7 @@ If the two chains have the same length the private miner also publishes its bloc
 Now the network is split into two parts where one part is mining on the public tip and the other part is mining on the now public-private tip.
 In general, the selfish miner achieves that the other miners are wasting their computational power on blocks which will not end up in the longest chain and thus is able to increase its relative share of mining rewards.
 
-\todo[inline]{explained relative gain/total gain}
+\todo[inline]{paragraph about relative gain/total gain}
 
 Even though the selfish miner can increase is relative gain in respect to the other miners, its total gain is lower than it would behave honest.
 This is possible because the execution of the selfish mining algorithm by the selfish miner decreases the amount of blocks which end up in the longest chain.
@@ -41,7 +41,7 @@ All other above-mentioned methodologies have the following drawbacks:
 Since there is no official specification of the Bitcoin protocol it is hard to capture all details.
 Furthermore, it is hard to keep the simulation framework up-to-date because of the ongoing development of the protocol.
 \item Abstraction of the whole network layer of the peer-to-peer network.
-The available simulations abstract the network topology by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by using the stale block rate as input for the MDP \cite{gervais2016security}.
+The available simulations abstract the network topology by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by additionally using the stale block rate as input for the MDP \cite{gervais2016security}.
 Hence the highly abstract the presence of network delays and natural forks of the chain.
 \end{itemize}
 
@@ -58,10 +58,11 @@ The introduced simulation approach is then used to examine the following selfish
 \end{itemize}
 
 These strategies are executed by a selfish mining node in a defined, realistic simulation scenario with a certain amount of participating nodes.
-To gain a holistic insight different distributions of computation power between the nodes are used.
+To gain a holistic insight different distributions of computation power between the selfish miner and the public network are used.
 
-The result of the executed simulations shows which strategy is the best strategy for a certain distribution of mining power between the selfish miner and the honest network.
-Furthermore, the relative and total gain of the selfish miner in the different simulation scenarios is observed. The outcome of the thesis is further analysed by answering the following two research questions:
+The result of the executed simulations shows which strategy is the best strategy for a certain distribution of mining power in the simulation scenario.
+Furthermore, the relative and total gain of the selfish miner is observed and compared with previous research.
+The evaluation of the simulation results is sustained with following two research questions:
 
 \begin{itemize}
 	\item \textbf{RQ1:} Do the simulations of selfish mining with the proposed software solutions show an increase of the total and relative gain for the selfish miner compared to the normal, honest mining behaviour?
@@ -71,7 +72,7 @@ Furthermore, the relative and total gain of the selfish miner in the different s
 
 
 An additional outcome of the thesis is a general simulation framework.
-The framework allows an accurate and deterministic simulation of the blockchain by using directly the reference implementation and a realistic network topology.
+The implemented framework allows an accurate and deterministic simulation of the blockchain by using directly the Bitcoin reference implementation and a realistic network topology.
 Hence, the simulation framework could not only be used to simulate selfish mining attacks but could for example be used to simulate other attacks or new protocol versions of Bitcoin. 
 Since many other cryptocurrencies are derived from Bitcoin, they simulation framework could also be utilized to simulate their behaviour and properties.
 
@@ -90,8 +91,8 @@ This is achieved by setting the connections from the nodes by the simulation fra
 Normally Bitcoin nodes share their connections with other nodes over the Bitcoin protocol and try to improve the connectivity over time.
 
 Subsequently, the determinism of the simulation framework is evaluated.
-Therefore a deterministic behaviour and a realistic reference scenario reflecting the Bitcoin network is defined.
-The results of executing the scenario with the framework show then that the framework behaves deterministically as defined. 
+Therefore a deterministic behaviour and a realistic reference scenario reflecting the Bitcoin network are defined.
+The results of executing the scenario with the framework shows then that the framework behaves deterministically as defined. 
 
 In the next step, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \cite{nayak2016stubborn} and \cite{eyal2014majority} are implemented.
 This is achieved by implementing a proxy which eclipses a normal Bitcoin client from the other nodes in the network.
