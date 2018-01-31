@@ -381,5 +381,6 @@ nBlockSize = nextPowerOfTwo - 8;
 \end{minipage}
 
 Listing \ref{lst:align_zfs} shows how this can be achieved in the Bitcoin reference implementation by setting the \textit{nBlockSize} in the file \textit{validation.cpp} to the next power of two.
-If the node now persists a block, the block occupies a power of two big space in the used \textit{blk-file}. Then afterwards the \textit{ZFS} file system is able to deduplicate the aligned block on the files system.
+The blocks persisted by nodes implementing the introduced patch are then occupying a power of two big space in the used \textit{blk-file}.
+If now the \textit{ZFS} file system persists a \textit{blk-file} all blocks are aligned and can be deduplicate if they are already stored in the file system.
 The added and subtracted eight bytes in line 2 and 6 are an implementation detail in the Bitcoin reference implementation.
