@@ -1,4 +1,4 @@
-Already in the year 2010 the user \textit{ByteCoin} described the idea of selfish mining in the Bitcoin forum \textit{bitcointalk} \cite{ByteCoin2010}.
+Already in the year 2010, the user \textit{ByteCoin} described the idea of selfish mining in the Bitcoin forum \textit{bitcointalk} \cite{ByteCoin2010}.
 He provided simulation results of the attack which at that time was called \textit{mining cartel attack}.
 Nevertheless, the discussions in the thread never caught fire and no further investigations or countermeasures were taken by the community \cite{BitcoinTalk2010, bahack2013theoretical}.
 
@@ -42,7 +42,7 @@ The strategy space for a selfish miner is practically endless and combinations o
 \todo[inline]{extend to explain stale block rate}
 
 To find the best strategy for a given mining power share $\alpha$ and connectivity $\gamma$ researchers used different methodologies.
-\cite{eyal2014majority, sapirshtein2016optimal} used a closed-source simulations which we cannot discuss here.
+\cite{eyal2014majority, sapirshtein2016optimal} used closed-source simulations which we cannot discuss here.
 Other researchers used numeric simulations of paths in the state machine to find optimal selfish mining strategies \cite{gervais2015tampering, nayak2016stubborn}.
 Lastly, \cite{sapirshtein2016optimal, gervais2016security} used MDPs based on a state machine to find strategies with the most relative gain.
 The basic structure of the used state machines is for all publications the same, despite the MDP introduced by \cite{gervais2016security}.
@@ -61,14 +61,14 @@ The operational costs of unsuccessful double-spending can be seen as low because
 
 Last but not least also the prevention of selfish mining is part of the current work in selfish mining research \cite{eyal2014majority, billah2015one, solat2016zeroblock, zhang2017publish}.
 A backwards-compatible patch to mitigate selfish mining is uniform tie-breaking \cite{eyal2014majority}.
-This means whenever a node receives two blocks of the same height it randomly select on of the blocks to mine on.
+This means whenever a node receives two blocks of the same height it randomly select one of the blocks to mine on.
 \cite{eyal2014majority} showed that this would raise the profit threshold to 25\% of the computational power and hence mitigating selfish mining.
 The drawback of this proposed change is that it would increase the connectivity of badly connected attackers to almost 50\% with no actual effort for them.
 Ethereum, the currently second largest cryptocurrency by market capitalization \cite{marketcap2017}, has implemented uniform tie-breaking as a countermeasure against selfish mining \cite{gervais2016security, unifromtiebreakingethereum}.
 Another countermeasure foresees unforgeable timestamps to secure Bitcoin against selfish mining \cite{billah2015one}.
 This countermeasure would make all pre-mined blocks of the selfish miner invalid after a certain amount of time.
 The implementation of this patch would require random beacons and hence introduce complexity and a new attack vector \cite{billah2015one}.
-\cite{zhang2017publish} proposes backward-compatible countermeasure by neglecting blocks that are not published in time and allows incorporation of competing blocks in the chain similar to Ethereum's uncle blocks \cite{wood2014ethereum}.
+\cite{zhang2017publish} proposes backwards-compatible countermeasure by neglecting blocks that are not published in time and allows incorporation of competing blocks in the chain similar to Ethereum's uncle blocks \cite{wood2014ethereum}.
 This enables a new fork-resolving policy where a block always contributes to neither or both branches of the fork \cite{zhang2017publish}.
 All of this mentioned countermeasures are not planned to be implemented or implemented in Bitcoin \cite{bitcoin, bitcoinbip}.
 The countermeasures against selfish mining are forming an interesting research field but are not in the focus of this thesis.

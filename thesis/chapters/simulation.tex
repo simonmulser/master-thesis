@@ -40,7 +40,7 @@ python3 simcoin.py multi-run
 
 \section{Simulation}
 
-The previously defined selfish mining scenarios are executed on a \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}.
+The previously defined selfish mining scenarios are executed on an \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}.
 Each scenario gets executed three times by using the \textit{multi-run} command as shown in line 1 and 2 in the listing \ref{lst:simulation_cmd}.
 To extract a particular metric from the multiple executions of a scenario, the simulation with the median stale block rate is used.
 Since the simulation framework can not behave perfectly deterministic due its architecture, the median provides a robust method against possible outliers and hence, more accurate results are achieved.
@@ -128,7 +128,7 @@ Since in that simulation the computational share was always distributed evenly a
 In figure \ref{fig:relative_block_share} the relative revenue, given a particular computation share and selfish mining strategy, is shown.
 The graph shows that the two strategies selfish mining with \textit{lead stubborn, equal-fork stubborn} (\textit{L, F}) and selfish mining with all three modifications (\textit{L, F, T\textsubscript{1}}) are the worst performing strategies.
 The relative share of accepted blocks of the two strategies stays clearly under the relative proportion which could be obtained by behaving honestly.
-Also with an increase of the computational power the efficiency of the two selfish strategies is not amplified and the curve shows a linear progression.
+Also with an increase of the computational power, the efficiency of the two selfish strategies is not amplified and the curve shows a linear progression.
 The other six, better performing strategies are all exhibiting a similar behaviour.
 The performance of these strategies is intensified with the augmentation of the computational share underlined by a concave curve.
 Overall all selfish mining strategies are performing poorly and only with a computational share of about 40\% the six better performing strategies can retain a more significant share than the share obtained behaving honestly.

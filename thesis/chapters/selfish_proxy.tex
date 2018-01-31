@@ -12,7 +12,7 @@ During the simulation run, the proxy mimics the behaviour of a normal Bitcoin no
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
-In the current implementation the selfish proxy can only eclipse one single node.
+In the current implementation, the selfish proxy can only eclipse one single node.
 In the case where the proxy could eclipse multiple nodes to build a private chain, the selfish proxy could also be used as a stand-alone man-in-the-middle attacking tool eclipsing a larger amount of nodes.
 
 The topology of the peer-to-peer network in a simulation run is solely established by the simulation framework.
@@ -30,7 +30,7 @@ The proxy accepts the connection and behaves like a normal Bitcoin node during t
 
 The implementation of all network related functionalities of the selfish proxy is based on the two open-source libraries \textit{pycoin} \cite{pycoin} and \textit{python-bitcoinlib} \cite{python-bitcoinlib}.
 The library \textit{pycoin} provides simple networking utilities to connect to other Bitcoin nodes and to manage those connections. 
-The \textit{python-bitcoinlib} library on the other hand implements functionalities to serialise and de-serialise Bitcoin network messages.
+The \textit{python-bitcoinlib} library, on the other hand, implements functionalities to serialise and de-serialise Bitcoin network messages.
 
 \section{Chain}
 
@@ -51,7 +51,7 @@ The block origin is a simple enumeration if the block was received from the hone
 The \textit{transfer\_allowed} variable determines if the transfer of a block is allowed and is initially always set to \textit{False}.
 Depending on the selfish mining strategy the block may be relayed to the other nodes at some later point in time changing the boolean to \textit{True}.
 These two variables are stored to be able to distinguish between the public chain, the current longest chain known to the honest network and the private chain, the current longest chain known to  the eclipsed node.
-For example to determine the current private chain all blocks originated by the eclipsed node and all blocks with \textit{transfer\_allowed} set to \textit{True} are used.
+For example, to determine the current private chain all blocks originated by the eclipsed node and all blocks with \textit{transfer\_allowed} set to \textit{True} are used.
 The two views of the chain are essential for the selfish mining algorithm to decide which action to take and hence when to relay which block to the other side of the network.
 
 \begin{figure}
@@ -79,7 +79,7 @@ If the chain does not provide all needed bocks, then only the available blocks a
 \textit{Node\_a}, after it received the \textit{get\_headers}, will search the block hashes from the block locator array in its own longest chain starting with the highest block.
 Once a block hash matches a block in the longest chain of \textit{node\_a}, \textit{node\_a} collects all block headers after the matched block in a \textit{headers} message and sends the message back to the proxy (3.a).
 In the normal case the proxy trails just one block behind the highest block known by \textit{node\_a}, hence the headers message will contain only one single block header.
-In the usual cases the proxy actually felt more then one block behind and \textit{node\_a} will send multiple block headers back to the proxy.
+In the usual cases, the proxy actually felt more than one block behind and \textit{node\_a} will send multiple block headers back to the proxy.
 Since the proxy only needs block headers to update the chain, it can immediately update with the received headers the whole chain to the newest tip known tho the \textit{node\_a}.
 
 The \textit{get\_data} message (2.b) sent by the proxy just contains the block hash of the desired block.
@@ -132,7 +132,7 @@ To easier track the changes between the two chains an integer variable called pr
 A positive lead \textit{n} denotes an advantage of \textit{n} blocks of the private chain over the chain of the honest network.
 Conversely, a negative lead \textit{n} stands for a \textit{n} block lag of the eclipsed node over the public chain.
 Furthermore, there exist positive leads annotated with an apostrophe denoting that at the height of the public chain a block race happens.
-In this block race the possibility that the private chain is extended on the height of the public chain is $\gamma$ and the probability that the public chain gets extended is $1 - \gamma$.
+In this block race, the possibility that the private chain is extended to the height of the public chain is $\gamma$ and the probability that the public chain gets extended is $1 - \gamma$.
 Lastly, a private lead of zero can be annotated with two apostrophes expressing that both chains have the same height but everyone is mining on his own chain.
 
 \subsection{Actions}
@@ -174,7 +174,7 @@ Figure \ref{fig:stubborn_mining} shows all strategies as a state machine where t
 The labels $\alpha$ and $\beta$ used in the transitions are describing the probability that either the eclipsed node or the honest network finds a block.
 The variable $\gamma$ represents the likelihood that the part of the honest network which mines on the private chain finds a block.
 
-In the normal selfish mining strategy two possible cases can occur in state \textit{0}.
+In the normal selfish mining strategy, two possible cases can occur in state \textit{0}.
 If the honest network finds a block, then the selfish miner immediately adopts to the public chain and hence remains in the state \textit{0}.
 In the other case where the selfish miner finds a block, the state 1 is reached because the selfish miner does not share the block with the honest network.
 The same happens if the selfish miner finds more blocks.
@@ -184,7 +184,7 @@ If then the honest network honest network finds a block the selfish miner immedi
 Any node in the honest block either chooses the private-public or the public block to mine on top depending which block it sees first.
 The block race is dissolved after any node in the network finds a block.
 If the honest network finds a block, then the selfish miner adopts to the new tip.
-In the other case where the selfish miner finds a block it immediately sends out the block to win the race.
+In the other case where the selfish miner finds a block, it immediately sends out the block to win the race.
 In both cases, the state \textit{0} is reached again.
 Lastly, if the private lead is two and the honest network finds a block then the selfish miner immediately publishes the two blocks.
 This overrides the newly created block by the honest network, and the state \textit{0} is reached.
@@ -206,7 +206,7 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 	Thus the strategy compromises the idea to keep the honest network split over two chains as long as possible.
 	\item \textbf{Trail stubborn mining (\textit{T})}:
 	In trail stubborn mining, the selfish miner allows the private chain to even trail behind the public chain.
-	If the block race in state \textit{0'} is won by the honest network, the selfish miner does not adopt the public chain and trails back leading into state \textit{-1}.
+	If the block race in state \textit{0'} is won by the honest network, the selfish miner does not adopt the public chain and trails back leading into the state \textit{-1}.
 	In the case that the selfish miner can catch up by creating a new block the state \textit{0''} where both chains have the same length.
 	The trail stubborn strategy finally pays off when the selfish miner finds another block and can override the public chain with the private chain.
 	Trail stubbornness is parametrised with an integer \textit{n} determining how many blocks the private chain is allowed to trail behind the public chain.
