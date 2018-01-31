@@ -1,4 +1,4 @@
-The simulation framework provides all needed functionalities to orchestrate a peer-to-peer network where the nodes are running the \textit{Bitcoin} reference implementation.
+The simulation framework provides all needed functionalities to orchestrate a peer-to-peer network where the nodes are running the Bitcoin reference implementation.
 The whole simulation runs on a single host using the virtualisation software \textit{Docker}.
 The framework furthermore coordinates the block discovery in the network.
 Based on a sequence defined in a configuration file the software sends commands to the nodes which are then generating valid blocks.
@@ -112,7 +112,7 @@ Hence the length of lines in a \textit{ticks.csv} varies depending on the number
 The main functionality of the simulation framework is to coordinate a simulation based on the configuration files.
 The software uses therefore the high-level programming language \textit{Python} and the virtualisation software technology \textit{Docker}.
 \textit{Python} is mainly used to handle the configuration files and to execute \textit{Docker} and other binaries whenever necessary automatically.
-\textit{Docker} on the other side provides the needed capabilities to run the \textit{Bitcoin} reference implementation and other programs in lightweight containers on one single host as explained in chapter \ref{chap:virtualisation}.
+\textit{Docker} on the other side provides the needed capabilities to run the Bitcoin reference implementation and other programs in lightweight containers on one single host as explained in chapter \ref{chap:virtualisation}.
 	
 To execute a simulation the command \textit{simulate} (chapter \ref{chap:simulate_command}) can be used.
 In that case the configuration files need to be available on disk.
@@ -137,13 +137,13 @@ Afterwards based on the two configuration files \textit{nodes.csv} and \textit{n
 Listing \ref{lst:docker_create} shows how \textit{Docker} is used to create a container, which executes \textit{bitcoind} on start-up.
 In line 2 the unique IP of the container is set by using the \textit{-{}-ip} argument.
 Line 3 shows the usage of a so-called \textit{Docker volume} to mount the folder \textit{data/run-10/node-5/} into the container's folder \textit{/data/regtest}.
-By running \textit{bitcoind} in \textit{regtest mode} (line 6) and setting the data directory of \textit{bitcoind} to \textit{/data} (line 7) \textit{Bitcoin} persists all relevant data into \textit{/data/regtest}.
+By running \textit{bitcoind} in \textit{regtest mode} (line 6) and setting the data directory of \textit{bitcoind} to \textit{/data} (line 7) Bitcoin persists all relevant data into \textit{/data/regtest}.
 Hence all the data persisted by \textit{bitcoind} under \textit{/data/regtest} will actually be persisted under \textit{data/run-10/node-5/} on the host machine and is therefore still available after the destruction of the container.
 In line 8 we define to which other nodes the node should connect to by specifying their IP.
-By using the \textit{-connect} parameters the \textit{Bitcoin} reference implementation automatically stops to listen for incoming connections.
+By using the \textit{-connect} parameters the Bitcoin reference implementation automatically stops to listen for incoming connections.
 Since this is needed to accept incoming connections, it is re-enabled in line 9 by setting \textit{-listen} to 1.
 
-Lastly, after all nodes are spawned, an RPC-connection to the \textit{Bitcoin} API running in each node is established by using the library \textit{python-bitcoinlib}.
+Lastly, after all nodes are spawned, an RPC-connection to the Bitcoin API running in each node is established by using the library \textit{python-bitcoinlib}.
 These connections are later used to directly send commands to the nodes.
 
 \begin{minipage}{\linewidth}
@@ -164,7 +164,7 @@ docker run
 \label{chap:simulation_execution}
 
 In the execution phase the simulation framework iterates over each tick from the \textit{ticks.csv}.
-If a tick contains a block event, the framework calls \textit{generate} on the \textit{Bitcoin} API of the specific node to generate a new block.
+If a tick contains a block event, the framework calls \textit{generate} on the Bitcoin API of the specific node to generate a new block.
 Since all nodes are running in \textit{regtest mode} the proof-of-work is deactivated and the block can be created immediately.
 Some ticks may contain multiple block events.
 In this case the block events are executed one after another always waiting for the block hash to be returned by the nodes.
@@ -211,8 +211,8 @@ These log line types are:
    \item \textit{RPCExceptionEventLine}: Log line denoting an exception occurred while using the RPC-connection to a node.
 \end{itemize}
 
-The log lines \textit{BlockGenerateLine}, \textit{BlockStatsLine}, \textit{UpdateTipLine}, \textit{PeerLogicValidationLine}, \textit{BlockReconstructLine} and \textit{BlockReceivedLine} are all produced by nodes executing \textit{Bitcoin} where on the other hand \textit{TickLine}, \textit{BlockExceptionLine} and \textit{RPCExceptionEventLine} are created by the simulation framework itself.
-Furthermore, the \textit{BlockGenerateLine} log line was added especially for the simulation framework to the \textit{Bitcoin} reference implementation.
+The log lines \textit{BlockGenerateLine}, \textit{BlockStatsLine}, \textit{UpdateTipLine}, \textit{PeerLogicValidationLine}, \textit{BlockReconstructLine} and \textit{BlockReceivedLine} are all produced by nodes executing Bitcoin where on the other hand \textit{TickLine}, \textit{BlockExceptionLine} and \textit{RPCExceptionEventLine} are created by the simulation framework itself.
+Furthermore, the \textit{BlockGenerateLine} log line was added especially for the simulation framework to the Bitcoin reference implementation.
 Normally the reference implementation does not create a log line containing the block hash when it creates a new block.
 To circumvent this fact, a log line was added to the reference implementation to persist the event of the block creation including a hash of the block.
 

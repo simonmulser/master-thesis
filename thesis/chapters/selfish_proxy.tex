@@ -1,6 +1,6 @@
-The selfish proxy is a node in the peer-to-peer network which performs selfish mining in collaboration with a connected, eclipsed \textit{Bitcoin} node.
+The selfish proxy is a node in the peer-to-peer network which performs selfish mining in collaboration with a connected, eclipsed Bitcoin node.
 Together the two nodes are forming a selfish miner as shown in figure \ref{fig:selfish_proxy}.
-The proxy implements parts of the \textit{Bitcoin} communication protocol and requests all blocks created either by the honest network or by the eclipsed node.
+The proxy implements parts of the Bitcoin communication protocol and requests all blocks created either by the honest network or by the eclipsed node.
 With the retrieved blocks the selfish proxy recreates the chain locally and whenever the public or the private chain changes the node executes the configured selfish mining algorithm.
 Depending on the outcome of the selfish mining algorithm the proxy afterwards relays blocks to the other part of the network.
 With this withholding method, the selfish proxy can mimic different selfish mining strategies without creating a single block.
@@ -8,7 +8,7 @@ With this withholding method, the selfish proxy can mimic different selfish mini
 \section{Network}
 
 The selfish proxy is a normal member of the peer-to-peer network and is also executed as a \textit{Docker} container.
-During the simulation run, the proxy mimics the behaviour of a normal \textit{Bitcoin} node so that all nodes connected to proxy think they are connected to a normal peer.
+During the simulation run, the proxy mimics the behaviour of a normal Bitcoin node so that all nodes connected to proxy think they are connected to a normal peer.
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
@@ -17,9 +17,9 @@ In the case where the proxy could eclipse multiple nodes to build a private chai
 
 The topology of the peer-to-peer network in a simulation run is solely established by the simulation framework.
 First, the software starts the selfish proxy which then just listens for new incoming connections.
-Afterwards, the normal \textit{Bitcoin} nodes are started with the respective \textit{-connect} parameters set.
-If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the \textit{Bitcoin} node simply connects to the listening proxy.
-The proxy accepts the connection and behaves like a normal \textit{Bitcoin} node during the whole simulation run by obeying the \textit{Bitcoin} communication protocol.
+Afterwards, the normal Bitcoin nodes are started with the respective \textit{-connect} parameters set.
+If such a normal node has the IP of the selfish proxy set in a \textit{-connect} parameter, then the Bitcoin node simply connects to the listening proxy.
+The proxy accepts the connection and behaves like a normal Bitcoin node during the whole simulation run by obeying the Bitcoin communication protocol.
 
 \begin{figure}
 	\centering
@@ -29,8 +29,8 @@ The proxy accepts the connection and behaves like a normal \textit{Bitcoin} node
 \end{figure}
 
 The implementation of all network related functionalities of the selfish proxy is based on the two open-source libraries \textit{pycoin} \cite{pycoin} and \textit{python-bitcoinlib} \cite{python-bitcoinlib}.
-The library \textit{pycoin} provides simple networking utilities to connect to other \textit{Bitcoin} nodes and to manage those connections. 
-The \textit{python-bitcoinlib} library on the other hand implements functionalities to serialise and de-serialise \textit{Bitcoin} network messages.
+The library \textit{pycoin} provides simple networking utilities to connect to other Bitcoin nodes and to manage those connections. 
+The \textit{python-bitcoinlib} library on the other hand implements functionalities to serialise and de-serialise Bitcoin network messages.
 
 \section{Chain}
 
@@ -67,7 +67,7 @@ The two views of the chain are essential for the selfish mining algorithm to dec
 An essential capability of the selfish proxy is to retrieve blocks and block headers from its peers.
 Figure \ref{fig:receive_block} depicts the communication flow between an arbitrary node called \textit{node\_a} and the selfish proxy which wants to retrieve the information of a new block.
 Firstly \textit{node\_a} either finds a new block itself or retrieves a new block from some other node in the network.
-Then, adhering to the \textit{Bitcoin} protocol, the node sends an \textit{inv} message (1) containing the hash of the block to its peers including the proxy.
+Then, adhering to the Bitcoin protocol, the node sends an \textit{inv} message (1) containing the hash of the block to its peers including the proxy.
 The proxy subsequently checks if it already requested the block from another node or even has the block in the own local chain.
 In this two cases, the proxy would just ignore the received hash, and the communication flow would end.
 If the block hash is unknown, the proxy sends a \textit{get\_headers} (2.a) message and a \textit{get\_data} (2.b) message to the \textit{node\_a} as pictured in figure \ref{fig:receive_block}.
