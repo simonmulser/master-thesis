@@ -234,8 +234,6 @@ In the lines 2 to 6, the state 0 is treated by simply looking at the origin of t
 If the block was mined by the honest network, then the proxy just adopts to the public chain.
 In the other case, the block was found by the eclipsed node, and the proxy just waits for the next block to be discovered.
 
-The lines 7 to 17 are covering the 0' and 0'' states.
-
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption=Part of the selfish mining algorithm where private lead is zero, label={lst:algo}, basicstyle=\ttfamily, captionpos=b]
 if private_lead == 0:
@@ -258,6 +256,7 @@ if private_lead == 0:
 \end{lstlisting}
 \end{minipage}
 
+The lines 7 to 17 are covering the 0' and 0'' states.
 In the case the last block was found by the honest network, the proxy adopts to the public chain except the algorithm was configured with trail stubbornness.
 Then the proxy waits and hopes to catch up with the public chain at a later point (line 10).
 The other case, implemented from line 7 to 17, reflects the fact when the block is found by the eclipsed node.
