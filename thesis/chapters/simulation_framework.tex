@@ -248,8 +248,7 @@ The final report contains:
 
 Most of the stated information and charts can be directly generated from the CSV files with respective R commands.
 Only the stale block rate and the propagation time of blocks needs some further processing, which is executed on report creation.
-The stale block rate and propagation time of blocks needs to be calculated in the report.
-todo[inline]{The term stale block rate should be explained in the State-of-the-Art section when talking about the other simulations - this is a key metric that is important and it should be clear why - maybe also cite Eyals Bitcoin NG}
+\todo[inline]{stale block rate is explained in state-of-the-art. you mentioned to cite Bitcoin NG by Eyal. i did not found anything about stale block rate in that paper}
 
 The stale rate, describing how many blocks did not end up in the longest chain, is calculated by checking each created block against the consensus chain determined previously by simply merging the \textit{BlockGenerateLine} log lines with the consensus chain.
 The propagation time of blocks is calculated with \textit{R} as shown in listing \ref{lst:propagation_time}.
