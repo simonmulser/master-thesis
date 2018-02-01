@@ -1,1 +1,17 @@
-My abstract. Coming soon...
+The cryptocurrency Bitcoin was started in 2008 with the creation of the first block, the genesis block.
+Since then, the computing power of the network, which secures the blockchain of the digital currency, has multiplied considerably.
+Today, around twenty professional miners are constantly extending the blockchain, always building on the latest block known to them.
+The miners are incentivised to do so, as they create with each found block new Bitcoins for themselves.
+In 2014, Eyal and Gün Sirer showed for the first time that apart from this desired, honest behaviour, there are deviating mining methods that increase the relative gain of a miner compared to the rest of the network.\\
+\todo[inline]{imho relative gain can be understood by saying "compared to the rest of the network"}
+This so-called selfish mining attack and all its modifications are examined in this thesis and compared with previous research results.
+In contrast to previous research, a novel, deterministic simulation method is used, which captures the underlying peer-to-peer network and all properties of the Bitcoin protocol more accurately.
+This is made possible by virtualising the entire network using the \textit{Docker} software.
+Hence, the network layer of the whole system is replicated in a realistic and natural way.
+Furthermore, the Bitcoin protocol can be simulated unbiased, since the actual reference implementation is executed directly in the nodes of the network.\\
+The results of the simulations show the most efficient selfish mining strategy for a specific computing power of the attacker and emphasise the current state of research as well as the relevance of the selfish mining attack.
+Furthermore, out of the used simulation method originated a the simulation framework, which facilitates the exploration of different attack vectors and the testing of improvements of different blockchain protocols.
+
+\bigskip
+\noindent \textbf{Keywords}\\
+selfish mining, selfish mining attack, Bitcoin, blockchain, simulation, simulation method, simulation framework, network latency, reference implementation, Docker
