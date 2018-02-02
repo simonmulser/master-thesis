@@ -92,11 +92,12 @@
   \begin{columns}[t]
 
     \begin{column}{.35\textwidth}
+      
       \begin{block}{Context}
-      	Selfish mining is an attack on the Bitcoin mining process.
-      	Recent research showed that the selfish miner can increase the relative gain on mining rewards compared to the rest of the network.
-      	The miner achieves this by withholding found blocks, which it then later uses to match or overwrite blocks found by the honest miners.
-      	The attack comprises the idea that the miner lets the rest of the network waste their computational power on mining blocks which do not end up in the longest chain.
+		Selfish mining is an attack on the Bitcoin mining process.
+		In the attack, the selfish miner can increase the relative gain on mining rewards compared to the rest of the network.
+		The miner achieves this by withholding own blocks, which it then later uses to match or overwrite blocks found by the honest network.
+		The attack comprises the idea that the miner lets the rest of the network waste their computational power on mining blocks which do not end up in the longest chain.
       \end{block}
       
     \end{column}
@@ -104,9 +105,9 @@
     \begin{column}{.55\textwidth}
     
       \begin{block}{Goals}
-      Development of a novel, more accurate simulation framework which:
+      Development of a novel, deterministic simulation framework which:
       	\begin{itemize}
-      		\item naturally respects the the peer-to-peer network and its latency
+      		\item naturally respects the peer-to-peer network and its latency
       		\item directly reuses the reference implementation to capture all protocol details and to avoid time-consuming and error-prone adaptation or abstraction of the protocol
       	\end{itemize}
       Afterwards:
@@ -140,15 +141,15 @@
      	\begin{itemize}
      		\item \textit{Docker} is used to virtualise the whole peer-to-peer network
      		\item Latency is applied to the TCP-connections between the nodes by using \textit{Unix tc}
-     		\item In the \textit{Docker} container the actual Bitcoin reference implementation is executed
-     		\item Bitcoin nodes are not mining but are creating blocks on RPC-call from framework
+     		\item The \textit{Docker} containers execute the actual Bitcoin reference implementation
+     		\item Bitcoin nodes are not mining but are creating blocks on RPC-calls from the framework
      	\end{itemize}
      	Simulation:
        	\begin{itemize}
      		\item Network is set-up by framework based on pre-defined scenario
      		\item Nodes generate blocks based on samples drawn from an exponential distribution
      		\item Safety checks if simulation is executed to fast by splitting real time into multiple spans
-     		\item After a simulation run log-files of nodes are parsed and calculated statistics are summarised in report 	\end{itemize}
+     		\item After a simulation run, log-files of nodes are parsed and calculated statistics are summarised in report 	\end{itemize}
     \end{column}
 
   \end{columns}
@@ -157,7 +158,7 @@
   \begin{block}{Selfish Proxy}
   	\begin{columns}[t]
      	\begin{column}{.45\textwidth}
-     		Node in the network which eclipses a normal Bitcoin node from the rest of the network. By withholding blocks from the eclipsed node to the honest network and vice versa, the selfish proxy is able to mimic different selfish mining strategies.
+     		A node in the network which eclipses a normal Bitcoin node from the rest of the network. By withholding blocks from the eclipsed node to the honest network and vice versa, the selfish proxy is able to mimic different selfish mining strategies.
      		
      		\bigskip
      		Advantages:
@@ -168,7 +169,7 @@
      		Disadvantage:
      		\begin{itemize}
      			\item Part of the Bitcoin protocol and the current state of the blockchain needs to be handled
-     			\item Introduces extra hop and thus, impacts performance of selfish mining algorithms
+     			\item Introduces an extra hop and thus, impacts performance of selfish mining algorithms
 			\end{itemize}   			
     	\end{column}
  	
@@ -201,9 +202,9 @@
     		\end{column}
     		\begin{column}{.45\textwidth}
 				\begin{itemize}
-					\item Simulation showed that selfish mining increases the relative gain compare to honest mining
-					\item With a computation power of 45\% the selfish miner can gather about 50\% of the mining rewards
-					\item Best performing strategies are equal-fork-stubborn and selfish mining
+					\item The simulation showed that selfish mining increases the relative gain compare to honest mining
+					\item With a computation power of 45\%, the selfish miner can gather about 50\% of the mining rewards
+					\item Best performing strategies were equal-fork-stubborn and selfish mining
 				\end{itemize}
     		\end{column}
   		\end{columns}
@@ -214,13 +215,16 @@
 
     \begin{column}{.35\textwidth}
     
-      \begin{block}{Additional Outcome}
+      \begin{block}{Further research}
+      	Performance selfish proxy:
       	\begin{itemize}
-     		\item RQ1: Do the simulations of selfish mining with the proposed software solutions
-show an increase of the total and relative gain for the selfish miner compared to
-the normal, honest mining behaviour?
-			\item RQ2: How do the obtained results of the simulation match the outcome of previous
-research in the area of selfish mining?
+     		\item Use compact block relay mechanism to process blocks faster
+     		\item Remove extra hop by implementing strategies directly in a Bitcoin node scenarios
+      	\end{itemize}
+      	Scenario:
+      	\begin{itemize}
+     		\item Investigate in combining selfish mining with other known attacks
+     		\item Use transactions in scenario and thus, bigger blocks
       	\end{itemize}
       \end{block}
 
