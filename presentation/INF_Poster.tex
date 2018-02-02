@@ -127,7 +127,8 @@
     \begin{column}{.3\textwidth}
 		
 		\begin{figure}[t]
-			\includegraphics[width=22cm]{overview_setup}
+		    \vspace*{-1cm}
+			\includegraphics[width=20cm]{overview_setup}
 			\centering
 			\caption{Virtual peer-to-peer network with \textit{Docker}}
 		\end{figure}      	
@@ -145,7 +146,7 @@
      	Simulation:
        	\begin{itemize}
      		\item Network is set-up by framework based on pre-defined scenario
-     		\item Framework let nodes generate blocks based on samples drawn from an exponential distribution
+     		\item Nodes generate blocks based on samples drawn from an exponential distribution
      		\item Safety checks if simulation is executed to fast by splitting real time into multiple spans
      		\item After a simulation run log-files of nodes are parsed and calculated statistics are summarised in report 	\end{itemize}
     \end{column}
@@ -173,7 +174,8 @@
  	
         \begin{column}{.45\textwidth}
         	\begin{figure}[t]
-            	\includegraphics[width=25cm]{selfish_proxy}
+        	    \vspace*{-1cm}
+            	\includegraphics[width=23cm]{selfish_proxy}
             	\centering
             	\caption{Selfish proxy eclipsed node to perform selfish mining}
         	\end{figure} 
@@ -191,26 +193,23 @@
 
     		\begin{column}{.45\textwidth}
         		\begin{figure}[t]
-            		\includegraphics[width=20cm]{relative_block_share}
+        			\vspace*{-1cm}
+            		\includegraphics[width=18cm]{relative_block_share}
             		\centering
-            		\caption{Relative gain}
+            		\caption{Relative gain of different mining methods}
         		\end{figure}
     		\end{column}
-
     		\begin{column}{.45\textwidth}
-        		\begin{figure}[t]
-            		\includegraphics[width=20cm]{stale_rate}
-            		\centering
-            		\caption{Stale block rate}
-        		\end{figure}
+				\begin{itemize}
+					\item Simulation showed that selfish mining increases the relative gain compare to honest mining
+					\item With a computation power of 45\% the selfish miner can gather about 50\% of the mining rewards
+					\item Best performing strategies are equal-fork-stubborn and selfish mining
+				\end{itemize}
     		\end{column}
-
   		\end{columns}
   		
       \end{block}  
-
-		\lipsum[66]      
-          
+                
     \end{column}
 
     \begin{column}{.35\textwidth}

@@ -20,9 +20,9 @@ mykey <- list(space = 'top',
               text = list(levels(df$strategy)),
               points = list(pch = 1, col = cols)
 ) 
-df
+
 df$selfish_mined_share = df$accepted_blocks_selfish_miner/(df$accepted_blocks_selfish_miner + df$accepted_blocks_honest)
-xyplot(selfish_mined_share ~ selfish_share, df, type = 'a', groups = factor(df$strategy), asp = 1, col = cols,
+xyplot(selfish_mined_share ~ selfish_share, df, type = 'b', groups = factor(df$strategy), asp = 1, col = cols,
        ylab = 'Relative gain [%]', xlab = 'Computational share [%]',
        scales=list(
          y=list(
