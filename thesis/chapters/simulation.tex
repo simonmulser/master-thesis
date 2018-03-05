@@ -10,6 +10,7 @@ As strategies, the standard selfish mining strategy and the three modifications 
 The used trail-stubborn strategy is parametrised with 1 meaning that the selfish miner will at the maximum trail one block behind the public chain.
 Hence, the at least trail stubborn strategy is executed in the different scenarios.
 Since the modifications of the selfish mining strategies can be combined a total of eight different selfish mining strategies are executed during the simulation.
+\aju{Why even combine the L,F,T strategies? This is not explained and requires some justification - as the results show - it does not make sense in all cases since they require contradicting decisions in certain steps. So I would suggest  argue that combing some of them does not make sense and therefore was tested to see if the simulation really detects ''worst behaviour''}
 
 For the distribution of computation power, five different settings are used where the selfish miner receives either 15\%, 22.5\%, 30\%, 37.5\% or 45\% of the computation power.
 The rest of the computation power in each scenario is distributed equally over all remaining, honest nodes.
@@ -124,6 +125,7 @@ Since in that simulation the computational share was always distributed evenly a
 \caption{Relative revenue of the selfish miner}
 \label{fig:relative_block_share}
 \end{figure}
+\aju{Bigger figure, and maybe change the colors e.g., use dashed line for H}
 
 In figure \ref{fig:relative_block_share} the relative revenue, given a particular computation share and selfish mining strategy, is shown.
 The graph shows that the two strategies selfish mining with \textit{lead stubborn, equal-fork stubborn} (\textit{L, F}) and selfish mining with all three modifications (\textit{L, F, T\textsubscript{1}}) are the worst performing strategies.

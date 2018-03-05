@@ -48,7 +48,7 @@ This could be either achieved by filling up the mempool with prepared transactio
 In the latter approach also the relaying of transactions would be simulated resulting in an even more realistic simulation.
 Using this method the performance and reliability of the RPC-connections over TCP/IP needs to be considered.
 The current implementation of the simulation framework has troubles to maintain the connection to the API of the nodes often resulting in \textit{broken pipe} errors.
-At the moment these errors are recovered by simply reconnecting to the node which costs precious time.
+At the moment these errors are recovered by simply reconnecting to the node which costs time.
 Due to the lost time, the execution speed of the simulation needs to be lowered resulting in unsustainable long simulation durations.
 Hence, to support the creation of transaction during a simulation run, the unreliability of the RPC-connections should be dissolved, or it should be considered to use the more performant Unix domain sockets.
 The Unix domain sockets are providing their performance by bypassing the TCP/IP stack, and are likely to sustain the higher workload when adding transactions to a simulation scenario.

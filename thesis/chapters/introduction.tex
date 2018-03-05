@@ -23,11 +23,14 @@ In general, the selfish miner achieves that the other miners are wasting their c
 
 Even though the selfish miner can increase its relative gain compared to the other miners, its total gain is lower than it would behave honestly.
 This is possible because the execution of the selfish mining algorithm by the selfish miner decreases the number of blocks which end up in the longest chain.
-During the selfish mining more blocks by both, the selfish miner and the honest network, are not included in the longest chain, so-called stale blocks.
+During selfish mining more block, of the selfish miner as well as the honest network, are not included in the longest chain, the so-called stale block rate increases.
 Hence, less mining rewards are distributed between the nodes in the network which also affects the miner conducting selfish mining.
 The fact that less mining rewards are distributed prevails the relative gain obtained by the selfish miner and therefore the selfish miner earns less than it would earn behaving honestly \cite{nayak2016stubborn, sapirshtein2016optimal}.
+\aju{Doesn't this also depend on the actual hashrate of the selfish miner? 
+If the selfish miner has a large enough hash rate he can win the block race in more cases therefore earn more blocks relative to all other miners. Hence, he can earn a bigger share than other miners and economically dominate of the long run ... The sentence here reads like it is not a problem, maybe highlight that an attacker can actually benefit from this attack e.g., by improvements to the attack like double-spending and selfish-mining. 
+Maybe (optional) also mention here briefly that such long lasting selfish mining has not been studied or observed yet and therefore its good to better understand those attacks to know why they do not happen or if they have just not been detected - this better justifies your work.}
 Since there end up fewer blocks in the longest chain the Bitcoin protocol would simplify the cryptographic puzzle during the next difficulty adjustment.
-From then on more blocks are found and it is likely that the selfish miner would also increase its total gain.
+From then on, more blocks are found and it is likely that the selfish miner would also increase its total gain.
 The scenario where the difficulty is adjusted was not yet investigated by researchers and is also not a focus of this thesis.
 
 Despite the normal selfish mining further research \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical} showed different modifications of the algorithm which perform slightly better under certain circumstances.
@@ -44,7 +47,7 @@ Since there is no official specification of the Bitcoin protocol it is hard to c
 Furthermore, it is hard to keep the simulation framework up-to-date because of the ongoing development of the protocol.
 \item Abstraction of the whole network layer of the peer-to-peer network.
 The available simulations abstract the network topology by either defining a single connectivity parameter \cite{eyal2014majority, bahack2013theoretical, nayak2016stubborn, sapirshtein2016optimal, gervais2015tampering} or by additionally using the stale block rate as input for the MDP \cite{gervais2016security}.
-Hence the highly abstract the presence of network delays and natural forks of the chain.
+Hence they highly abstract the presence of network delays and natural forks of the chain.
 \end{itemize}
 
 \todo[inline]{first usage of "stale block rate", but with a reference. detailed explanation of relative gain later in the thesis}
@@ -75,8 +78,9 @@ The evaluation of the simulation results is sustained with following two researc
 
 An additional outcome of the thesis is a general simulation framework.
 The implemented framework allows an accurate and deterministic simulation of the blockchain by using directly the Bitcoin reference implementation and a realistic network topology.
-Hence, the simulation framework could not only be used to simulate selfish mining attacks but could, for example, be used to simulate other attacks or new protocol versions of Bitcoin. 
-Since many other cryptocurrencies are derived from Bitcoin, they simulation framework could also be utilized to simulate their behaviour and properties.
+%Hence, the simulation framework could not only be used to simulate selfish mining attacks but could, for example, be used to simulate other attacks or new protocol versions of Bitcoin. 
+Hence, the simulation framework could not only be used to simulate selfish mining attacks but could also be used to simulate other attacks as well, on different protocol versions of Bitcoin. 
+Since many other cryptocurrencies are derived from Bitcoin, the simulation framework could also be utilized to simulate their behaviour and properties.
 
 \section{Structure of this thesis}
 

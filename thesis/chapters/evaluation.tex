@@ -34,7 +34,7 @@ The proxy which eclipses the private node does not implement the fast block prop
 Instead, the proxy uses the standard but slower block propagation technique to receive and send blocks.
 Thus, the proxy receives and sends blocks slower than the rest of the network.
 
-Assuming that the probability of the selfish miner to win a block race is very low, the attained results match the outcome of previous research closely.
+Assuming that the probability of the selfish miner to win a block race is very low, the attained results match the outcome of previous research.
 In figure \ref{fig:eyal_results} the red line shows the relative revenue of the selfish miner conducting normal selfish mining when it is not able to win any block race \cite{eyal2014majority}.
 The curve shows the same concave course as in figure \ref{fig:accepted_blocks_selfish} underlining that with an increase of the computational share the efficiency of the selfish mining is amplified.
 Moreover, the selfish miner achieved more relative revenue compare to the honest miner with about 36\% of the mining power, similar to the slightly worse results of 40\% showed in chapter \ref{chap:results}.
@@ -86,3 +86,4 @@ The loss of profit is possible because the stale block rate increases during sel
 To still profit from the attack the miner would need to wait for the difficulty adjustment.
 After the difficulty adjustment, the nodes in the network can find more blocks and hence, also the selfish miner can create more blocks.
 Since selfish mining was never observed for such a long time and no research was conducted in this area, it is not clear if such a long attack would be successful \cite{nayak2016stubborn}.
+\aju{Basically this needs to be stated somewhere earlier - either state-of-the-art or earlier in this chapter}

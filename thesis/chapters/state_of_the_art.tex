@@ -23,7 +23,9 @@ In the case of a block race they artificially split the network where one part i
 \end{figure}
 
 Further research showed that more generalised selfish mining strategies lead to even more relative gain for the selfish miner \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical}.
-\cite{nayak2016stubborn} provided a comprehensive description of the strategy space and also coined different names for the selfish mining variations:
+\aju{Describe the \emph{relative gain} aspect here in one parapgraph before it is used in the above sentence. Maybe therefore first describe the term \emph{stale block rate}. Maybe start like that: One important metric in context of PoW Blockchains is the stale block rate. It ... }
+The authors of \cite{nayak2016stubborn} provided a comprehensive description of the strategy space and also coined different names for the selfish mining variations:
+\aju{Its better style to start a sentence with a word and not directly with a reference.}
 
 \begin{itemize}
 	\item \textbf{Lead stubborn}: 
@@ -31,6 +33,7 @@ Further research showed that more generalised selfish mining strategies lead to 
 	This strategy continuously tries to split the network to mine on different blocks and is therefore especially promising when the probability to win the block race is very high.
 	\item \textbf{Equal-fork stubborn}: 
 	The mining strategy equal-fork stubborn changes the selfish mining strategy just by one transition.
+  \aju{'' .... changes the lead stubborn mining strategy just by one ...'' or?}
 	In case the selfish miner finds a block during a block race, it does not publish his block to win the race but it also keeps this block undisclosed to secretly mine on this new tip of the chain.
 \item \textbf{Trail stubborn}: 
 The mining strategies based on trail stubbornness are reflecting the idea to even trail behind the public chain and to eventually catch up.
@@ -46,9 +49,9 @@ To find the best strategy for a given mining power share $\alpha$ and connectivi
 Other researchers used numeric simulations of paths in the state machine to find optimal selfish mining strategies \cite{gervais2015tampering, nayak2016stubborn}.
 Lastly, \cite{sapirshtein2016optimal, gervais2016security} used MDPs based on a state machine to find strategies with the most relative gain.
 The basic structure of the used state machines is for all publications the same, despite the MDP introduced by \cite{gervais2016security}.
-They additionally used in their MDP the so-called stale block rate which denotes the ratio between blocks from the consensus chain and stale blocks.
+They additionally they used in their MDP the so-called stale block rate which denotes the ratio between blocks from the consensus chain and stale blocks.
 This metric accounts for the most important parameters of a blockchain protocol such as block sizes, block intervals, network delays, information propagation mechanisms and network configuration and can be seen as a general security parameter of a blockchain protocol.
-The higher the stale block rate, the less secure the blockchain protocol is \cite{gervais2016security}.
+The higher the stale block rate, the less secure the blockchain protocol \cite{gervais2016security}.
 
 Besides using variations of the selfish mining strategies, the attack can also be combined with other attacks to achieve better results \cite{gervais2016security, sapirshtein2016optimal, nayak2016stubborn, gervais2015tampering}.
 If the eclipse attack is used in combination with selfish mining the victim contributes its mining power to the private chain and hence, strengthens the position of the selfish miner \cite{nayak2016stubborn, gervais2016security}.

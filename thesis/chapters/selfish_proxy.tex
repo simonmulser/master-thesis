@@ -8,7 +8,8 @@ With this withholding method, the selfish proxy can mimic different selfish mini
 \section{Network}
 
 The selfish proxy is a normal member of the peer-to-peer network and is also executed as a \textit{Docker} container.
-During the simulation run, the proxy mimics the behaviour of a normal Bitcoin node so that all nodes connected to proxy think they are connected to a normal peer.
+%During the simulation run, the proxy mimics the behaviour of a normal Bitcoin node so that all nodes connected to proxy think they are connected to a normal peer.
+During the simulation run, the proxy mimics the behaviour of a normal Bitcoin node.
 In figure \ref{fig:selfish_proxy} a possible network topology with a selfish proxy is depicted.
 The nodes on the left side are forming the honest, public network working together on the public chain.
 The two nodes on the right side are forming the selfish miner where the proxy abuses the private chain build by the eclipsed node to execute a particular selfish mining strategy.
@@ -34,10 +35,10 @@ The \textit{python-bitcoinlib} library, on the other hand, implements functional
 
 \section{Chain}
 
-The selfish proxy continuously collects all block and block headers sent by the connected peers and reassembles the whole chain locally.
+The selfish proxy continuously collects all blocks and block headers sent by the connected peers and reassembles the whole chain locally.
 To execute the selfish mining algorithm efficiently the proxy needs to retrieve updates of the private and public chain as fast as possible.
 Therefore the proxy uses solely block headers to update the chain despite using whole blocks.
-The block headers which contain all necessary information to updated the chain can be retrieved faster than the full block because they are just a part of the block and hence smaller.
+The block headers which contain all necessary information to update the chain can be retrieved faster than the full block because they are just a part of the block and hence smaller.
 Furthermore, it is secure for the proxy to trust in the validity of the block header since all other nodes in the network are assumed to behave honestly in our simulation and hence are sending only valid block headers.
 
 When the selfish proxy tries to update the chain with a so far unknown block header, it simply looks at the hash of the previous block stored in the block header.
@@ -50,7 +51,7 @@ Alongside the information stored in the block, the proxy also keeps track of the
 The block origin is a simple enumeration if the block was received from the honest network or from the eclipsed node and hence does not change over time.
 The \textit{transfer\_allowed} variable determines if the transfer of a block is allowed and is initially always set to \textit{False}.
 Depending on the selfish mining strategy the block may be relayed to the other nodes at some later point in time changing the boolean to \textit{True}.
-These two variables are stored to be able to distinguish between the public chain, the current longest chain known to the honest network and the private chain, the current longest chain known to  the eclipsed node.
+These two variables are stored to be able to distinguish between the public chain, the current longest chain known to the honest network and the private chain, the current longest chain known to the eclipsed node.
 For example, to determine the current private chain all blocks originated by the eclipsed node and all blocks with \textit{transfer\_allowed} set to \textit{True} are used.
 The two views of the chain are essential for the selfish mining algorithm to decide which action to take and hence when to relay which block to the other side of the network.
 
@@ -214,6 +215,7 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 \end{itemize}
 
 The modifications of the selfish mining strategy can lead to even more relative gain for the selfish miner depending on the actual computational share and the parameter $\gamma$.
+\aju{Here relative gain, is used without further explanation - ref to state-of-the-art or explain again here}
 Furthermore, the strategies can be combined and since the trail stubbornness can be parametrised the build an infinite strategy space.
 
 \subsection{Algorithm}
@@ -275,3 +277,5 @@ On execution time the three modifications lead, equal-fork and trail stubborn mi
 	\item \textit{trail\_stubborn}:
 	Used with an integer specifying how much the selfish proxy should trail back.
 \end{itemize}
+
+\aju{The typesetting of this page looks strange - only one sentence on the last page and then one empty page - but this can be neglected}
