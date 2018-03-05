@@ -338,10 +338,11 @@ It is possible to pass all desired input arguments to the specific commands, but
 The \textit{multi-run} command accepts an input parameter denoting how often a run should be repeated ($repeat$).
 The simulation framework then creates all configuration files using the passed input arguments and subsequently executes the simulation $repeat$ times using the same configuration files as depicted in figure \ref{fig:flow_chart_multi_run}.
 
-\section{Long-term storage of simulation data}
-\aju{Here a brief section about the storage during the simulation i.e., the ramfs would also be nice, maybe rename this seciton to ''Storage of simulation data'' and have a brief subsection on during the simulation and a long-term subsection.}
+\section{Storage of simulation data}
 
 During a simulation run, all nodes persist their data on the disk of the host machine.
+Hence, for better perfomance the data should be written into RAM by provding a disk with \textit{ramfs} or \textit{tmpfs}.
+
 Most of the persisted data by a node are the blocks created during the simulation scenario.
 Since all nodes act independently, these blocks are furthermore replicated multiple times on the host.
 Thus, the amount of simulation data can be very large occupying multiple gigabytes on the host disk.
