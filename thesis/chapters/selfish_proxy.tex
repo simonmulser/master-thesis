@@ -214,23 +214,6 @@ As introduced by \cite{nayak2016stubborn} the selfish mining strategy can be mod
 \end{itemize}
 
 The modifications of the selfish mining strategy can lead to even more gain for the selfish miner depending on the actual computational share and the parameter $\gamma$.
-Furthermore, the strategies can be combined and since the trail stubbornness can be parametrised the build an infinite strategy space.
-
-\subsection{Algorithm}
-
-The selfish mining strategies and its modifications are implemented in selfish proxy by a simple algorithm using normal control flow structures.
-Since the selfish proxy does not have a holistic overview of when a node finds a block, it only can try to apply selfish mining whenever the public or private chain changes locally after the insertion of a new block header.
-The algorithm mimics the behaviour shown in the state diagram from figure \ref{fig:stubborn_mining} by looking at the private lead before the insertion of the block header and the origin of the inserted block header.
-For example, if the private lead before the insertion of the block header was one and the block header was appended to the public chain.
-This would correspond to the state \textit{1} and the outgoing transition $\beta$ which leads in the state diagram to the state \textit{0'} denoting a block race.
-The selfish mining algorithm must now assure that this state is also reached in the simulated network by starting a block race.
-Thus the algorithm needs to execute the \textit{match} action by publishing the private block to the honest network.
-
-Listing \ref{lst:algo} shows a part of the algorithm, namely the part where the private lead before the insertion is 0, and an action to be executed is searched.
-Hence, this part of the algorithm reflects the states 0, 0' and 0'' of the state machine pictured in figure \ref{fig:selfish_mining}.
-In the lines 2 to 6, the state 0 is treated by simply looking at the origin of the last block.
-If the block was mined by the honest network, then the proxy just adopts to the public chain.
-In the other case, the block was found by the eclipsed node, and the proxy just waits for the next block to be discovered.
 
 \begin{minipage}{\linewidth}
 \begin{lstlisting}[caption=Part of the selfish mining algorithm where private lead is zero, label={lst:algo}, basicstyle=\ttfamily, captionpos=b]
@@ -253,6 +236,24 @@ if private_lead == 0:
                 return Action.override
 \end{lstlisting}
 \end{minipage}
+
+Furthermore, the strategies can be combined and since the trail stubbornness can be parametrised the build an infinite strategy space.
+
+\subsection{Algorithm}
+
+The selfish mining strategies and its modifications are implemented in selfish proxy by a simple algorithm using normal control flow structures.
+Since the selfish proxy does not have a holistic overview of when a node finds a block, it only can try to apply selfish mining whenever the public or private chain changes locally after the insertion of a new block header.
+The algorithm mimics the behaviour shown in the state diagram from figure \ref{fig:stubborn_mining} by looking at the private lead before the insertion of the block header and the origin of the inserted block header.
+For example, if the private lead before the insertion of the block header was one and the block header was appended to the public chain.
+This would correspond to the state \textit{1} and the outgoing transition $\beta$ which leads in the state diagram to the state \textit{0'} denoting a block race.
+The selfish mining algorithm must now assure that this state is also reached in the simulated network by starting a block race.
+Thus the algorithm needs to execute the \textit{match} action by publishing the private block to the honest network.
+
+Listing \ref{lst:algo} shows a part of the algorithm, namely the part where the private lead before the insertion is 0, and an action to be executed is searched.
+Hence, this part of the algorithm reflects the states 0, 0' and 0'' of the state machine pictured in figure \ref{fig:selfish_mining}.
+In the lines 2 to 6, the state 0 is treated by simply looking at the origin of the last block.
+If the block was mined by the honest network, then the proxy just adopts to the public chain.
+In the other case, the block was found by the eclipsed node, and the proxy just waits for the next block to be discovered.
 
 The lines 7 to 17 are covering the 0' and 0'' states.
 In the case the last block was found by the honest network, the proxy adopts to the public chain except the algorithm was configured with trail stubbornness.
