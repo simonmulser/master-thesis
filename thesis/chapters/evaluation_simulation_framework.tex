@@ -10,9 +10,7 @@ Hence, the results of multiple executions of a particular tick sequence are only
 The simulation framework is assessed against a defined \emph{near-deterministic} behaviour to have confidence in single executions of particular simulation scenario.
 The software is considered to behave near-deterministic if:
 
-%The standard deviation of the stale block rate is lower than 0.2\% after sufficient executions of the reference scenario.
 The standard deviation of the stale block rate is lower than 0.2\% after 100 executions of the reference scenario.
-\aju{What is \emph{sufficient}, I would write a specific value - also a small if not tested for larger ones but better be precise here.}
 
 In this definition solely the stale block rate is used to define a near-deterministic behaviour because it reflects the outcome of a simulation comprehensively.
 All configuration parameters of a simulation run influence the stale block rate directly or indirectly\cite{gervais2016security}:
