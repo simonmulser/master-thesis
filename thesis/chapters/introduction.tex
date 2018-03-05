@@ -24,12 +24,9 @@ This is possible because the execution of the selfish mining algorithm by the se
 During selfish mining more block, of the selfish miner as well as the honest network, are not included in the longest chain, the so-called stale block rate increases.
 Hence, less mining rewards are distributed between the nodes in the network which also affects the miner conducting selfish mining.
 The fact that less mining rewards are distributed prevails the relative gain obtained by the selfish miner and therefore the selfish miner earns less than it would earn behaving honestly \cite{nayak2016stubborn, sapirshtein2016optimal}.
-\aju{Doesn't this also depend on the actual hashrate of the selfish miner? 
-If the selfish miner has a large enough hash rate he can win the block race in more cases therefore earn more blocks relative to all other miners. Hence, he can earn a bigger share than other miners and economically dominate of the long run ... The sentence here reads like it is not a problem, maybe highlight that an attacker can actually benefit from this attack e.g., by improvements to the attack like double-spending and selfish-mining. 
-Maybe (optional) also mention here briefly that such long lasting selfish mining has not been studied or observed yet and therefore its good to better understand those attacks to know why they do not happen or if they have just not been detected - this better justifies your work.}
 Since there end up fewer blocks in the longest chain the Bitcoin protocol would simplify the cryptographic puzzle during the next difficulty adjustment.
 From then on, more blocks are found and it is likely that the selfish miner would also increase its total gain.
-The scenario where the difficulty is adjusted was not yet investigated by researchers and is also not a focus of this thesis.
+The scenario where the difficulty is adjusted was not yet investigated by researchers or observed on a blockchain network like Bitcoin and is also not a focus of this thesis.
 
 Despite the normal selfish mining further research \cite{nayak2016stubborn,sapirshtein2016optimal, gervais2015tampering, gervais2016security, bahack2013theoretical} showed different modifications of the algorithm which perform slightly better under certain circumstances.
 These modifications include for example the idea that the selfish miner does not adopt immediately to new blocks but trails behind the public chain and tries to catch up with its secretly mined, private chain.
