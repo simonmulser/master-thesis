@@ -41,7 +41,7 @@ python3 simcoin.py multi-run
 
 \section{Simulation}
 
-The previously defined selfish mining scenarios are executed on an \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}.
+The previously defined selfish mining scenarios are executed on an \textit{x86 Linux} host machine with 16 virtualised cores and 57.718 GB of memory, the same machine used to examine the near-deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}.
 Each scenario gets executed three times by using the \textit{multi-run} command as shown in line 1 and 2 in the listing \ref{lst:simulation_cmd}.
 To extract a particular metric from the multiple executions of a scenario, the simulation with the median stale block rate is used.
 Since the simulation framework can not behave perfectly deterministic due its architecture, the median provides a robust method against possible outliers and hence, more accurate results are achieved.
@@ -209,7 +209,7 @@ In the case that a node conducts a selfish mining strategy the stale block rate 
 Furthermore, the gap between the two worst performing selfish strategies and the other strategies can be observed.
 If a node conducts lead stubbornness combined with equal-fork stubbornness (\textit{L, F}) or selfish mining with all three modifications (\textit{L, F, T\textsubscript{1}}), there are even more stale blocks in the network.
 
-Similar as during the evaluation of the deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}, also during the execution of the selfish mining scenarios the utilisation of the CPU and the memory of the host machine stayed under 10\% as shown in figure \ref{fig:selfish_simulations_cpu} and figure \ref{fig:selfish_simulations_memory}.
+Similar as during the evaluation of the near-deterministic behaviour of the simulation framework in chapter \ref{chap:evaluation}, also during the execution of the selfish mining scenarios the utilisation of the CPU and the memory of the host machine stayed under 10\% as shown in figure \ref{fig:selfish_simulations_cpu} and figure \ref{fig:selfish_simulations_memory}.
 Thus, the specifications of the host machine did not restrict the simulations in any way.
 
 \begin{figure}[t]

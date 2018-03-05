@@ -77,7 +77,7 @@ The evaluation of the simulation results is sustained with following two researc
 
 
 An additional outcome of the thesis is a general simulation framework.
-The implemented framework allows an accurate and deterministic simulation of the blockchain by using directly the Bitcoin reference implementation and a realistic network topology.
+The implemented framework allows an accurate and near-deterministic simulation of the blockchain by using directly the Bitcoin reference implementation and a realistic network topology.
 %Hence, the simulation framework could not only be used to simulate selfish mining attacks but could, for example, be used to simulate other attacks or new protocol versions of Bitcoin. 
 Hence, the simulation framework could not only be used to simulate selfish mining attacks but could also be used to simulate other attacks as well, on different protocol versions of Bitcoin. 
 Since many other cryptocurrencies are derived from Bitcoin, the simulation framework could also be utilized to simulate their behaviour and properties.
@@ -96,9 +96,9 @@ For the simulation run, it is important that the connectivity of the nodes stays
 This is achieved by setting the connections from the nodes by the simulation framework itself which is in contrast to the normal behaviour.
 Normally Bitcoin nodes share their connections with other nodes over the Bitcoin protocol and try to improve the connectivity over time.
 
-Subsequently, the determinism of the simulation framework is evaluated.
-Therefore a deterministic behaviour and a realistic reference scenario reflecting the Bitcoin network are defined.
-The results of executing the scenario with the framework show then that the framework behaves deterministically as defined. 
+Subsequently, the degree of determinism of the simulation framework is evaluated.
+Therefore a near-deterministic behaviour and a realistic reference scenario reflecting the Bitcoin network are defined.
+The results of executing the scenario with the framework show then that the framework behaves near-deterministic as defined.
 
 In the next step, the different strategies selfish, lead stubborn, trail stubborn and equal-fork stubborn mining from \cite{nayak2016stubborn} and \cite{eyal2014majority} are implemented.
 This is achieved by implementing a proxy which eclipses a normal Bitcoin client from the other nodes in the network.
