@@ -5,18 +5,16 @@ For example, the order of low-level operations executed by the different nodes o
 This indeterminism introduced by how the simulation framework works is unchangeable without breaking the whole architecture of the simulation framework.
 Hence, the results of multiple executions of a particular tick sequence are only  evaluated against a specific similarity and not if the outcome is exactly the same.
 
-\section{Near-Deterministic behaviour} \label{chap:deterministic_behaviour}
-\aju{I would suggest to introduce a new term e.g., \emph{near-deterministic} to highlight that it is something different. 
-Must not be that term but I did not came up with a better one. Would suggest a search/replace for that term}
+\section{Near-deterministic behaviour} \label{chap:near-deterministic_behaviour}
 
 The simulation framework is assessed against a defined \emph{near-deterministic} behaviour to have confidence in single executions of particular simulation scenario.
-The software is considered to behave deterministically if:
+The software is considered to behave near-deterministic if:
 
 %The standard deviation of the stale block rate is lower than 0.2\% after sufficient executions of the reference scenario.
 The standard deviation of the stale block rate is lower than 0.2\% after 100 executions of the reference scenario.
 \aju{What is \emph{sufficient}, I would write a specific value - also a small if not tested for larger ones but better be precise here.}
 
-In this definition solely the stale block rate is used to define a deterministic behaviour because it reflects the outcome of a simulation comprehensively.
+In this definition solely the stale block rate is used to define a near-deterministic behaviour because it reflects the outcome of a simulation comprehensively.
 All configuration parameters of a simulation run influence the stale block rate directly or indirectly\cite{gervais2016security}:
 
 \begin{itemize}
@@ -29,13 +27,10 @@ All configuration parameters of a simulation run influence the stale block rate 
 	Hence, the topology impacts how fast or slow blocks are propagating in the network which impacts the stale block rate.
 \end{itemize}
 
-%The definition of the deterministic behaviour is subjective and needs to be considered when trying to conclude something from the results of a simulation framework with such a deterministic behaviour.
-%\aju{Would drop that sentence - confuses more than it helps I guess and it is clear now anyway that it is not 100% deterministic}
-
 \section{Reference scenario}
 \label{chap:reference_scenario}
 
-The reference scenario used to evaluate the simulation framework for its deterministic behaviour, tries to abstract the real Bitcoin network.
+The reference scenario used to evaluate the simulation framework for its near-deterministic behaviour, tries to abstract the real Bitcoin network.
 The mining process in the real system is known to be dominated by a few mining pools \cite{gervais2014bitcoin, beikverdi2015trend, tschorsch2016bitcoin, clarkresearch, gencer2018decentralization}.
 Current statistics show that about twenty miners create almost all blocks \cite{gencer2018decentralization, blockchaininfopools, coindanceblocks, bitcointickerpools}.
 Hence, in the reference scenario, a total of twenty nodes are used.
@@ -63,7 +58,7 @@ Compared to Bitcoin, wherein average every ten minutes a block is created, this 
 \section{Evaluation}
 \label{chap:evaluation}
 
-For the evaluation of the deterministic behaviour the reference scenario was executed 100 times to obtain sufficient figures of the stale block rate.
+For the evaluation of the near-deterministic behaviour the reference scenario was executed 100 times to obtain sufficient figures of the stale block rate.
 The individual simulations were conducted on an \textit{x86 Linux} host machine with \textit{Ubuntu 4.4.0-97-generic} installed.
 The CPU of the host machine was virtualised with \textit{QEMO 2.5+} and provided 16 cores.
 Furthermore, the machine provided 57.718 GB of memory.
@@ -74,9 +69,9 @@ The outcome of the evaluation is shown as box plot in figure \ref{fig:box_stale_
 Despite one outlier at 4.521\% all data points are inside the whiskers area defined by $[Q1 - 1.5IQR, Q3 + 1.5IQR]$ with the median value equal 4.821\%.
 Even though the stale block rate is a continuous variable, the calculated 100 values are accumulated at certain values because the fixed amount of blocks only allows certain combinations of accepted and stale blocks.
 
-To evaluate if the simulation framework has a deterministic behaviour as defined in chapter \ref{chap:deterministic_behaviour} the standard deviation is calculated.
+To evaluate if the simulation framework has a near-deterministic behaviour as defined in chapter \ref{chap:near-deterministic_behaviour} the standard deviation is calculated.
 The calculation of the standard deviation results in 0.159\%.
-Hence, the value satisfies the defined deterministic behaviour, and the simulation framework can be assumed to behave deterministically as defined.
+Hence, it can be assumed that the simulation framework behaves near-deterministic as defined.
 
 \begin{figure}[t]
 \includegraphics[width=9cm]{cpu_usage}
