@@ -1,4 +1,0 @@
-Folder for bibliographies and other references used  e.g. git submodules of bibliographies, ... 
-```bash
-$ git submodule add https://github.com/kernoelpanic/blockchainbib
-```
