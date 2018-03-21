@@ -1,3 +1,7 @@
+# alter reference client
+
+you can find the changes made to the reference implementation at https://github.com/simonmulser/bitcoin/commit/ce1e5fb71c377e17f4fa17d03770a3ed33f5be26.
+
 # zfs documentation and commands
 * can be installed on OS X (OpenZFS) and on linux
 * can also be mounted from a usb-stick or a large file
