@@ -17,8 +17,8 @@ First, I would like to sincerely thank my parents for their ongoing support thro
 
 Special thanks go to [Internet Foundation Austria](https://www.netidee.at/) for granting me a scholarship for this thesis. With the scholarship, I had the possibility to invest more time and resources in the thesis. Additionally, I could extend the implemented simulation software for a more general purpose and provide it as a stand-alone framework to foster more investigation and development in the research area.
 
-<img src="https://github.com/simonmulser/thesis/blob/master/graphics/netidee_logo_scholarship.jpg" alt="Image of netidee scholarship logo" style="width: 248px;"/>
+<img src="https://github.com/simonmulser/master-thesis/blob/master/graphics/netidee_logo_scholarship.jpg" alt="Image of netidee scholarship logo" style="width: 248px;"/>
 
 Finally, I would like to thank Privatdoz. Mag.rer.soc.oec. Dipl.-Ing. Dr.techn. Edgar Weippl and Univ.Lektor Dipl.-Ing. Aljosha Judmayer for the possibility of conducting this master thesis as well as their supervision and their constructive feedback.
 
-<img src="https://github.com/simonmulser/thesis/blob/master/graphics/sba_logo.jpg" alt="Image of SBA-Research logo" style="width: 236px;"/>
+<img src="https://github.com/simonmulser/master-thesis/blob/master/graphics/sba_logo.jpg" alt="Image of SBA-Research logo" style="width: 236px;"/>
